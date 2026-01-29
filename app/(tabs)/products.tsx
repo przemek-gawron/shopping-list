@@ -1,22 +1,19 @@
 import React from 'react';
 import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useRecipes } from '@/hooks/use-recipes';
-import { useSelections } from '@/hooks/use-selections';
+import { useProducts } from '@/hooks/use-products';
 import { useAppContext } from '@/context/app-context';
-import { RecipeListItem } from '@/components/recipes/recipe-list-item';
-import { FloatingActionButton } from '@/components/ui/floating-action-button';
+import { ProductListItem } from '@/components/products/product-list-item';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
-export default function RecipesScreen() {
+export default function ProductsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
-  const { recipes } = useRecipes();
-  const { totalSelections, hasSelections, setSelection, getSelectionCount } = useSelections();
+  const { products } = useProducts();
 
   if (isLoading) {
     return (
@@ -29,40 +26,26 @@ export default function RecipesScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.icon + '40' }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Przepisy</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Produkty</Text>
         <Pressable
           style={[styles.addButton, { backgroundColor: colors.tint }]}
-          onPress={() => router.push('/recipe/new')}
+          onPress={() => router.push('/product/new')}
         >
           <IconSymbol name="plus" size={20} color="#fff" />
         </Pressable>
       </View>
 
-      {recipes.length === 0 ? (
+      {products.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyText, { color: colors.icon }]}>
-            Brak przepisow. Dodaj pierwszy przepis!
+            Brak produktow. Dodaj pierwszy produkt!
           </Text>
         </View>
       ) : (
         <FlatList
-          data={recipes}
+          data={products}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <RecipeListItem
-              recipe={item}
-              count={getSelectionCount(item.id)}
-              onCountChange={(count) => setSelection(item.id, count)}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
-
-      {hasSelections && (
-        <FloatingActionButton
-          onPress={() => router.push('/shopping-list')}
-          badge={totalSelections}
+          renderItem={({ item }) => <ProductListItem product={item} />}
         />
       )}
     </View>
@@ -107,8 +90,5 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     textAlign: 'center',
-  },
-  listContent: {
-    paddingBottom: 100,
   },
 });
