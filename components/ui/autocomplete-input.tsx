@@ -34,7 +34,6 @@ export function AutocompleteInput({
 
   const handleSelect = (item: AutocompleteItem) => {
     onSelect(item);
-    onChangeText(item.label);
     setShowSuggestions(false);
     inputRef.current?.blur();
   };
