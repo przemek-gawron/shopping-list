@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, TextInput, ScrollView, Text, StyleSheet, Pressable } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { IconSymbol } from './icon-symbol';
 
 interface AutocompleteItem {
   id: string;
@@ -14,6 +15,8 @@ interface AutocompleteInputProps {
   onSelect: (item: AutocompleteItem) => void;
   items: AutocompleteItem[];
   placeholder?: string;
+  onCreateNew?: (name: string) => void;
+  createNewLabel?: string;
 }
 
 export function AutocompleteInput({
@@ -22,20 +25,36 @@ export function AutocompleteInput({
   onSelect,
   items,
   placeholder,
+  onCreateNew,
+  createNewLabel = 'Dodaj nowy',
 }: AutocompleteInputProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const filteredItems = value.trim()
-    ? items.filter((item) => item.label.toLowerCase().includes(value.toLowerCase()))
+  const trimmedValue = value.trim();
+  const filteredItems = trimmedValue
+    ? items.filter((item) => item.label.toLowerCase().includes(trimmedValue.toLowerCase()))
     : items;
+
+  const exactMatch = items.some(
+    (item) => item.label.toLowerCase() === trimmedValue.toLowerCase()
+  );
+  const showCreateNew = onCreateNew && trimmedValue.length > 0 && !exactMatch;
 
   const handleSelect = (item: AutocompleteItem) => {
     onSelect(item);
     setShowSuggestions(false);
     inputRef.current?.blur();
+  };
+
+  const handleCreateNew = () => {
+    if (onCreateNew && trimmedValue) {
+      onCreateNew(trimmedValue);
+      setShowSuggestions(false);
+      inputRef.current?.blur();
+    }
   };
 
   return (
@@ -53,7 +72,7 @@ export function AutocompleteInput({
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
       />
-      {showSuggestions && filteredItems.length > 0 && (
+      {showSuggestions && (filteredItems.length > 0 || showCreateNew) && (
         <ScrollView
           style={[styles.suggestionsContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
           keyboardShouldPersistTaps="handled"
@@ -73,6 +92,20 @@ export function AutocompleteInput({
               </Text>
             </Pressable>
           ))}
+          {showCreateNew && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.createNewItem,
+                { backgroundColor: pressed ? colors.tint + '20' : colors.tint + '10' },
+              ]}
+              onPress={handleCreateNew}
+            >
+              <IconSymbol name="plus.circle.fill" size={18} color={colors.tint} />
+              <Text style={[styles.createNewText, { color: colors.tint }]}>
+                {createNewLabel}: "{trimmedValue}"
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
     </View>
@@ -86,10 +119,10 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 15,
   },
   suggestionsContainer: {
     position: 'absolute',
@@ -112,5 +145,18 @@ const styles = StyleSheet.create({
   },
   suggestionText: {
     fontSize: 16,
+  },
+  createNewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e0e0e0',
+  },
+  createNewText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

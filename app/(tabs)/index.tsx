@@ -16,7 +16,7 @@ export default function RecipesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
-  const { recipes } = useRecipes();
+  const { recipes, deleteRecipe } = useRecipes();
   const { totalSelections, hasSelections, setSelection, getSelectionCount } = useSelections();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -77,6 +77,7 @@ export default function RecipesScreen() {
               recipe={item}
               count={getSelectionCount(item.id)}
               onCountChange={(count) => setSelection(item.id, count)}
+              onDelete={() => deleteRecipe(item.id)}
             />
           )}
           contentContainerStyle={styles.listContent}

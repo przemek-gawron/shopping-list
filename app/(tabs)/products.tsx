@@ -13,7 +13,7 @@ export default function ProductsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
-  const { products } = useProducts();
+  const { products, deleteProduct } = useProducts();
 
   if (isLoading) {
     return (
@@ -37,7 +37,9 @@ export default function ProductsScreen() {
         <FlatList
           data={products}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ProductListItem product={item} />}
+          renderItem={({ item }) => (
+            <ProductListItem product={item} onDelete={() => deleteProduct(item.id)} />
+          )}
           contentContainerStyle={styles.listContent}
         />
       )}

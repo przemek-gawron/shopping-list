@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, Pressable, Text } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { Ingredient, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -7,6 +9,7 @@ import { UNIT_OPTIONS } from '@/constants/units';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 import { useProducts } from '@/hooks/use-products';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { generateId } from '@/utils/id-generator';
 
 interface IngredientRowProps {
   ingredient: Ingredient & { productName: string };
@@ -17,7 +20,7 @@ interface IngredientRowProps {
 export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { products } = useProducts();
+  const { products, addProduct } = useProducts();
 
   const productItems = products.map((p) => ({ id: p.id, label: p.name }));
 
@@ -31,24 +34,62 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
     });
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-      <View style={styles.row}>
-        <TextInput
-          style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-          value={ingredient.quantity ? ingredient.quantity.toString() : ''}
-          onChangeText={(text) => {
-            const qty = parseFloat(text) || 0;
-            onChange({ ...ingredient, quantity: qty });
-          }}
-          keyboardType="decimal-pad"
-          placeholder="Ilosc"
-          placeholderTextColor={colors.textSecondary}
-        />
+  const handleCreateNewProduct = (name: string) => {
+    const newProduct = {
+      id: generateId(),
+      name: name,
+      defaultUnit: ingredient.unit,
+    };
+    addProduct(newProduct);
+    onChange({
+      ...ingredient,
+      productId: newProduct.id,
+      productName: name,
+    });
+  };
 
-        <View style={styles.unitSelector}>
+  const renderRightActions = () => (
+    <View style={styles.deleteAction}>
+      <IconSymbol name="trash.fill" size={20} color="#fff" />
+    </View>
+  );
+
+  return (
+    <Swipeable
+      renderRightActions={renderRightActions}
+      onSwipeableOpen={onRemove}
+      rightThreshold={60}
+      friction={2}
+      overshootRight={false}
+    >
+      <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+        <View style={styles.row}>
+          <View style={styles.productSection}>
+            <AutocompleteInput
+              value={ingredient.productName}
+              onChangeText={(text) => onChange({ ...ingredient, productName: text, productId: '' })}
+              onSelect={handleProductSelect}
+              items={productItems}
+              placeholder="Produkt"
+              onCreateNew={handleCreateNewProduct}
+              createNewLabel="Dodaj"
+            />
+          </View>
+
+          <TextInput
+            style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+            value={ingredient.quantity ? ingredient.quantity.toString() : ''}
+            onChangeText={(text) => {
+              const qty = parseFloat(text) || 0;
+              onChange({ ...ingredient, quantity: qty });
+            }}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            placeholderTextColor={colors.textSecondary}
+          />
+
           <Pressable
-            style={[styles.unitButton, { borderColor: colors.tint, backgroundColor: colors.tint + '15' }]}
+            style={[styles.unitButton, { backgroundColor: colors.tint + '15' }]}
             onPress={() => {
               const currentIndex = UNIT_OPTIONS.findIndex((u) => u.value === ingredient.unit);
               const nextIndex = (currentIndex + 1) % UNIT_OPTIONS.length;
@@ -58,65 +99,55 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
             <Text style={[styles.unitText, { color: colors.tint }]}>{ingredient.unit}</Text>
           </Pressable>
         </View>
-
-        <Pressable style={styles.removeButton} onPress={onRemove}>
-          <IconSymbol name="xmark.circle.fill" size={26} color="#EF4444" />
-        </Pressable>
       </View>
-
-      <View style={styles.productRow}>
-        <AutocompleteInput
-          value={ingredient.productName}
-          onChangeText={(text) => onChange({ ...ingredient, productName: text, productId: '' })}
-          onSelect={handleProductSelect}
-          items={productItems}
-          placeholder="Wybierz produkt"
-        />
-      </View>
-    </View>
+    </Swipeable>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
-    padding: 14,
-    borderRadius: 12,
+    marginBottom: 8,
+    marginHorizontal: 2,
+    padding: 10,
+    borderRadius: 10,
     borderWidth: 1,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
+    gap: 8,
+  },
+  productSection: {
+    flex: 1,
+    zIndex: 1,
   },
   quantityInput: {
-    width: 80,
+    width: 55,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    fontSize: 15,
     textAlign: 'center',
   },
-  unitSelector: {
-    flex: 1,
-  },
   unitButton: {
-    borderWidth: 2,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    minWidth: 50,
     alignItems: 'center',
   },
   unitText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
   },
-  removeButton: {
-    padding: 4,
-  },
-  productRow: {
-    zIndex: 1,
+  deleteAction: {
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70,
+    marginBottom: 8,
+    marginRight: 2,
+    borderRadius: 10,
   },
 });

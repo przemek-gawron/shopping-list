@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Recipe, Ingredient } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -115,10 +115,17 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
   };
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
-      keyboardShouldPersistTaps="handled"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={100}
     >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Tytul</Text>
         <TextInput
@@ -186,14 +193,21 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       )}
 
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 40,
   },
   field: {
     marginBottom: 24,
