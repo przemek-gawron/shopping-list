@@ -22,26 +22,30 @@ export function RecipeListItem({ recipe, count, onCountChange }: RecipeListItemP
   };
 
   return (
-    <View style={[styles.container, { borderBottomColor: colors.icon + '40' }]}>
-      <Pressable
-        style={({ pressed }) => [
-          styles.content,
-          { backgroundColor: pressed ? colors.icon + '20' : 'transparent' },
-        ]}
-        onPress={handlePress}
-      >
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        {
+          backgroundColor: colors.cardBackground,
+          borderColor: colors.border,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
+      ]}
+      onPress={handlePress}
+    >
+      <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
         {recipe.description && (
-          <Text style={[styles.description, { color: colors.icon }]} numberOfLines={1}>
+          <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={1}>
             {recipe.description}
           </Text>
         )}
-        <Text style={[styles.ingredients, { color: colors.icon }]}>
+        <Text style={[styles.ingredients, { color: colors.tint }]}>
           {recipe.ingredients.length} skladnikow
         </Text>
-      </Pressable>
+      </View>
       <CounterButton count={count} onChange={onCountChange} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -49,24 +53,33 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginHorizontal: 16,
+    marginVertical: 6,
+    paddingRight: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   content: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   title: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
   description: {
     fontSize: 14,
-    marginTop: 2,
+    marginTop: 3,
   },
   ingredients: {
     fontSize: 12,
-    marginTop: 4,
+    fontWeight: '500',
+    marginTop: 6,
   },
 });

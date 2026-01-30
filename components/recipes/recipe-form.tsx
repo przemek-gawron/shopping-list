@@ -122,11 +122,11 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Tytul</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.icon }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
           value={title}
           onChangeText={setTitle}
           placeholder="np. Kurczak curry"
-          placeholderTextColor={colors.icon}
+          placeholderTextColor={colors.textSecondary}
           autoFocus={!recipe}
         />
       </View>
@@ -134,11 +134,11 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Opis (opcjonalny)</Text>
         <TextInput
-          style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.icon }]}
+          style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
           value={description}
           onChangeText={setDescription}
           placeholder="Krotki opis przepisu..."
-          placeholderTextColor={colors.icon}
+          placeholderTextColor={colors.textSecondary}
           multiline
           numberOfLines={3}
         />
@@ -196,22 +196,24 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
   },
   textArea: {
-    minHeight: 80,
+    minHeight: 100,
     textAlignVertical: 'top',
   },
   ingredientsHeader: {
@@ -223,31 +225,31 @@ const styles = StyleSheet.create({
   addIngredientButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 6,
   },
   addIngredientText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   noIngredients: {
     fontSize: 14,
     fontStyle: 'italic',
     textAlign: 'center',
-    paddingVertical: 20,
+    paddingVertical: 24,
   },
   saveButton: {
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 24,
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
   deleteButton: {
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   deleteButtonText: {
-    color: '#e53935',
+    color: '#EF4444',
     fontSize: 16,
     fontWeight: '500',
   },

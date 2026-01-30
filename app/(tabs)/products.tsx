@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useProducts } from '@/hooks/use-products';
 import { useAppContext } from '@/context/app-context';
 import { ProductListItem } from '@/components/products/product-list-item';
+import { GradientHeader } from '@/components/ui/gradient-header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function ProductsScreen() {
   const router = useRouter();
@@ -25,15 +25,7 @@ export default function ProductsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderBottomColor: colors.icon + '40' }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Produkty</Text>
-        <Pressable
-          style={[styles.addButton, { backgroundColor: colors.tint }]}
-          onPress={() => router.push('/product/new')}
-        >
-          <IconSymbol name="plus" size={20} color="#fff" />
-        </Pressable>
-      </View>
+      <GradientHeader title="Produkty" onAdd={() => router.push('/product/new')} />
 
       {products.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -46,6 +38,7 @@ export default function ProductsScreen() {
           data={products}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ProductListItem product={item} />}
+          contentContainerStyle={styles.listContent}
         />
       )}
     </View>
@@ -61,26 +54,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -90,5 +63,8 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  listContent: {
+    paddingTop: 8,
   },
 });

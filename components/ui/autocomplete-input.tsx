@@ -42,7 +42,7 @@ export function AutocompleteInput({
     <View style={styles.container}>
       <TextInput
         ref={inputRef}
-        style={[styles.input, { color: colors.text, borderColor: colors.icon }]}
+        style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
         value={value}
         onChangeText={(text) => {
           onChangeText(text);
@@ -51,11 +51,11 @@ export function AutocompleteInput({
         onFocus={() => setShowSuggestions(true)}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         placeholder={placeholder}
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.textSecondary}
       />
       {showSuggestions && filteredItems.length > 0 && (
         <ScrollView
-          style={[styles.suggestionsContainer, { backgroundColor: colors.background, borderColor: colors.icon }]}
+          style={[styles.suggestionsContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled
         >
@@ -64,7 +64,7 @@ export function AutocompleteInput({
               key={item.id}
               style={({ pressed }) => [
                 styles.suggestionItem,
-                { backgroundColor: pressed ? colors.icon + '20' : 'transparent' },
+                { backgroundColor: pressed ? colors.tint + '15' : 'transparent' },
               ]}
               onPress={() => handleSelect(item)}
             >
@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
   },
   suggestionsContainer: {
@@ -96,20 +96,19 @@ const styles = StyleSheet.create({
     top: '100%',
     left: 0,
     right: 0,
+    marginTop: 4,
     borderWidth: 1,
-    borderTopWidth: 0,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderRadius: 10,
     maxHeight: 200,
     elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
   suggestionItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   suggestionText: {
     fontSize: 16,

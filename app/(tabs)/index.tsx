@@ -6,6 +6,7 @@ import { useSelections } from '@/hooks/use-selections';
 import { useAppContext } from '@/context/app-context';
 import { RecipeListItem } from '@/components/recipes/recipe-list-item';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
+import { GradientHeader } from '@/components/ui/gradient-header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -35,18 +36,10 @@ export default function RecipesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { borderBottomColor: colors.icon + '40' }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Przepisy</Text>
-        <Pressable
-          style={[styles.addButton, { backgroundColor: colors.tint }]}
-          onPress={() => router.push('/recipe/new')}
-        >
-          <IconSymbol name="plus" size={20} color="#fff" />
-        </Pressable>
-      </View>
+      <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')} />
 
       {recipes.length > 0 && (
-        <View style={[styles.searchContainer, { backgroundColor: colors.icon + '20' }]}>
+        <View style={[styles.searchContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
           <IconSymbol name="magnifyingglass" size={18} color={colors.icon} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -109,26 +102,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -141,16 +114,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
+    paddingTop: 8,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginVertical: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
-    gap: 8,
+    marginTop: -12,
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,

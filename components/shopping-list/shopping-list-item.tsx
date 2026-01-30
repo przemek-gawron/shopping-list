@@ -19,26 +19,40 @@ export function ShoppingListItem({ item, onToggle }: ShoppingListItemProps) {
     <Pressable
       style={({ pressed }) => [
         styles.container,
-        { backgroundColor: pressed ? colors.icon + '20' : 'transparent' },
+        {
+          backgroundColor: item.checked ? colors.border : colors.cardBackground,
+          borderColor: colors.border,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
       ]}
       onPress={onToggle}
     >
-      <View style={[styles.checkbox, { borderColor: item.checked ? colors.tint : colors.icon }]}>
-        {item.checked && <IconSymbol name="checkmark" size={16} color={colors.tint} />}
+      <View
+        style={[
+          styles.checkbox,
+          {
+            borderColor: item.checked ? colors.tint : colors.border,
+            backgroundColor: item.checked ? colors.tint : 'transparent',
+          },
+        ]}
+      >
+        {item.checked && <IconSymbol name="checkmark" size={14} color="#fff" />}
       </View>
       <View style={styles.content}>
         <Text
           style={[
             styles.name,
-            { color: item.checked ? colors.icon : colors.text },
+            { color: item.checked ? colors.textSecondary : colors.text },
             item.checked && styles.strikethrough,
           ]}
         >
           {item.productName}
         </Text>
-        <Text style={[styles.quantity, { color: colors.icon }]}>
-          {formatQuantity(item.quantity)} {item.unit}
-        </Text>
+        <View style={[styles.quantityBadge, { backgroundColor: colors.tint + '15' }]}>
+          <Text style={[styles.quantity, { color: colors.tint }]}>
+            {formatQuantity(item.quantity)} {item.unit}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -48,19 +62,26 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ccc',
+    marginHorizontal: 16,
+    marginVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
+    width: 26,
+    height: 26,
+    borderRadius: 8,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   content: {
     flex: 1,
@@ -70,13 +91,20 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
+    fontWeight: '500',
     flex: 1,
   },
   strikethrough: {
     textDecorationLine: 'line-through',
   },
-  quantity: {
-    fontSize: 14,
+  quantityBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
     marginLeft: 8,
+  },
+  quantity: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

@@ -29,7 +29,14 @@ export default function EditRecipeScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Edytuj przepis' }} />
+      <Stack.Screen
+        options={{
+          title: 'Edytuj przepis',
+          headerStyle: { backgroundColor: colors.tint },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
       <RecipeForm
         recipe={recipe}
         onSave={updateRecipe}

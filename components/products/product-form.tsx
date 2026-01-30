@@ -63,11 +63,11 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Nazwa</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.icon }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
           value={name}
           onChangeText={setName}
           placeholder="np. Marchewka"
-          placeholderTextColor={colors.icon}
+          placeholderTextColor={colors.textSecondary}
           autoFocus={!product}
         />
       </View>
@@ -75,11 +75,11 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Aliasy (oddzielone przecinkami)</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.icon }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
           value={aliases}
           onChangeText={setAliases}
           placeholder="np. marchew, karota"
-          placeholderTextColor={colors.icon}
+          placeholderTextColor={colors.textSecondary}
         />
       </View>
 
@@ -134,44 +134,46 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
   },
   unitContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   unitButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
   },
   unitText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   saveButton: {
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 24,
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
   deleteButton: {
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   deleteButtonText: {
-    color: '#e53935',
+    color: '#EF4444',
     fontSize: 16,
     fontWeight: '500',
   },

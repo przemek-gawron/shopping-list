@@ -18,23 +18,26 @@ export function CounterButton({ count, onChange }: CounterButtonProps) {
         style={({ pressed }) => [
           styles.button,
           {
-            backgroundColor: count > 0 ? colors.tint : colors.icon + '40',
-            opacity: pressed ? 0.8 : 1,
+            backgroundColor: count > 0 ? colors.tint : colors.border,
+            transform: [{ scale: pressed ? 0.9 : 1 }],
           },
         ]}
         onPress={() => onChange(Math.max(0, count - 1))}
       >
-        <Text style={styles.buttonText}>-</Text>
+        <Text style={[styles.buttonText, { color: count > 0 ? '#fff' : colors.textSecondary }]}>-</Text>
       </Pressable>
 
-      <View style={[styles.countContainer, { borderColor: colors.icon + '40' }]}>
-        <Text style={[styles.count, { color: colors.text }]}>{count}</Text>
+      <View style={[styles.countContainer, { backgroundColor: count > 0 ? colors.tint + '15' : 'transparent' }]}>
+        <Text style={[styles.count, { color: count > 0 ? colors.tint : colors.textSecondary }]}>{count}</Text>
       </View>
 
       <Pressable
         style={({ pressed }) => [
           styles.button,
-          { backgroundColor: colors.tint, opacity: pressed ? 0.8 : 1 },
+          {
+            backgroundColor: colors.tint,
+            transform: [{ scale: pressed ? 0.9 : 1 }],
+          },
         ]}
         onPress={() => onChange(count + 1)}
       >
@@ -48,26 +51,29 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 2,
   },
   button: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
   },
   countContainer: {
-    minWidth: 36,
+    minWidth: 40,
     paddingHorizontal: 8,
+    paddingVertical: 4,
     alignItems: 'center',
+    borderRadius: 8,
   },
   count: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });

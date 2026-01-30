@@ -60,13 +60,20 @@ export default function ShoppingListScreen() {
       <Stack.Screen
         options={{
           title: 'Lista zakupow',
+          headerStyle: {
+            backgroundColor: colors.tint,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '600',
+          },
           headerRight: () => (
             <View style={styles.headerButtons}>
               <Pressable style={styles.headerButton} onPress={handleCopy}>
-                <IconSymbol name="doc.on.doc" size={22} color={colors.tint} />
+                <IconSymbol name="doc.on.doc" size={22} color="#fff" />
               </Pressable>
               <Pressable style={styles.headerButton} onPress={handleClear}>
-                <IconSymbol name="trash" size={22} color="#e53935" />
+                <IconSymbol name="trash" size={22} color="#fff" />
               </Pressable>
             </View>
           ),
@@ -89,6 +96,7 @@ export default function ShoppingListScreen() {
                 onToggle={() => toggleItem(item.productId)}
               />
             )}
+            contentContainerStyle={styles.listContent}
           />
         )}
       </View>
@@ -102,10 +110,16 @@ const styles = StyleSheet.create({
   },
   headerButtons: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   headerButton: {
-    padding: 4,
+    padding: 6,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8,
+  },
+  listContent: {
+    paddingTop: 12,
+    paddingBottom: 24,
   },
   emptyContainer: {
     flex: 1,

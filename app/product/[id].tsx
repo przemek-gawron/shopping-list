@@ -29,7 +29,14 @@ export default function EditProductScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Edytuj produkt' }} />
+      <Stack.Screen
+        options={{
+          title: 'Edytuj produkt',
+          headerStyle: { backgroundColor: colors.tint },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
       <ProductForm
         product={product}
         onSave={updateProduct}

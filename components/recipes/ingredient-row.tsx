@@ -32,10 +32,10 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
       <View style={styles.row}>
         <TextInput
-          style={[styles.quantityInput, { color: colors.text, borderColor: colors.icon }]}
+          style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
           value={ingredient.quantity ? ingredient.quantity.toString() : ''}
           onChangeText={(text) => {
             const qty = parseFloat(text) || 0;
@@ -43,24 +43,24 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
           }}
           keyboardType="decimal-pad"
           placeholder="Ilosc"
-          placeholderTextColor={colors.icon}
+          placeholderTextColor={colors.textSecondary}
         />
 
         <View style={styles.unitSelector}>
           <Pressable
-            style={[styles.unitButton, { borderColor: colors.icon }]}
+            style={[styles.unitButton, { borderColor: colors.tint, backgroundColor: colors.tint + '15' }]}
             onPress={() => {
               const currentIndex = UNIT_OPTIONS.findIndex((u) => u.value === ingredient.unit);
               const nextIndex = (currentIndex + 1) % UNIT_OPTIONS.length;
               onChange({ ...ingredient, unit: UNIT_OPTIONS[nextIndex].value });
             }}
           >
-            <Text style={[styles.unitText, { color: colors.text }]}>{ingredient.unit}</Text>
+            <Text style={[styles.unitText, { color: colors.tint }]}>{ingredient.unit}</Text>
           </Pressable>
         </View>
 
         <Pressable style={styles.removeButton} onPress={onRemove}>
-          <IconSymbol name="xmark.circle.fill" size={24} color="#e53935" />
+          <IconSymbol name="xmark.circle.fill" size={26} color="#EF4444" />
         </Pressable>
       </View>
 
@@ -79,23 +79,23 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ccc',
+    marginBottom: 12,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 10,
   },
   quantityInput: {
     width: 80,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     fontSize: 16,
     textAlign: 'center',
   },
@@ -103,14 +103,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   unitButton: {
-    borderWidth: 1,
-    borderRadius: 8,
+    borderWidth: 2,
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   unitText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '600',
   },
   removeButton: {
     padding: 4,
