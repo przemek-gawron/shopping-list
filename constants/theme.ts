@@ -5,49 +5,49 @@
 
 import { Platform } from 'react-native';
 
-// Fresh green palette
-const primaryLight = '#10B981'; // Emerald green
-const primaryDark = '#34D399'; // Lighter emerald for dark mode
+// Deep green palette
+const primaryLight = '#047857'; // Deep emerald
+const primaryDark = '#10B981'; // Emerald for dark mode
 
 export const Colors = {
   light: {
-    text: '#1F2937',
-    textSecondary: '#6B7280',
-    background: '#F0FDF4', // Very light green tint
+    text: '#111827',
+    textSecondary: '#4B5563',
+    background: '#F3F4F6', // Light gray
     backgroundSecondary: '#FFFFFF',
     tint: primaryLight,
-    tintSecondary: '#059669', // Darker green for accents
+    tintSecondary: '#065F46', // Even darker green
     icon: '#6B7280',
     tabIconDefault: '#9CA3AF',
     tabIconSelected: primaryLight,
-    border: '#D1FAE5',
+    border: '#E5E7EB',
     cardBackground: '#FFFFFF',
-    success: '#10B981',
-    error: '#EF4444',
+    success: '#059669',
+    error: '#DC2626',
   },
   dark: {
     text: '#F9FAFB',
     textSecondary: '#9CA3AF',
-    background: '#0F1A14', // Dark with green tint
-    backgroundSecondary: '#1A2E23',
+    background: '#111827',
+    backgroundSecondary: '#1F2937',
     tint: primaryDark,
-    tintSecondary: '#6EE7B7',
+    tintSecondary: '#34D399',
     icon: '#9CA3AF',
     tabIconDefault: '#6B7280',
     tabIconSelected: primaryDark,
-    border: '#1F3D2D',
-    cardBackground: '#1A2E23',
-    success: '#34D399',
+    border: '#374151',
+    cardBackground: '#1F2937',
+    success: '#10B981',
     error: '#F87171',
   },
   // Gradient definitions
   gradients: {
-    primary: ['#10B981', '#059669'],
-    primaryDark: ['#34D399', '#10B981'],
-    header: ['#10B981', '#0D9488'],
-    headerDark: ['#1A2E23', '#0F1A14'],
-    card: ['#FFFFFF', '#F0FDF4'],
-    cardDark: ['#1F3D2D', '#1A2E23'],
+    primary: ['#047857', '#065F46'],
+    primaryDark: ['#10B981', '#059669'],
+    header: ['#047857', '#0F766E'],
+    headerDark: ['#1F2937', '#111827'],
+    card: ['#FFFFFF', '#F9FAFB'],
+    cardDark: ['#374151', '#1F2937'],
   },
 };
 
