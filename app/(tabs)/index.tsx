@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useSelections } from '@/hooks/use-selections';
@@ -17,6 +17,13 @@ export default function RecipesScreen() {
   const { isLoading } = useAppContext();
   const { recipes } = useRecipes();
   const { totalSelections, hasSelections, setSelection, getSelectionCount } = useSelections();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredRecipes = useMemo(() => {
+    if (!searchQuery.trim()) return recipes;
+    const query = searchQuery.toLowerCase();
+    return recipes.filter((recipe) => recipe.title.toLowerCase().includes(query));
+  }, [recipes, searchQuery]);
 
   if (isLoading) {
     return (
@@ -38,15 +45,39 @@ export default function RecipesScreen() {
         </Pressable>
       </View>
 
+      {recipes.length > 0 && (
+        <View style={[styles.searchContainer, { backgroundColor: colors.icon + '20' }]}>
+          <IconSymbol name="magnifyingglass" size={18} color={colors.icon} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Szukaj przepisu..."
+            placeholderTextColor={colors.icon}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')}>
+              <IconSymbol name="xmark.circle.fill" size={18} color={colors.icon} />
+            </Pressable>
+          )}
+        </View>
+      )}
+
       {recipes.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyText, { color: colors.icon }]}>
             Brak przepisow. Dodaj pierwszy przepis!
           </Text>
         </View>
+      ) : filteredRecipes.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyText, { color: colors.icon }]}>
+            Nie znaleziono przepisow dla "{searchQuery}"
+          </Text>
+        </View>
       ) : (
         <FlatList
-          data={recipes}
+          data={filteredRecipes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <RecipeListItem
@@ -110,5 +141,20 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 0,
   },
 });
