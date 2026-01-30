@@ -55,71 +55,83 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
   );
 
   return (
-    <Swipeable
-      renderRightActions={renderRightActions}
-      onSwipeableOpen={onRemove}
-      rightThreshold={60}
-      friction={2}
-      overshootRight={false}
-    >
-      <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-        <View style={styles.row}>
-          <View style={styles.productSection}>
-            <AutocompleteInput
-              value={ingredient.productName}
-              onChangeText={(text) => onChange({ ...ingredient, productName: text, productId: '' })}
-              onSelect={handleProductSelect}
-              items={productItems}
-              placeholder="Produkt"
-              onCreateNew={handleCreateNewProduct}
-              createNewLabel="Dodaj"
+    <View style={styles.wrapper}>
+      <Swipeable
+        renderRightActions={renderRightActions}
+        onSwipeableOpen={onRemove}
+        rightThreshold={60}
+        friction={2}
+        overshootRight={false}
+        containerStyle={styles.swipeableContainer}
+      >
+        <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+          <View style={styles.row}>
+            <View style={styles.productSection}>
+              <AutocompleteInput
+                value={ingredient.productName}
+                onChangeText={(text) => onChange({ ...ingredient, productName: text, productId: '' })}
+                onSelect={handleProductSelect}
+                items={productItems}
+                placeholder="Produkt"
+                onCreateNew={handleCreateNewProduct}
+                createNewLabel="Dodaj"
+              />
+            </View>
+
+            <TextInput
+              style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+              value={ingredient.quantity ? ingredient.quantity.toString() : ''}
+              onChangeText={(text) => {
+                const qty = parseFloat(text) || 0;
+                onChange({ ...ingredient, quantity: qty });
+              }}
+              keyboardType="decimal-pad"
+              placeholder="0"
+              placeholderTextColor={colors.textSecondary}
             />
+
+            <Pressable
+              style={[styles.unitButton, { backgroundColor: colors.tint + '15' }]}
+              onPress={() => {
+                const currentIndex = UNIT_OPTIONS.findIndex((u) => u.value === ingredient.unit);
+                const nextIndex = (currentIndex + 1) % UNIT_OPTIONS.length;
+                onChange({ ...ingredient, unit: UNIT_OPTIONS[nextIndex].value });
+              }}
+            >
+              <Text style={[styles.unitText, { color: colors.tint }]}>{ingredient.unit}</Text>
+            </Pressable>
           </View>
-
-          <TextInput
-            style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-            value={ingredient.quantity ? ingredient.quantity.toString() : ''}
-            onChangeText={(text) => {
-              const qty = parseFloat(text) || 0;
-              onChange({ ...ingredient, quantity: qty });
-            }}
-            keyboardType="decimal-pad"
-            placeholder="0"
-            placeholderTextColor={colors.textSecondary}
-          />
-
-          <Pressable
-            style={[styles.unitButton, { backgroundColor: colors.tint + '15' }]}
-            onPress={() => {
-              const currentIndex = UNIT_OPTIONS.findIndex((u) => u.value === ingredient.unit);
-              const nextIndex = (currentIndex + 1) % UNIT_OPTIONS.length;
-              onChange({ ...ingredient, unit: UNIT_OPTIONS[nextIndex].value });
-            }}
-          >
-            <Text style={[styles.unitText, { color: colors.tint }]}>{ingredient.unit}</Text>
-          </Pressable>
         </View>
-      </View>
-    </Swipeable>
+      </Swipeable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
+    zIndex: 1,
     marginBottom: 8,
+  },
+  swipeableContainer: {
+    overflow: 'visible',
+  },
+  container: {
     marginHorizontal: 2,
     padding: 10,
     borderRadius: 10,
     borderWidth: 1,
+    overflow: 'visible',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    overflow: 'visible',
   },
   productSection: {
     flex: 1,
-    zIndex: 1,
+    zIndex: 10,
+    overflow: 'visible',
   },
   quantityInput: {
     width: 55,
@@ -146,7 +158,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 70,
-    marginBottom: 8,
     marginRight: 2,
     borderRadius: 10,
   },

@@ -169,12 +169,13 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
           </Text>
         ) : (
           ingredients.map((ing, index) => (
-            <IngredientRow
-              key={ing.id}
-              ingredient={ing}
-              onChange={(updated) => updateIngredient(index, updated)}
-              onRemove={() => removeIngredient(index)}
-            />
+            <View key={ing.id} style={{ zIndex: ingredients.length - index }}>
+              <IngredientRow
+                ingredient={ing}
+                onChange={(updated) => updateIngredient(index, updated)}
+                onRemove={() => removeIngredient(index)}
+              />
+            </View>
           ))
         )}
       </View>
@@ -208,9 +209,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
+    overflow: 'visible',
   },
   field: {
     marginBottom: 24,
+    overflow: 'visible',
   },
   label: {
     fontSize: 13,

@@ -115,7 +115,7 @@ export function AutocompleteInput({
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
-    zIndex: 1,
+    zIndex: 100,
   },
   input: {
     borderWidth: 1,
@@ -133,10 +133,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     maxHeight: 200,
-    elevation: 4,
+    zIndex: 1000,
+    elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
   },
   suggestionItem: {
