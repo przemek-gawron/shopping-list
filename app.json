@@ -15,6 +15,9 @@
         "image": "./assets/images/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#1B4332"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
