@@ -25,7 +25,7 @@ export function CounterButton({ count, onChange }: CounterButtonProps) {
         styles.pill,
         {
           borderColor: isActive ? `${colors.tint}28` : colors.borderSubtle,
-          backgroundColor: isActive ? `${colors.tint}0F` : colors.surfaceElevated,
+          backgroundColor: isActive ? `${colors.tint}3D` : colors.surfaceElevated,
         },
       ]}
     >
