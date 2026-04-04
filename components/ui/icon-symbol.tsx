@@ -32,7 +32,7 @@ const MAPPING = {
   'pencil': 'edit',
   'trash.fill': 'delete',
   'key': 'key',
-  'sparkles': 'auto_awesome',
+  'sparkles': 'flare',
 } as IconMapping;
 
 /**
