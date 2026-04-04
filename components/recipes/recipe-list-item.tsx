@@ -33,9 +33,9 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
   };
 
   const renderRightActions = () => (
-    <Pressable style={styles.deleteAction} onPress={handleDelete}>
-      <IconSymbol name="trash.fill" size={20} color="#fff" />
-      <Text style={styles.deleteText}>Usun</Text>
+    <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={handleDelete}>
+      <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
     </Pressable>
   );
 
@@ -50,9 +50,11 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
         style={({ pressed }) => [
           styles.container,
           {
-            backgroundColor: colors.cardBackground,
+            backgroundColor: colors.surfaceGlass,
             borderLeftColor: isSelected ? colors.tint : colors.tint + '40',
-            opacity: pressed ? 0.92 : 1,
+            borderColor: colors.borderSubtle,
+            shadowColor: colors.shadowColor,
+            opacity: pressed ? 0.94 : 1,
           },
         ]}
         onPress={handlePress}
@@ -64,8 +66,8 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
               {recipe.description}
             </Text>
           ) : null}
-          <View style={[styles.chip, { backgroundColor: colors.tint, }]}>
-            <Text style={styles.chipText}>
+          <View style={[styles.chip, { backgroundColor: colors.tint }]}>
+            <Text style={[styles.chipText, { color: colors.onPrimary }]}>
               {recipe.ingredients.length} skł.
             </Text>
           </View>
@@ -87,10 +89,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 16,
     borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 3,
   },
   content: {
@@ -118,11 +120,9 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
     letterSpacing: 0.1,
   },
   deleteAction: {
-    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteText: {
-    color: '#fff',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
   },

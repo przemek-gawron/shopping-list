@@ -143,22 +143,29 @@ export default function ShoppingListScreen() {
         options={{
           title: 'Lista zakupow',
           headerStyle: {
-            backgroundColor: colorScheme === 'dark' ? '#064E3B' : colors.tint,
+            backgroundColor:
+              colorScheme === 'dark' ? colors.headerBackgroundDark : colors.headerChrome,
           },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: {
             fontFamily: 'Inter_600SemiBold',
             fontSize: 17,
-            color: '#fff',
+            color: colors.onPrimary,
           },
           headerShadowVisible: false,
           headerRight: () => (
             <View style={styles.headerButtons}>
-              <Pressable style={styles.headerButton} onPress={handleCopy}>
-                <IconSymbol name="doc.on.doc" size={19} color="#fff" />
+              <Pressable
+                style={[styles.headerButton, { backgroundColor: colors.overlayOnPrimarySubtle }]}
+                onPress={handleCopy}
+              >
+                <IconSymbol name="doc.on.doc" size={19} color={colors.onPrimary} />
               </Pressable>
-              <Pressable style={styles.headerButton} onPress={handleClear}>
-                <IconSymbol name="trash" size={19} color="rgba(255,255,255,0.85)" />
+              <Pressable
+                style={[styles.headerButton, { backgroundColor: colors.overlayOnPrimarySubtle }]}
+                onPress={handleClear}
+              >
+                <IconSymbol name="trash" size={19} color={colors.onPrimaryMuted} />
               </Pressable>
             </View>
           ),
@@ -167,13 +174,13 @@ export default function ShoppingListScreen() {
 
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {totalCount > 0 && (
-          <View style={[styles.progressContainer, { backgroundColor: colors.tint }]}>
+          <View style={[styles.progressContainer, { backgroundColor: colors.headerChrome, shadowColor: colors.shadowColor }]}>
             <View style={styles.progressHeader}>
-              <Text style={styles.progressLabel}>Postep zakupow</Text>
-              <Text style={styles.progressCount}>{checkedCount} / {totalCount}</Text>
+              <Text style={[styles.progressLabel, { color: colors.onPrimaryMuted }]}>Postep zakupow</Text>
+              <Text style={[styles.progressCount, { color: colors.onPrimary }]}>{checkedCount} / {totalCount}</Text>
             </View>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+            <View style={[styles.progressTrack, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
+              <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: colors.onPrimary }]} />
             </View>
           </View>
         )}
@@ -206,11 +213,15 @@ export default function ShoppingListScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.addButton,
-            { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+            {
+              backgroundColor: colors.tint,
+              shadowColor: colors.shadowColor,
+              opacity: pressed ? 0.85 : 1,
+            },
           ]}
           onPress={openAddModal}
         >
-          <IconSymbol name="plus" size={22} color="#fff" />
+          <IconSymbol name="plus" size={22} color={colors.onPrimary} />
         </Pressable>
       </View>
 
@@ -221,7 +232,10 @@ export default function ShoppingListScreen() {
         animationType="fade"
         onRequestClose={() => setAddModalVisible(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setAddModalVisible(false)} />
+        <Pressable
+          style={[styles.modalOverlay, { backgroundColor: colors.modalOverlay }]}
+          onPress={() => setAddModalVisible(false)}
+        />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.modalKAV}
@@ -278,7 +292,7 @@ export default function ShoppingListScreen() {
                     <Text
                       style={[
                         styles.unitPillText,
-                        { color: newUnit === opt.value ? '#fff' : colors.tint },
+                        { color: newUnit === opt.value ? colors.onPrimary : colors.tint },
                       ]}
                     >
                       {opt.label}
@@ -295,7 +309,7 @@ export default function ShoppingListScreen() {
               ]}
               onPress={handleAddItem}
             >
-              <Text style={styles.modalSaveText}>Dodaj do listy</Text>
+              <Text style={[styles.modalSaveText, { color: colors.onPrimary }]}>Dodaj do listy</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
@@ -318,7 +332,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   progressContainer: {
     marginHorizontal: 16,
@@ -343,23 +356,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    color: 'rgba(255,255,255,0.8)',
   },
   progressCount: {
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
   },
   progressTrack: {
     height: 6,
     borderRadius: 3,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   progressFill: {
     height: '100%',
     borderRadius: 3,
-    backgroundColor: '#fff',
   },
   listContent: {
     paddingTop: 10,
@@ -406,7 +415,6 @@ const styles = StyleSheet.create({
   // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   modalKAV: {
     justifyContent: 'flex-end',
@@ -469,7 +477,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   modalSaveText: {
-    color: '#fff',
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
   },

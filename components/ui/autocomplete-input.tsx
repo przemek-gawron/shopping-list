@@ -61,7 +61,7 @@ export function AutocompleteInput({
     <View style={styles.container}>
       <TextInput
         ref={inputRef}
-        style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+        style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
         value={value}
         onChangeText={(text) => {
           onChangeText(text);
@@ -74,7 +74,14 @@ export function AutocompleteInput({
       />
       {showSuggestions && (filteredItems.length > 0 || showCreateNew) && (
         <ScrollView
-          style={[styles.suggestionsContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+          style={[
+            styles.suggestionsContainer,
+            {
+              backgroundColor: colors.surfaceElevated,
+              borderColor: colors.borderSubtle,
+              shadowColor: colors.shadowColor,
+            },
+          ]}
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled
         >
@@ -96,13 +103,16 @@ export function AutocompleteInput({
             <Pressable
               style={({ pressed }) => [
                 styles.createNewItem,
-                { backgroundColor: pressed ? colors.tint + '20' : colors.tint + '10' },
+                {
+                  backgroundColor: pressed ? colors.tint + '20' : colors.tint + '10',
+                  borderTopColor: colors.borderSubtle,
+                },
               ]}
               onPress={handleCreateNew}
             >
               <IconSymbol name="plus.circle.fill" size={18} color={colors.tint} />
               <Text style={[styles.createNewText, { color: colors.tint }]}>
-                {createNewLabel}: "{trimmedValue}"
+                {`${createNewLabel}: „${trimmedValue}”`}
               </Text>
             </Pressable>
           )}
@@ -154,7 +164,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e0e0e0',
   },
   createNewText: {
     fontSize: 15,

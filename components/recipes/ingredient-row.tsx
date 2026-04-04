@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, Pressable, Text } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import { Ingredient, Unit } from '@/types';
+import { Ingredient } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { UNIT_OPTIONS } from '@/constants/units';
@@ -49,8 +48,8 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
   };
 
   const renderRightActions = () => (
-    <View style={styles.deleteAction}>
-      <IconSymbol name="trash.fill" size={20} color="#fff" />
+    <View style={[styles.deleteAction, { backgroundColor: colors.destructive }]}>
+      <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
     </View>
   );
 
@@ -64,7 +63,7 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
         overshootRight={false}
         containerStyle={styles.swipeableContainer}
       >
-        <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+        <View style={[styles.container, { backgroundColor: colors.surfaceElevated, borderColor: colors.borderSubtle }]}>
           <View style={styles.row}>
             <View style={styles.productSection}>
               <AutocompleteInput
@@ -79,7 +78,7 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
             </View>
 
             <TextInput
-              style={[styles.quantityInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+              style={[styles.quantityInput, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.background }]}
               value={ingredient.quantity ? ingredient.quantity.toString() : ''}
               onChangeText={(text) => {
                 const qty = parseFloat(text) || 0;
@@ -155,7 +154,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   deleteAction: {
-    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 70,

@@ -129,7 +129,7 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Tytul</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={title}
           onChangeText={setTitle}
           placeholder="np. Kurczak curry"
@@ -141,7 +141,7 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Opis (opcjonalny)</Text>
         <TextInput
-          style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
+          style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={description}
           onChangeText={setDescription}
           placeholder="Krotki opis przepisu..."
@@ -158,14 +158,14 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
             style={[styles.addIngredientButton, { backgroundColor: colors.tint }]}
             onPress={addIngredient}
           >
-            <IconSymbol name="plus" size={16} color="#fff" />
-            <Text style={styles.addIngredientText}>Dodaj</Text>
+            <IconSymbol name="plus" size={16} color={colors.onPrimary} />
+            <Text style={[styles.addIngredientText, { color: colors.onPrimary }]}>Dodaj</Text>
           </Pressable>
         </View>
 
         {ingredients.length === 0 ? (
           <Text style={[styles.noIngredients, { color: colors.icon }]}>
-            Brak skladnikow. Kliknij "Dodaj" aby dodac skladnik.
+            {`Brak skladnikow. Kliknij „Dodaj”, aby dodac skladnik.`}
           </Text>
         ) : (
           ingredients.map((ing, index) => (
@@ -184,12 +184,12 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
         style={[styles.saveButton, { backgroundColor: colors.tint }]}
         onPress={handleSave}
       >
-        <Text style={styles.saveButtonText}>Zapisz</Text>
+        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
       </Pressable>
 
       {onDelete && (
         <Pressable style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Usun przepis</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>Usun przepis</Text>
         </Pressable>
       )}
 
@@ -249,7 +249,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   addIngredientText: {
-    color: '#fff',
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
   },
@@ -267,7 +266,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
   },
@@ -277,7 +275,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   deleteButtonText: {
-    color: '#EF4444',
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
   },

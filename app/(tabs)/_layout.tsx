@@ -1,21 +1,13 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
 
-import { HapticTab } from '@/components/haptic-tab';
+import { FloatingTabBar } from '@/components/ui/floating-tab-bar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 function TabIcon({ name, color, focused }: { name: any; color: string; focused: boolean }) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-
-  return (
-    <View style={[styles.iconWrapper, focused && { backgroundColor: colors.tint + '28' }]}>
-      <IconSymbol size={22} name={name} color={color} />
-    </View>
-  );
+  return <IconSymbol size={focused ? 22 : 21} name={name} color={color} />;
 }
 
 export default function TabLayout() {
@@ -24,24 +16,12 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.tabIconDefault,
-        tabBarStyle: {
-          backgroundColor: colors.cardBackground,
-          borderTopColor: colors.border,
-          borderTopWidth: StyleSheet.hairlineWidth,
-          height: 70,
-          paddingTop: 8,
-          paddingBottom: 10,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontFamily: 'Inter_600SemiBold',
-          marginTop: 2,
-        },
+        tabBarHideOnKeyboard: true,
         headerShown: false,
-        tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="index"
@@ -64,13 +44,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  iconWrapper: {
-    width: 44,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

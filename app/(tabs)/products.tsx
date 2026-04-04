@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useProducts } from '@/hooks/use-products';
 import { useAppContext } from '@/context/app-context';
@@ -12,19 +13,26 @@ export default function ProductsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const screenGradient =
+    colorScheme === 'dark'
+      ? ([colors.background, colors.background] as const)
+      : ([colors.backgroundSecondary, colors.surfacePrimary] as const);
   const { isLoading } = useAppContext();
   const { products, deleteProduct } = useProducts();
 
   if (isLoading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.tint} />
-      </View>
+      <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.tint} />
+        </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+    <View style={styles.container}>
       <GradientHeader title="Produkty" onAdd={() => router.push('/product/new')} />
 
       {products.length === 0 ? (
@@ -46,6 +54,7 @@ export default function ProductsScreen() {
         />
       )}
     </View>
+    </LinearGradient>
   );
 }
 

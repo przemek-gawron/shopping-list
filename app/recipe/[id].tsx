@@ -32,8 +32,8 @@ export default function EditRecipeScreen() {
       <Stack.Screen
         options={{
           title: 'Edytuj przepis',
-          headerStyle: { backgroundColor: colors.tint },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.headerChrome },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />

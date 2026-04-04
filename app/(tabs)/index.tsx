@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator, TextInput } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useSelections } from '@/hooks/use-selections';
@@ -26,30 +27,38 @@ export default function RecipesScreen() {
     return recipes.filter((recipe) => recipe.title.toLowerCase().includes(query));
   }, [recipes, searchQuery]);
 
+  const screenGradient =
+    colorScheme === 'dark'
+      ? ([colors.background, colors.background] as const)
+      : ([colors.backgroundSecondary, colors.surfacePrimary] as const);
+
   if (isLoading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.tint} />
-      </View>
+      <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.tint} />
+        </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+    <View style={styles.container}>
       <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')}>
         {recipes.length > 0 && (
-          <View style={styles.searchContainer}>
-            <IconSymbol name="magnifyingglass" size={16} color="rgba(255,255,255,0.7)" />
+          <View style={[styles.searchContainer, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
+            <IconSymbol name="magnifyingglass" size={16} color={colors.onPrimaryMuted} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.onPrimary }]}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Szukaj przepisu..."
-              placeholderTextColor="rgba(255,255,255,0.55)"
+              placeholderTextColor="rgba(255,255,255,0.5)"
             />
             {searchQuery.length > 0 && (
               <Pressable onPress={() => setSearchQuery('')}>
-                <IconSymbol name="xmark.circle.fill" size={16} color="rgba(255,255,255,0.7)" />
+                <IconSymbol name="xmark.circle.fill" size={16} color={colors.onPrimaryMuted} />
               </Pressable>
             )}
           </View>
@@ -69,7 +78,7 @@ export default function RecipesScreen() {
           <Text style={styles.emptyEmoji}>🔍</Text>
           <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
           <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-            Nie znaleziono przepisow dla "{searchQuery}"
+            {`Nie znaleziono przepisow dla „${searchQuery}”`}
           </Text>
         </View>
       ) : (
@@ -95,6 +104,7 @@ export default function RecipesScreen() {
         />
       )}
     </View>
+    </LinearGradient>
   );
 }
 
@@ -113,8 +123,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 14,
     gap: 10,
   },
   searchInput: {
@@ -122,7 +131,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     padding: 0,
     fontFamily: 'Inter_400Regular',
-    color: '#fff',
   },
   emptyContainer: {
     flex: 1,

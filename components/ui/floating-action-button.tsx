@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Pressable, View, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from './icon-symbol';
@@ -12,6 +13,8 @@ interface FloatingActionButtonProps {
 export function FloatingActionButton({ onPress, badge }: FloatingActionButtonProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const insets = useSafeAreaInsets();
+  const bottomOffset = Math.max(insets.bottom, 12) + 88;
 
   return (
     <Pressable
@@ -19,16 +22,17 @@ export function FloatingActionButton({ onPress, badge }: FloatingActionButtonPro
         styles.button,
         {
           backgroundColor: colors.tint,
-          shadowColor: colors.tint,
+          bottom: bottomOffset,
+          shadowColor: colors.shadowColor,
           transform: [{ scale: pressed ? 0.94 : 1 }],
         },
       ]}
       onPress={onPress}
     >
-      <IconSymbol name="cart.fill" size={26} color="#fff" />
+      <IconSymbol name="cart.fill" size={26} color={colors.onPrimary} />
       {badge !== undefined && badge > 0 && (
-        <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-          <Text style={styles.badgeText}>{badge}</Text>
+        <View style={[styles.badge, { backgroundColor: colors.accent, borderColor: colors.surfaceElevated }]}>
+          <Text style={[styles.badgeText, { color: colors.onPrimary }]}>{badge}</Text>
         </View>
       )}
     </Pressable>
@@ -38,7 +42,6 @@ export function FloatingActionButton({ onPress, badge }: FloatingActionButtonPro
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 28,
     right: 24,
     width: 64,
     height: 64,
@@ -46,8 +49,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
     elevation: 8,
   },
   badge: {
@@ -61,10 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 5,
     borderWidth: 2,
-    borderColor: '#fff',
   },
   badgeText: {
-    color: '#fff',
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
   },

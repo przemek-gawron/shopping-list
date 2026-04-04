@@ -15,8 +15,8 @@ export default function NewProductScreen() {
       <Stack.Screen
         options={{
           title: 'Nowy produkt',
-          headerStyle: { backgroundColor: colors.tint },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.headerChrome },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />

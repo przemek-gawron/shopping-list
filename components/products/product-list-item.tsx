@@ -29,9 +29,9 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
   };
 
   const renderRightActions = () => (
-    <Pressable style={styles.deleteAction} onPress={handleDelete}>
-      <IconSymbol name="trash.fill" size={20} color="#fff" />
-      <Text style={styles.deleteText}>Usun</Text>
+    <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={handleDelete}>
+      <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
     </Pressable>
   );
 
@@ -46,9 +46,11 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
         style={({ pressed }) => [
           styles.container,
           {
-            backgroundColor: colors.cardBackground,
+            backgroundColor: colors.surfaceGlass,
             borderLeftColor: colors.tint + '50',
-            opacity: pressed ? 0.92 : 1,
+            borderColor: colors.borderSubtle,
+            shadowColor: colors.shadowColor,
+            opacity: pressed ? 0.94 : 1,
           },
         ]}
         onPress={handlePress}
@@ -62,7 +64,7 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
           )}
         </View>
         <View style={[styles.unitBadge, { backgroundColor: colors.tint }]}>
-          <Text style={styles.unit}>{product.defaultUnit}</Text>
+          <Text style={[styles.unit, { color: colors.onPrimary }]}>{product.defaultUnit}</Text>
         </View>
       </Pressable>
     </Swipeable>
@@ -80,10 +82,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 16,
     borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 3,
   },
   content: {
@@ -107,10 +109,8 @@ const styles = StyleSheet.create({
   unit: {
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
   },
   deleteAction: {
-    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteText: {
-    color: '#fff',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
   },

@@ -18,15 +18,15 @@ export default function NewRecipeScreen() {
       <Stack.Screen
         options={{
           title: 'Nowy przepis',
-          headerStyle: { backgroundColor: colors.tint },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.headerChrome },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
           headerRight: () => (
             <Pressable
               style={({ pressed }) => [styles.headerButton, { opacity: pressed ? 0.7 : 1 }]}
               onPress={() => router.push('/recipe/import-photo')}
             >
-              <IconSymbol name="sparkles" size={22} color="#fff" />
+              <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
             </Pressable>
           ),
         }}

@@ -130,8 +130,8 @@ export default function ImportPhotoScreen() {
       <Stack.Screen
         options={{
           title: step === 'review' ? 'Sprawdź przepis' : 'Importuj ze zdjęcia',
-          headerStyle: { backgroundColor: colors.tint },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.headerChrome },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
           headerShadowVisible: false,
         }}
@@ -139,7 +139,7 @@ export default function ImportPhotoScreen() {
 
       {step === 'pick' && (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <View style={[styles.card, { backgroundColor: colors.cardBackground }]}>
+          <View style={[styles.card, { backgroundColor: colors.surfaceElevated, borderColor: colors.borderSubtle }]}>
             <ImportPhotoPicker
               photos={photos}
               onAddFromCamera={handleAddFromCamera}
@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 16,
+    borderWidth: 1,
     padding: 20,
     gap: 16,
     shadowColor: '#000',

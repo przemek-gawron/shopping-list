@@ -32,8 +32,8 @@ export default function EditProductScreen() {
       <Stack.Screen
         options={{
           title: 'Edytuj produkt',
-          headerStyle: { backgroundColor: colors.tint },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.headerChrome },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />

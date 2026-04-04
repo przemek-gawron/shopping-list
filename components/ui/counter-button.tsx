@@ -14,19 +14,29 @@ export function CounterButton({ count, onChange }: CounterButtonProps) {
   const isActive = count > 0;
 
   return (
-    <View style={[styles.container, { borderColor: isActive ? colors.tint : colors.border }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          borderColor: isActive ? colors.tint : colors.borderSubtle,
+          backgroundColor: colors.surfaceElevated,
+        },
+      ]}
+    >
       <Pressable
         style={({ pressed }) => [
           styles.sideButton,
           {
-            backgroundColor: isActive ? colors.tint : colors.background,
+            backgroundColor: isActive ? colors.tint : colors.surfaceElevated,
             opacity: pressed ? 0.75 : 1,
           },
         ]}
         onPress={() => onChange(Math.max(0, count - 1))}
         disabled={!isActive}
       >
-        <Text style={[styles.sideButtonText, { color: isActive ? '#fff' : colors.icon }]}>−</Text>
+        <Text style={[styles.sideButtonText, { color: isActive ? colors.onPrimary : colors.icon }]}>
+          −
+        </Text>
       </Pressable>
 
       <View style={[styles.countArea, { backgroundColor: isActive ? colors.tint + '14' : 'transparent' }]}>
@@ -42,7 +52,7 @@ export function CounterButton({ count, onChange }: CounterButtonProps) {
         ]}
         onPress={() => onChange(count + 1)}
       >
-        <Text style={styles.sideButtonTextActive}>+</Text>
+        <Text style={[styles.sideButtonTextActive, { color: colors.onPrimary }]}>+</Text>
       </Pressable>
     </View>
   );
@@ -71,7 +81,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Inter_500Medium',
     lineHeight: 22,
-    color: '#fff',
   },
   countArea: {
     minWidth: 30,

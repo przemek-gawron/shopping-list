@@ -71,7 +71,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Nazwa</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={name}
           onChangeText={setName}
           placeholder="np. Marchewka"
@@ -83,7 +83,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Aliasy (oddzielone przecinkami)</Text>
         <TextInput
-          style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.cardBackground }]}
+          style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={aliases}
           onChangeText={setAliases}
           placeholder="np. marchew, karota"
@@ -101,7 +101,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
                 styles.unitButton,
                 {
                   backgroundColor:
-                    defaultUnit === option.value ? colors.tint : colors.background,
+                    defaultUnit === option.value ? colors.tint : colors.surfacePrimary,
                   borderColor: colors.tint,
                 },
               ]}
@@ -110,7 +110,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
               <Text
                 style={[
                   styles.unitText,
-                  { color: defaultUnit === option.value ? '#fff' : colors.tint },
+                  { color: defaultUnit === option.value ? colors.onPrimary : colors.tint },
                 ]}
               >
                 {option.label}
@@ -124,12 +124,12 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
         style={[styles.saveButton, { backgroundColor: colors.tint }]}
         onPress={handleSave}
       >
-        <Text style={styles.saveButtonText}>Zapisz</Text>
+        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
       </Pressable>
 
       {onDelete && (
         <Pressable style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Usun produkt</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>Usun produkt</Text>
         </Pressable>
       )}
     </ScrollView>
@@ -181,7 +181,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
   },
@@ -191,7 +190,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   deleteButtonText: {
-    color: '#EF4444',
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
   },

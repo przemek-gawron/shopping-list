@@ -41,9 +41,9 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
   };
 
   const renderRightActions = () => (
-    <Pressable style={styles.deleteAction} onPress={onDelete}>
-      <IconSymbol name="trash.fill" size={20} color="#fff" />
-      <Text style={styles.deleteText}>Usun</Text>
+    <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={onDelete}>
+      <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
     </Pressable>
   );
 
@@ -58,26 +58,27 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
         style={[
           styles.container,
           {
-            backgroundColor: colors.cardBackground,
+            backgroundColor: colors.surfaceGlass,
             borderLeftColor: item.checked ? colors.tint + '30' : colors.tint,
+            borderColor: colors.borderSubtle,
+            shadowColor: colors.shadowColor,
             opacity: item.checked && !editing ? 0.65 : 1,
           },
         ]}
       >
-        {/* Main row */}
         <View style={styles.mainRow}>
           <Pressable
             style={({ pressed }) => [
               styles.checkbox,
               {
-                borderColor: item.checked ? colors.tint : colors.border,
+                borderColor: item.checked ? colors.tint : colors.borderSubtle,
                 backgroundColor: item.checked ? colors.tint : 'transparent',
                 opacity: pressed ? 0.7 : 1,
               },
             ]}
             onPress={onToggle}
           >
-            {item.checked && <IconSymbol name="checkmark" size={12} color="#fff" />}
+            {item.checked && <IconSymbol name="checkmark" size={12} color={colors.onPrimary} />}
           </Pressable>
 
           <Text
@@ -100,20 +101,26 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
             ]}
             onPress={startEditing}
           >
-            <Text style={[styles.quantity, { color: item.checked ? colors.textSecondary : '#fff' }]}>
+            <Text
+              style={[
+                styles.quantity,
+                {
+                  color: item.checked ? colors.textSecondary : colors.onPrimary,
+                },
+              ]}
+            >
               {formatQuantity(item.quantity)} {item.unit}
             </Text>
             <IconSymbol
               name="pencil"
               size={10}
-              color={item.checked ? colors.textSecondary : 'rgba(255,255,255,0.7)'}
+              color={item.checked ? colors.textSecondary : colors.onPrimaryMuted}
             />
           </Pressable>
         </View>
 
-        {/* Inline edit row */}
         {editing && (
-          <View style={[styles.editRow, { borderTopColor: colors.border }]}>
+          <View style={[styles.editRow, { borderTopColor: colors.borderSubtle }]}>
             <TextInput
               style={[
                 styles.editInput,
@@ -135,7 +142,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
               style={[styles.iconButton, { backgroundColor: colors.tint }]}
               onPress={handleConfirm}
             >
-              <IconSymbol name="checkmark" size={16} color="#fff" />
+              <IconSymbol name="checkmark" size={16} color={colors.onPrimary} />
             </Pressable>
             <Pressable
               style={[styles.iconButton, { backgroundColor: colors.border }]}
@@ -160,10 +167,10 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderRadius: 16,
     borderLeftWidth: 4,
-    shadowColor: '#000',
+    borderWidth: 1,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     elevation: 2,
   },
   mainRow: {
@@ -237,7 +244,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteAction: {
-    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
@@ -247,7 +253,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteText: {
-    color: '#fff',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
   },
