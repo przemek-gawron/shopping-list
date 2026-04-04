@@ -29,8 +29,10 @@ export default function ProductsScreen() {
 
       {products.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.icon }]}>
-            Brak produktow. Dodaj pierwszy produkt!
+          <Text style={styles.emptyEmoji}>📦</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak produktow</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+            Dodaj produkty, aby moc tworzyc przepisy
           </Text>
         </View>
       ) : (
@@ -60,13 +62,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: 40,
+    gap: 8,
   },
-  emptyText: {
-    fontSize: 16,
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: -0.3,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
+    lineHeight: 20,
+    marginTop: 4,
   },
   listContent: {
-    paddingTop: 8,
+    paddingTop: 10,
+    paddingBottom: 24,
   },
 });

@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Pressable, View, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from './icon-symbol';
@@ -12,22 +11,23 @@ interface FloatingActionButtonProps {
 
 export function FloatingActionButton({ onPress, badge }: FloatingActionButtonProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const gradient = isDark ? Colors.gradients.primaryDark : Colors.gradients.primary;
+  const colors = Colors[colorScheme ?? 'light'];
 
   return (
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { transform: [{ scale: pressed ? 0.95 : 1 }] },
+        {
+          backgroundColor: colors.tint,
+          shadowColor: colors.tint,
+          transform: [{ scale: pressed ? 0.94 : 1 }],
+        },
       ]}
       onPress={onPress}
     >
-      <LinearGradient colors={gradient} style={styles.gradient}>
-        <IconSymbol name="cart.fill" size={24} color="#fff" />
-      </LinearGradient>
+      <IconSymbol name="cart.fill" size={26} color="#fff" />
       {badge !== undefined && badge > 0 && (
-        <View style={styles.badge}>
+        <View style={[styles.badge, { backgroundColor: colors.accent }]}>
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
       )}
@@ -38,41 +38,34 @@ export function FloatingActionButton({ onPress, badge }: FloatingActionButtonPro
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 28,
     right: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    elevation: 6,
-    shadowColor: '#047857',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  gradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
   badge: {
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: '#EF4444',
-    minWidth: 24,
-    height: 24,
-    borderRadius: 12,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     borderWidth: 2,
     borderColor: '#fff',
   },
   badgeText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
   },
 });

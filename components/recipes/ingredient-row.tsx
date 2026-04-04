@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 8,
     fontSize: 15,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
   },
   unitButton: {
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   },
   unitText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   deleteAction: {
     backgroundColor: '#EF4444',

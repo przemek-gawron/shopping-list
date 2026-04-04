@@ -11,37 +11,38 @@ interface CounterButtonProps {
 export function CounterButton({ count, onChange }: CounterButtonProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isActive = count > 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { borderColor: isActive ? colors.tint : colors.border }]}>
       <Pressable
         style={({ pressed }) => [
-          styles.button,
+          styles.sideButton,
           {
-            backgroundColor: count > 0 ? colors.tint : colors.border,
-            transform: [{ scale: pressed ? 0.9 : 1 }],
+            backgroundColor: isActive ? colors.tint : colors.background,
+            opacity: pressed ? 0.75 : 1,
           },
         ]}
         onPress={() => onChange(Math.max(0, count - 1))}
+        disabled={!isActive}
       >
-        <Text style={[styles.buttonText, { color: count > 0 ? '#fff' : colors.textSecondary }]}>-</Text>
+        <Text style={[styles.sideButtonText, { color: isActive ? '#fff' : colors.icon }]}>−</Text>
       </Pressable>
 
-      <View style={[styles.countContainer, { backgroundColor: count > 0 ? colors.tint + '15' : 'transparent' }]}>
-        <Text style={[styles.count, { color: count > 0 ? colors.tint : colors.textSecondary }]}>{count}</Text>
+      <View style={[styles.countArea, { backgroundColor: isActive ? colors.tint + '14' : 'transparent' }]}>
+        <Text style={[styles.count, { color: isActive ? colors.tint : colors.textSecondary }]}>
+          {count}
+        </Text>
       </View>
 
       <Pressable
         style={({ pressed }) => [
-          styles.button,
-          {
-            backgroundColor: colors.tint,
-            transform: [{ scale: pressed ? 0.9 : 1 }],
-          },
+          styles.sideButton,
+          { backgroundColor: colors.tint, opacity: pressed ? 0.75 : 1 },
         ]}
         onPress={() => onChange(count + 1)}
       >
-        <Text style={styles.buttonText}>+</Text>
+        <Text style={styles.sideButtonTextActive}>+</Text>
       </Pressable>
     </View>
   );
@@ -51,29 +52,36 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    overflow: 'hidden',
   },
-  button: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+  sideButton: {
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
+  sideButtonText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'Inter_500Medium',
+    lineHeight: 22,
   },
-  countContainer: {
-    minWidth: 40,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+  sideButtonTextActive: {
+    fontSize: 20,
+    fontFamily: 'Inter_500Medium',
+    lineHeight: 22,
+    color: '#fff',
+  },
+  countArea: {
+    minWidth: 30,
+    paddingHorizontal: 6,
+    height: 36,
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
   },
   count: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
   },
 });

@@ -36,35 +36,39 @@ export default function RecipesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')} />
-
-      {recipes.length > 0 && (
-        <View style={[styles.searchContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-          <IconSymbol name="magnifyingglass" size={18} color={colors.icon} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Szukaj przepisu..."
-            placeholderTextColor={colors.icon}
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')}>
-              <IconSymbol name="xmark.circle.fill" size={18} color={colors.icon} />
-            </Pressable>
-          )}
-        </View>
-      )}
+      <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')}>
+        {recipes.length > 0 && (
+          <View style={styles.searchContainer}>
+            <IconSymbol name="magnifyingglass" size={16} color="rgba(255,255,255,0.7)" />
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Szukaj przepisu..."
+              placeholderTextColor="rgba(255,255,255,0.55)"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')}>
+                <IconSymbol name="xmark.circle.fill" size={16} color="rgba(255,255,255,0.7)" />
+              </Pressable>
+            )}
+          </View>
+        )}
+      </GradientHeader>
 
       {recipes.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.icon }]}>
-            Brak przepisow. Dodaj pierwszy przepis!
+          <Text style={styles.emptyEmoji}>📋</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak przepisow</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+            Dodaj pierwszy przepis, aby zaczac planowac zakupy
           </Text>
         </View>
       ) : filteredRecipes.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.icon }]}>
+          <Text style={styles.emptyEmoji}>🔍</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
             Nie znaleziono przepisow dla "{searchQuery}"
           </Text>
         </View>
@@ -103,40 +107,48 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    padding: 0,
+    fontFamily: 'Inter_400Regular',
+    color: '#fff',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: 40,
+    gap: 8,
   },
-  emptyText: {
-    fontSize: 16,
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: -0.3,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
+    lineHeight: 20,
+    marginTop: 4,
   },
   listContent: {
-    paddingBottom: 100,
-    paddingTop: 8,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: -12,
-    marginBottom: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    padding: 0,
+    paddingBottom: 110,
+    paddingTop: 10,
   },
 });

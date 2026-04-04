@@ -19,6 +19,7 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isSelected = count > 0;
 
   const handlePress = () => {
     router.push(`/recipe/${recipe.id}`);
@@ -33,7 +34,7 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
 
   const renderRightActions = () => (
     <Pressable style={styles.deleteAction} onPress={handleDelete}>
-      <IconSymbol name="trash.fill" size={22} color="#fff" />
+      <IconSymbol name="trash.fill" size={20} color="#fff" />
       <Text style={styles.deleteText}>Usun</Text>
     </Pressable>
   );
@@ -50,22 +51,24 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
           styles.container,
           {
             backgroundColor: colors.cardBackground,
-            borderColor: colors.border,
-            transform: [{ scale: pressed ? 0.98 : 1 }],
+            borderLeftColor: isSelected ? colors.tint : colors.tint + '40',
+            opacity: pressed ? 0.92 : 1,
           },
         ]}
         onPress={handlePress}
       >
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
-          {recipe.description && (
+          {recipe.description ? (
             <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={1}>
               {recipe.description}
             </Text>
-          )}
-          <Text style={[styles.ingredients, { color: colors.tint }]}>
-            {recipe.ingredients.length} skladnikow
-          </Text>
+          ) : null}
+          <View style={[styles.chip, { backgroundColor: colors.tint, }]}>
+            <Text style={styles.chipText}>
+              {recipe.ingredients.length} skł.
+            </Text>
+          </View>
         </View>
         <CounterButton count={count} onChange={onCountChange} />
       </Pressable>
@@ -78,47 +81,59 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginVertical: 6,
-    paddingRight: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    marginVertical: 4,
+    paddingRight: 14,
+    paddingLeft: 14,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 3,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: 4,
+    marginRight: 12,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: -0.1,
   },
   description: {
-    fontSize: 14,
-    marginTop: 3,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 18,
   },
-  ingredients: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 6,
+  chip: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 2,
+  },
+  chipText: {
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#fff',
+    letterSpacing: 0.1,
   },
   deleteAction: {
     backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    marginVertical: 6,
+    marginVertical: 4,
     marginRight: 16,
-    borderRadius: 12,
+    borderRadius: 16,
+    gap: 4,
   },
   deleteText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
   },
 });

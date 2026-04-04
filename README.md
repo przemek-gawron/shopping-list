@@ -1,50 +1,49 @@
-# Welcome to your Expo app 👋
+# Lista zakupów
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplikacja mobilna (Expo + React Native) do zarządzania przepisami i produktami, wybierania liczby porcji oraz generowania **zbiorczej listy zakupów** z przeliczonymi składnikami. Interfejs jest w języku polskim; dane trzymane są lokalnie na urządzeniu (bez serwera).
 
-## Get started
+## Funkcje
 
-1. Install dependencies
+- **Przepisy** — dodawanie i edycja przepisów ze składnikami (ilość + jednostka).
+- **Produkty** — baza produktów powiązana z listą zakupów.
+- **Porcje** — dla każdego przepisu możesz ustawić liczbę porcji; lista zakupów sumuje składniki ze wszystkich wybranych przepisów.
+- **Lista zakupów** — agregacja składników z przeliczeniem jednostek (np. g/kg, ml/l) i sortowanie alfabetycznie (locale polski).
 
-   ```bash
-   npm install
-   ```
+## Stack techniczny
 
-2. Start the app
+- [Expo](https://expo.dev) (SDK 54) z [Expo Router](https://docs.expo.dev/router/introduction/) (nawigacja oparta o pliki w `app/`)
+- React 19, React Native, TypeScript
+- Stan aplikacji: **React Context + reducer** (`context/`), persystencja przez **AsyncStorage** (`services/storage.ts`)
+- Logika listy zakupów: `services/shopping-list-generator.ts`; jednostki i konwersje: `constants/units.ts`
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Uruchomienie
 
 ```bash
-npm run reset-project
+npm install
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Następnie wybierz platformę w terminalu lub użyj:
 
-## Learn more
+| Skrypt | Działanie |
+|--------|-----------|
+| `npm run ios` | Symulator iOS |
+| `npm run android` | Emulator Android |
+| `npm run web` | Przeglądarka |
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm run lint
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Uruchamia linter ESLint (Expo).
 
-## Join the community
+## Struktura repozytorium (skrót)
 
-Join our community of developers creating universal apps.
+- `app/` — ekrany i trasy (zakładki Przepisy / Produkty, modale edycji, ekran listy zakupów)
+- `components/` — komponenty UI i domenowe (przepisy, produkty, lista zakupów)
+- `context/` — provider i reducer stanu globalnego
+- `hooks/` — hooki domenowe (`use-products`, `use-recipes`, `use-selections`)
+- `services/` — generator listy, zapis do pamięci lokalnej
+- `constants/` — motyw, jednostki miary
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Szczegóły poleceń i konwencji UI znajdziesz w pliku `CLAUDE.md` w repozytorium.

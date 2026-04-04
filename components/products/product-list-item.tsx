@@ -30,7 +30,7 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
 
   const renderRightActions = () => (
     <Pressable style={styles.deleteAction} onPress={handleDelete}>
-      <IconSymbol name="trash.fill" size={22} color="#fff" />
+      <IconSymbol name="trash.fill" size={20} color="#fff" />
       <Text style={styles.deleteText}>Usun</Text>
     </Pressable>
   );
@@ -47,8 +47,8 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
           styles.container,
           {
             backgroundColor: colors.cardBackground,
-            borderColor: colors.border,
-            transform: [{ scale: pressed ? 0.98 : 1 }],
+            borderLeftColor: colors.tint + '50',
+            opacity: pressed ? 0.92 : 1,
           },
         ]}
         onPress={handlePress}
@@ -61,8 +61,8 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
             </Text>
           )}
         </View>
-        <View style={[styles.unitBadge, { backgroundColor: colors.tint + '20' }]}>
-          <Text style={[styles.unit, { color: colors.tint }]}>{product.defaultUnit}</Text>
+        <View style={[styles.unitBadge, { backgroundColor: colors.tint }]}>
+          <Text style={styles.unit}>{product.defaultUnit}</Text>
         </View>
       </Pressable>
     </Swipeable>
@@ -74,50 +74,54 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginVertical: 6,
-    paddingHorizontal: 16,
+    marginVertical: 4,
+    paddingLeft: 14,
+    paddingRight: 16,
     paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 16,
+    borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 3,
   },
   content: {
     flex: 1,
+    gap: 3,
   },
   name: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: -0.1,
   },
   aliases: {
     fontSize: 13,
-    marginTop: 3,
+    fontFamily: 'Inter_400Regular',
   },
   unitBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
   unit: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_700Bold',
+    color: '#fff',
   },
   deleteAction: {
     backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    marginVertical: 6,
+    marginVertical: 4,
     marginRight: 16,
-    borderRadius: 12,
+    borderRadius: 16,
+    gap: 4,
   },
   deleteText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
