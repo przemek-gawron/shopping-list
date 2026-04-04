@@ -59,7 +59,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
         style={[
           styles.container,
           {
-            backgroundColor: colors.surfaceGlass,
+            backgroundColor: colors.surfaceCard,
             borderLeftColor: item.checked ? colors.tint + '30' : colors.tint,
             borderColor: colors.borderSubtle,
             shadowColor: colors.shadowColor,

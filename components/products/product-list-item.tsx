@@ -47,7 +47,7 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
         style={({ pressed }) => [
           styles.container,
           {
-            backgroundColor: colors.surfaceGlass,
+            backgroundColor: colors.surfaceCard,
             borderLeftColor: colors.tint + '50',
             borderColor: colors.borderSubtle,
             shadowColor: colors.shadowColor,

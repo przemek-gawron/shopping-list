@@ -30,6 +30,8 @@ export const Colors = {
     surfaceElevated: '#F7FCFA',
     /** Frosted list rows / chips */
     surfaceGlass: 'rgba(255, 255, 255, 0.82)',
+    /** More solid list tiles */
+    surfaceCard: '#DDEDE4',
     surfaceOverlay: 'rgba(4, 120, 87, 0.45)',
     onPrimary: '#FFFFFF',
     onPrimaryMuted: 'rgba(255, 255, 255, 0.75)',
@@ -66,6 +68,7 @@ export const Colors = {
     surfacePrimary: '#0F0F0F',
     surfaceElevated: '#1C1C1E',
     surfaceGlass: 'rgba(28, 28, 30, 0.88)',
+    surfaceCard: '#202725',
     surfaceOverlay: 'rgba(16, 185, 129, 0.35)',
     onPrimary: '#FFFFFF',
     onPrimaryMuted: 'rgba(255, 255, 255, 0.72)',

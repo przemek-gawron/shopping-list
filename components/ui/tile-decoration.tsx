@@ -41,9 +41,9 @@ export function TileDecoration({ variant = 'recipe' }: TileDecorationProps) {
 
   const waveColorStrong = colorScheme === 'dark' ? 'rgba(255,255,255,0.09)' : colors.tint + '18';
   const waveColorSoft = colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : colors.tint + '12';
-  const baseTint = colorScheme === 'dark' ? 'rgba(255,255,255,0.015)' : colors.tint + '06';
-  const washStart = colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : colors.tint + '14';
-  const washMid = colorScheme === 'dark' ? 'rgba(255,255,255,0.015)' : colors.tint + '08';
+  const baseTint = colorScheme === 'dark' ? 'rgba(255,255,255,0.02)' : colors.tint + '0B';
+  const washStart = colorScheme === 'dark' ? 'rgba(255,255,255,0.035)' : colors.tint + '18';
+  const washMid = colorScheme === 'dark' ? 'rgba(255,255,255,0.018)' : colors.tint + '0D';
   const washEnd = 'transparent';
 
   return (

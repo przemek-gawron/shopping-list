@@ -51,7 +51,7 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
         style={({ pressed }) => [
           styles.container,
           {
-            backgroundColor: colors.surfaceGlass,
+            backgroundColor: colors.surfaceCard,
             borderLeftColor: isSelected ? colors.tint : colors.tint + '40',
             borderColor: colors.borderSubtle,
             shadowColor: colors.shadowColor,
