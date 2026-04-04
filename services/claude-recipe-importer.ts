@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Unit } from '@/types';
 
@@ -53,14 +53,14 @@ async function resizeImage(uri: string): Promise<string> {
   const result = await ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { width: 1600 } }],
-    { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+    { compress: 0.8, format: 'jpeg' as ImageManipulator.SaveFormat }
   );
   return result.uri;
 }
 
 async function encodeImageToBase64(uri: string): Promise<string> {
   return FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
+    encoding: 'base64' as FileSystem.EncodingType,
   });
 }
 

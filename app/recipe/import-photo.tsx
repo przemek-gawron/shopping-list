@@ -66,6 +66,8 @@ export default function ImportPhotoScreen() {
   const handleAnalyze = async () => {
     if (photos.length === 0) return;
 
+    console.log('[ImportPhoto] API_KEY present:', !!API_KEY, 'length:', API_KEY.length);
+
     if (!API_KEY) {
       Alert.alert('Brak klucza API', 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.');
       return;
@@ -110,12 +112,14 @@ export default function ImportPhotoScreen() {
 
       setStep('review');
     } catch (error) {
+      console.error('[ImportPhoto] error:', error);
       if (error instanceof ApiKeyError) {
         Alert.alert('Nieprawidłowy klucz API', 'Sprawdź wartość EXPO_PUBLIC_ANTHROPIC_API_KEY.');
       } else if (error instanceof ParseError) {
         Alert.alert('Nie rozpoznano przepisu', 'Nie udało się rozpoznać przepisu na zdjęciu. Spróbuj z innym zdjęciem.');
       } else {
-        Alert.alert('Błąd importu', 'Nie udało się połączyć z API. Sprawdź połączenie internetowe.');
+        const msg = error instanceof Error ? error.message : String(error);
+        Alert.alert('Błąd importu', msg);
       }
       setStep('pick');
     }
