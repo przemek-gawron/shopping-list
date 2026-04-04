@@ -10,7 +10,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -34,16 +33,41 @@ export default function ShoppingListScreen() {
   const { selections, clearSelections } = useSelections();
   const { products: allProducts } = useProducts();
 
-  const initialItems = useMemo(
+  const generatedItems = useMemo(
     () => generateShoppingList(recipes, selections, products),
     [recipes, selections, products]
   );
 
-  const [items, setItems] = useState<ShoppingListItem[]>(initialItems);
+  // User modifications — survive re-renders when selections change
+  const [manualItems, setManualItems] = useState<ShoppingListItem[]>([]);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+  const [quantityOverrides, setQuantityOverrides] = useState<Record<string, { quantity: number; unit: Unit }>>({});
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [newName, setNewName] = useState('');
   const [newQty, setNewQty] = useState('1');
   const [newUnit, setNewUnit] = useState<Unit>('szt');
+
+  // Merge generated + manual, applying overrides and filters
+  const items = useMemo<ShoppingListItem[]>(() => {
+    const apply = (item: ShoppingListItem): ShoppingListItem => ({
+      ...item,
+      quantity: quantityOverrides[item.productId]?.quantity ?? item.quantity,
+      unit: quantityOverrides[item.productId]?.unit ?? item.unit,
+      checked: checkedIds.includes(item.productId),
+    });
+
+    const generated = generatedItems
+      .filter((i) => !deletedIds.includes(i.productId))
+      .map(apply);
+
+    const manual = manualItems
+      .filter((i) => !deletedIds.includes(i.productId))
+      .map(apply);
+
+    return [...generated, ...manual];
+  }, [generatedItems, manualItems, deletedIds, quantityOverrides, checkedIds]);
 
   const sortedItems = useMemo(() => {
     const unchecked = items.filter((i) => !i.checked);
@@ -51,28 +75,24 @@ export default function ShoppingListScreen() {
     return [...unchecked, ...checked];
   }, [items]);
 
-  const checkedCount = items.filter((i) => i.checked).length;
+  const checkedCount = checkedIds.filter((id) =>
+    items.some((i) => i.productId === id)
+  ).length;
   const totalCount = items.length;
   const progress = totalCount > 0 ? checkedCount / totalCount : 0;
 
   const toggleItem = (productId: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.productId === productId ? { ...item, checked: !item.checked } : item
-      )
+    setCheckedIds((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
   const deleteItem = (productId: string) => {
-    setItems((prev) => prev.filter((item) => item.productId !== productId));
+    setDeletedIds((prev) => [...prev, productId]);
   };
 
   const updateItem = (productId: string, quantity: number, unit: Unit) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.productId === productId ? { ...item, quantity, unit } : item
-      )
-    );
+    setQuantityOverrides((prev) => ({ ...prev, [productId]: { quantity, unit } }));
   };
 
   const openAddModal = () => {
@@ -105,7 +125,7 @@ export default function ShoppingListScreen() {
       (p) => p.name.toLowerCase() === trimmedName.toLowerCase()
     );
 
-    setItems((prev) => [
+    setManualItems((prev) => [
       ...prev,
       {
         productId: matchedProduct?.id ?? generateId(),
@@ -127,7 +147,17 @@ export default function ShoppingListScreen() {
   const handleClear = () => {
     Alert.alert('Wyczysc selekcje', 'Czy na pewno chcesz wyczysc wszystkie wybrane przepisy?', [
       { text: 'Anuluj', style: 'cancel' },
-      { text: 'Wyczysc', style: 'destructive', onPress: clearSelections },
+      {
+        text: 'Wyczysc',
+        style: 'destructive',
+        onPress: () => {
+          clearSelections();
+          setManualItems([]);
+          setDeletedIds([]);
+          setQuantityOverrides({});
+          setCheckedIds([]);
+        },
+      },
     ]);
   };
 
@@ -214,7 +244,7 @@ export default function ShoppingListScreen() {
       <Modal
         visible={addModalVisible}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setAddModalVisible(false)}
       >
         <Pressable style={styles.modalOverlay} onPress={() => setAddModalVisible(false)} />
@@ -242,47 +272,45 @@ export default function ShoppingListScreen() {
               />
             </View>
 
-            <View style={styles.modalRow}>
-              <View style={[styles.modalField, { flex: 1 }]}>
-                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>ILOSC</Text>
-                <TextInput
-                  style={[
-                    styles.modalInput,
-                    { color: colors.text, borderColor: colors.border, backgroundColor: colors.background },
-                  ]}
-                  value={newQty}
-                  onChangeText={setNewQty}
-                  keyboardType="decimal-pad"
-                  selectTextOnFocus
-                />
-              </View>
+            <View style={styles.modalField}>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>ILOSC</Text>
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  { color: colors.text, borderColor: colors.border, backgroundColor: colors.background },
+                ]}
+                value={newQty}
+                onChangeText={setNewQty}
+                keyboardType="decimal-pad"
+                selectTextOnFocus
+              />
+            </View>
 
-              <View style={[styles.modalField, { flex: 1.6 }]}>
-                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>JEDNOSTKA</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.unitScroll}>
-                  {UNIT_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.value}
+            <View style={styles.modalField}>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>JEDNOSTKA</Text>
+              <View style={styles.unitWrap}>
+                {UNIT_OPTIONS.map((opt) => (
+                  <Pressable
+                    key={opt.value}
+                    style={[
+                      styles.unitPill,
+                      {
+                        backgroundColor: newUnit === opt.value ? colors.tint : colors.background,
+                        borderColor: colors.tint,
+                      },
+                    ]}
+                    onPress={() => setNewUnit(opt.value)}
+                  >
+                    <Text
                       style={[
-                        styles.unitPill,
-                        {
-                          backgroundColor: newUnit === opt.value ? colors.tint : colors.background,
-                          borderColor: colors.tint,
-                        },
+                        styles.unitPillText,
+                        { color: newUnit === opt.value ? '#fff' : colors.tint },
                       ]}
-                      onPress={() => setNewUnit(opt.value)}
                     >
-                      <Text
-                        style={[
-                          styles.unitPillText,
-                          { color: newUnit === opt.value ? '#fff' : colors.tint },
-                        ]}
-                      >
-                        {opt.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </ScrollView>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                ))}
               </View>
             </View>
 
@@ -445,20 +473,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
   },
-  modalRow: {
+  unitWrap: {
     flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-  },
-  unitScroll: {
-    flexGrow: 0,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   unitPill: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1.5,
-    marginRight: 6,
   },
   unitPillText: {
     fontSize: 13,
