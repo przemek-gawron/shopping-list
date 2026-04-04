@@ -73,8 +73,9 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
             style={({ pressed }) => [
               styles.checkbox,
               {
-                borderColor: item.checked ? colors.tint : colors.borderSubtle,
-                backgroundColor: item.checked ? colors.tint : 'transparent',
+                borderColor: item.checked ? colors.tint : colors.tint + '40',
+                backgroundColor: item.checked ? colors.tint : colors.surfaceElevated,
+                shadowColor: colors.shadowColor,
                 opacity: pressed ? 0.7 : 1,
               },
             ]}
@@ -183,13 +184,17 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
+    width: 28,
+    height: 28,
+    borderRadius: 9,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   name: {
     fontSize: 15,
