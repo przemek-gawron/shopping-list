@@ -26,6 +26,13 @@ const MAPPING = {
   'checkmark': 'check',
   'doc.on.doc': 'content-copy',
   'trash': 'delete',
+  'camera': 'photo-camera',
+  'photo.on.rectangle': 'photo-library',
+  'xmark': 'close',
+  'pencil': 'edit',
+  'trash.fill': 'delete',
+  'key': 'key',
+  'sparkles': 'auto_awesome',
 } as IconMapping;
 
 /**
