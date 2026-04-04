@@ -39,6 +39,7 @@ export function TileDecoration({ variant = 'recipe' }: TileDecorationProps) {
   const colors = Colors[colorScheme ?? 'light'];
   const placement = placements[variant];
 
+  const lineColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.035)' : colors.tint + '10';
   const waveColorStrong = colorScheme === 'dark' ? 'rgba(255,255,255,0.09)' : colors.tint + '18';
   const waveColorSoft = colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : colors.tint + '12';
   const baseTint = colorScheme === 'dark' ? 'rgba(255,255,255,0.02)' : colors.tint + '0B';
@@ -49,6 +50,20 @@ export function TileDecoration({ variant = 'recipe' }: TileDecorationProps) {
   return (
     <View pointerEvents="none" style={styles.container}>
       <View style={[styles.baseTint, { backgroundColor: baseTint }]} />
+      <View style={styles.lineField}>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.diagonalLine,
+              {
+                top: -42 + index * 18,
+                backgroundColor: lineColor,
+              },
+            ]}
+          />
+        ))}
+      </View>
       <LinearGradient
         colors={[washStart, washMid, washEnd]}
         start={{ x: 0, y: 0.5 }}
@@ -75,6 +90,20 @@ const styles = StyleSheet.create({
   wash: {
     position: 'absolute',
     borderRadius: 999,
+  },
+  lineField: {
+    ...StyleSheet.absoluteFillObject,
+    left: -40,
+    right: -40,
+    top: -16,
+    bottom: -16,
+    transform: [{ rotate: '-11deg' }],
+  },
+  diagonalLine: {
+    position: 'absolute',
+    left: -40,
+    right: -40,
+    height: 1,
   },
   waveLarge: {
     position: 'absolute',
