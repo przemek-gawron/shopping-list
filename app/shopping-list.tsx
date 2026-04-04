@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   FlatList,
@@ -48,6 +48,8 @@ export default function ShoppingListScreen() {
   const [newName, setNewName] = useState('');
   const [newQty, setNewQty] = useState('1');
   const [newUnit, setNewUnit] = useState<Unit>('szt');
+  const [pendingCheckedIds, setPendingCheckedIds] = useState<string[]>([]);
+  const toggleTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const items = useMemo<ShoppingListItem[]>(() => {
     const apply = (item: ShoppingListItem): ShoppingListItem => ({
@@ -138,6 +140,34 @@ export default function ShoppingListScreen() {
 
   const productItems = allProducts.map((p) => ({ id: p.id, label: p.name }));
 
+  useEffect(() => {
+    const timeouts = toggleTimeoutsRef.current;
+    return () => {
+      Object.values(timeouts).forEach(clearTimeout);
+    };
+  }, []);
+
+  const handleToggleWithAnimation = useCallback(
+    (item: ShoppingListItem) => {
+      if (item.checked) {
+        toggleItem(item.productId);
+        return;
+      }
+
+      if (pendingCheckedIds.includes(item.productId)) {
+        return;
+      }
+
+      setPendingCheckedIds((prev) => [...prev, item.productId]);
+      toggleTimeoutsRef.current[item.productId] = setTimeout(() => {
+        toggleItem(item.productId);
+        setPendingCheckedIds((prev) => prev.filter((id) => id !== item.productId));
+        delete toggleTimeoutsRef.current[item.productId];
+      }, 360);
+    },
+    [pendingCheckedIds, toggleItem]
+  );
+
   return (
     <>
       <Stack.Screen
@@ -174,7 +204,7 @@ export default function ShoppingListScreen() {
       />
 
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <AmbientBackground variant="shopping" />
+        <AmbientBackground variant="shopping" listHasItems={totalCount > 0} />
         {totalCount > 0 && (
           <View style={[styles.progressContainer, { backgroundColor: colors.headerChrome, shadowColor: colors.shadowColor }]}>
             <View style={styles.progressHeader}>
@@ -202,7 +232,8 @@ export default function ShoppingListScreen() {
             renderItem={({ item }) => (
               <ShoppingListItemComponent
                 item={item}
-                onToggle={() => toggleItem(item.productId)}
+                isCompleting={pendingCheckedIds.includes(item.productId)}
+                onToggle={() => handleToggleWithAnimation(item)}
                 onDelete={() => deleteItem(item.productId)}
                 onUpdate={(qty, unit) => updateItem(item.productId, qty, unit)}
               />

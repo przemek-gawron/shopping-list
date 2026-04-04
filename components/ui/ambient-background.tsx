@@ -8,6 +8,8 @@ type AmbientBackgroundVariant = 'recipes' | 'products' | 'shopping';
 
 interface AmbientBackgroundProps {
   variant?: AmbientBackgroundVariant;
+  /** Stronger, darker ambient when the screen shows a populated list (e.g. shopping list with items). */
+  listHasItems?: boolean;
 }
 
 const positions = {
@@ -31,19 +33,38 @@ const positions = {
   },
 };
 
-export function AmbientBackground({ variant = 'recipes' }: AmbientBackgroundProps) {
+export function AmbientBackground({
+  variant = 'recipes',
+  listHasItems = false,
+}: AmbientBackgroundProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const placement = positions[variant];
+  const boost = listHasItems;
 
-  const greenStart = isDark ? 'rgba(16, 185, 129, 0.24)' : 'rgba(4, 120, 87, 0.24)';
-  const greenMid = isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(52, 211, 153, 0.12)';
+  const greenStart = isDark
+    ? `rgba(16, 185, 129, ${boost ? 0.4 : 0.24})`
+    : `rgba(4, 120, 87, ${boost ? 0.4 : 0.24})`;
+  const greenMid = isDark
+    ? `rgba(16, 185, 129, ${boost ? 0.2 : 0.1})`
+    : `rgba(52, 211, 153, ${boost ? 0.22 : 0.12})`;
   const greenEnd = 'transparent';
-  const amberStart = isDark ? 'rgba(245, 158, 11, 0.14)' : 'rgba(245, 158, 11, 0.16)';
-  const gridBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(4, 120, 87, 0.12)';
-  const gridLine = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(4, 120, 87, 0.08)';
-  const gridSurface = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(255,255,255,0.22)';
-  const gridHighlight = isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(4, 120, 87, 0.12)';
+  const amberStart = isDark
+    ? `rgba(245, 158, 11, ${boost ? 0.26 : 0.14})`
+    : `rgba(245, 158, 11, ${boost ? 0.28 : 0.16})`;
+  const gridBorder = isDark
+    ? `rgba(255,255,255,${boost ? 0.12 : 0.08})`
+    : `rgba(4, 120, 87, ${boost ? 0.2 : 0.12})`;
+  const gridLine = isDark
+    ? `rgba(255,255,255,${boost ? 0.09 : 0.06})`
+    : `rgba(4, 120, 87, ${boost ? 0.14 : 0.08})`;
+  const gridSurface = isDark
+    ? `rgba(255,255,255,${boost ? 0.045 : 0.025})`
+    : `rgba(255,255,255,${boost ? 0.32 : 0.22})`;
+  const gridHighlight = isDark
+    ? `rgba(16, 185, 129, ${boost ? 0.2 : 0.12})`
+    : `rgba(4, 120, 87, ${boost ? 0.2 : 0.12})`;
+  const depthTint = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(4, 77, 58, 0.13)';
 
   return (
     <View pointerEvents="none" style={styles.container}>
@@ -103,6 +124,9 @@ export function AmbientBackground({ variant = 'recipes' }: AmbientBackgroundProp
           ))}
         </View>
       ))}
+      {boost && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: depthTint }]} />
+      )}
     </View>
   );
 }

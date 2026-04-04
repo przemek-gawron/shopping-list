@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { ShoppingListItem as ShoppingListItemType, Unit } from '@/types';
@@ -7,20 +7,35 @@ import { Colors } from '@/constants/theme';
 import { formatQuantity, UNIT_OPTIONS } from '@/constants/units';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TileDecoration } from '@/components/ui/tile-decoration';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface ShoppingListItemProps {
   item: ShoppingListItemType;
+  isCompleting?: boolean;
   onToggle: () => void;
   onDelete: () => void;
   onUpdate: (quantity: number, unit: Unit) => void;
 }
 
-export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: ShoppingListItemProps) {
+export function ShoppingListItem({
+  item,
+  isCompleting = false,
+  onToggle,
+  onDelete,
+  onUpdate,
+}: ShoppingListItemProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [editing, setEditing] = useState(false);
   const [editQty, setEditQty] = useState(item.quantity.toString());
   const [editUnit, setEditUnit] = useState<Unit>(item.unit);
+  const visualChecked = item.checked || isCompleting;
+  const completionProgress = useSharedValue(visualChecked ? 1 : 0);
 
   const startEditing = () => {
     setEditQty(item.quantity.toString());
@@ -41,6 +56,27 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
     setEditUnit(UNIT_OPTIONS[(idx + 1) % UNIT_OPTIONS.length].value);
   };
 
+  useEffect(() => {
+    completionProgress.value = withTiming(visualChecked ? 1 : 0, { duration: 260 });
+  }, [completionProgress, visualChecked]);
+
+  const animatedRowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(completionProgress.value, [0, 1], [1, 0.6]),
+    transform: [
+      { scale: interpolate(completionProgress.value, [0, 1], [1, 0.985]) },
+      { translateX: interpolate(completionProgress.value, [0, 1], [0, 8]) },
+    ],
+  }));
+
+  const animatedStrikeStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(completionProgress.value, [0, 1], [0, 1]),
+    transform: [{ scaleX: interpolate(completionProgress.value, [0, 1], [0.01, 1]) }],
+  }));
+
+  const animatedOverlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(completionProgress.value, [0, 1], [0, 1]),
+  }));
+
   const renderRightActions = () => (
     <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={onDelete}>
       <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
@@ -55,52 +91,69 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
       friction={2}
       overshootRight={false}
     >
-      <View
+      <Animated.View
         style={[
           styles.container,
           {
             backgroundColor: colors.surfaceCard,
-            borderLeftColor: item.checked ? colors.tint + '30' : colors.tint,
+            borderLeftColor: visualChecked ? colors.tint + '30' : colors.tint,
             borderColor: colors.borderSubtle,
             shadowColor: colors.shadowColor,
-            opacity: item.checked && !editing ? 0.65 : 1,
           },
+          !editing && animatedRowStyle,
         ]}
       >
         <TileDecoration variant="shopping" />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.completionOverlay,
+            { backgroundColor: colors.surfaceElevated },
+            animatedOverlayStyle,
+          ]}
+        />
         <View style={styles.mainRow}>
           <Pressable
             style={({ pressed }) => [
               styles.checkbox,
               {
-                borderColor: item.checked ? colors.tint : colors.tint + '40',
-                backgroundColor: item.checked ? colors.tint : colors.surfaceElevated,
+                borderColor: visualChecked ? colors.tint : colors.tint + '40',
+                backgroundColor: visualChecked ? colors.tint : colors.surfaceElevated,
                 shadowColor: colors.shadowColor,
                 opacity: pressed ? 0.7 : 1,
               },
             ]}
             onPress={onToggle}
           >
-            {item.checked && <IconSymbol name="checkmark" size={12} color={colors.onPrimary} />}
+            {visualChecked && <IconSymbol name="checkmark" size={12} color={colors.onPrimary} />}
           </Pressable>
 
-          <Text
-            style={[
-              styles.name,
-              {
-                color: item.checked ? colors.textSecondary : colors.text,
-                textDecorationLine: item.checked ? 'line-through' : 'none',
-              },
-            ]}
-            numberOfLines={1}
-          >
-            {item.productName}
-          </Text>
+          <View style={styles.nameWrap}>
+            <Text
+              style={[
+                styles.name,
+                {
+                  color: visualChecked ? colors.textSecondary : colors.text,
+                  textDecorationLine: visualChecked ? 'line-through' : 'none',
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {item.productName}
+            </Text>
+            <Animated.View
+              style={[
+                styles.strikeLine,
+                { backgroundColor: colors.textSecondary },
+                animatedStrikeStyle,
+              ]}
+            />
+          </View>
 
           <Pressable
             style={[
               styles.quantityBadge,
-              { backgroundColor: item.checked ? colors.border : colors.tint },
+              { backgroundColor: visualChecked ? colors.border : colors.tint },
             ]}
             onPress={startEditing}
           >
@@ -108,7 +161,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
               style={[
                 styles.quantity,
                 {
-                  color: item.checked ? colors.textSecondary : colors.onPrimary,
+                  color: visualChecked ? colors.textSecondary : colors.onPrimary,
                 },
               ]}
             >
@@ -117,7 +170,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
             <IconSymbol
               name="pencil"
               size={10}
-              color={item.checked ? colors.textSecondary : colors.onPrimaryMuted}
+              color={visualChecked ? colors.textSecondary : colors.onPrimaryMuted}
             />
           </Pressable>
         </View>
@@ -155,7 +208,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
             </Pressable>
           </View>
         )}
-      </View>
+      </Animated.View>
     </Swipeable>
   );
 }
@@ -196,11 +249,24 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  nameWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: 22,
+  },
   name: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    flex: 1,
     letterSpacing: -0.1,
+  },
+  strikeLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1.5,
+    top: '46%',
+    marginTop: -0.75,
+    transformOrigin: 'left',
   },
   quantityBadge: {
     flexDirection: 'row',
@@ -223,6 +289,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     zIndex: 1,
+  },
+  completionOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   editInput: {
     flex: 1,

@@ -20,6 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'book.fill': 'menu-book',
   'list.bullet': 'list',
+  'minus': 'remove',
   'plus': 'add',
   'cart.fill': 'shopping-cart',
   'xmark.circle.fill': 'cancel',

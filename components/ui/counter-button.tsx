@@ -2,95 +2,105 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 interface CounterButtonProps {
   count: number;
   onChange: (count: number) => void;
 }
 
+const ICON_SIZE = 17;
+
 export function CounterButton({ count, onChange }: CounterButtonProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const isActive = count > 0;
 
+  const minusColor = isActive ? colors.tint : colors.icon;
+  const ripple = { color: `${colors.tint}33` };
+
   return (
     <View
       style={[
-        styles.container,
+        styles.pill,
         {
-          borderColor: isActive ? colors.tint : colors.borderSubtle,
-          backgroundColor: colors.surfaceElevated,
+          borderColor: isActive ? `${colors.tint}28` : colors.borderSubtle,
+          backgroundColor: isActive ? `${colors.tint}0F` : colors.surfaceElevated,
         },
       ]}
     >
       <Pressable
-        style={({ pressed }) => [
-          styles.sideButton,
-          {
-            backgroundColor: isActive ? colors.tint : colors.surfaceElevated,
-            opacity: pressed ? 0.75 : 1,
-          },
-        ]}
-        onPress={() => onChange(Math.max(0, count - 1))}
+        accessibilityRole="button"
+        accessibilityLabel="Zmniejsz liczbę porcji"
         disabled={!isActive}
+        onPress={() => onChange(Math.max(0, count - 1))}
+        android_ripple={ripple}
+        style={({ pressed }) => [
+          styles.side,
+          styles.sideLeft,
+          pressed && isActive && { backgroundColor: `${colors.tint}18` },
+        ]}
       >
-        <Text style={[styles.sideButtonText, { color: isActive ? colors.onPrimary : colors.icon }]}>
-          −
-        </Text>
+        <IconSymbol name="minus" size={ICON_SIZE} color={minusColor} weight="medium" />
       </Pressable>
 
-      <View style={[styles.countArea, { backgroundColor: isActive ? colors.tint + '14' : 'transparent' }]}>
-        <Text style={[styles.count, { color: isActive ? colors.tint : colors.textSecondary }]}>
+      <View style={styles.countSlot}>
+        <Text
+          style={[styles.count, { color: isActive ? colors.text : colors.textSecondary }]}
+          numberOfLines={1}
+        >
           {count}
         </Text>
       </View>
 
       <Pressable
-        style={({ pressed }) => [
-          styles.sideButton,
-          { backgroundColor: colors.tint, opacity: pressed ? 0.75 : 1 },
-        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Zwiększ liczbę porcji"
         onPress={() => onChange(count + 1)}
+        android_ripple={ripple}
+        style={({ pressed }) => [
+          styles.side,
+          styles.sideRight,
+          pressed && { backgroundColor: `${colors.tint}18` },
+        ]}
       >
-        <Text style={[styles.sideButtonTextActive, { color: colors.onPrimary }]}>+</Text>
+        <IconSymbol name="plus" size={ICON_SIZE} color={colors.tint} weight="medium" />
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1.5,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
   },
-  sideButton: {
-    width: 36,
-    height: 36,
+  side: {
+    minWidth: 36,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sideButtonText: {
-    fontSize: 20,
-    fontFamily: 'Inter_500Medium',
-    lineHeight: 22,
+  sideLeft: {
+    borderTopLeftRadius: 999,
+    borderBottomLeftRadius: 999,
   },
-  sideButtonTextActive: {
-    fontSize: 20,
-    fontFamily: 'Inter_500Medium',
-    lineHeight: 22,
+  sideRight: {
+    borderTopRightRadius: 999,
+    borderBottomRightRadius: 999,
   },
-  countArea: {
+  countSlot: {
     minWidth: 30,
     paddingHorizontal: 6,
-    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
   count: {
-    fontSize: 16,
-    fontFamily: 'Inter_700Bold',
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    fontVariant: ['tabular-nums'],
   },
 });
