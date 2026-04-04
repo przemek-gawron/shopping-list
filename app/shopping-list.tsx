@@ -1,21 +1,38 @@
 import React, { useState, useMemo } from 'react';
-import { View, FlatList, StyleSheet, Pressable, Text, Alert } from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  Text,
+  Alert,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { Stack } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { useAppContext } from '@/context/app-context';
 import { useSelections } from '@/hooks/use-selections';
+import { useProducts } from '@/hooks/use-products';
 import { generateShoppingList, formatShoppingListForClipboard } from '@/services/shopping-list-generator';
 import { ShoppingListItem as ShoppingListItemComponent } from '@/components/shopping-list/shopping-list-item';
-import { ShoppingListItem } from '@/types';
+import { ShoppingListItem, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { UNIT_OPTIONS } from '@/constants/units';
+import { generateId } from '@/utils/id-generator';
+import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 
 export default function ShoppingListScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { recipes, products } = useAppContext();
   const { selections, clearSelections } = useSelections();
+  const { products: allProducts } = useProducts();
 
   const initialItems = useMemo(
     () => generateShoppingList(recipes, selections, products),
@@ -23,6 +40,10 @@ export default function ShoppingListScreen() {
   );
 
   const [items, setItems] = useState<ShoppingListItem[]>(initialItems);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newQty, setNewQty] = useState('1');
+  const [newUnit, setNewUnit] = useState<Unit>('szt');
 
   const sortedItems = useMemo(() => {
     const unchecked = items.filter((i) => !i.checked);
@@ -42,6 +63,61 @@ export default function ShoppingListScreen() {
     );
   };
 
+  const deleteItem = (productId: string) => {
+    setItems((prev) => prev.filter((item) => item.productId !== productId));
+  };
+
+  const updateItem = (productId: string, quantity: number, unit: Unit) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, quantity, unit } : item
+      )
+    );
+  };
+
+  const openAddModal = () => {
+    setNewName('');
+    setNewQty('1');
+    setNewUnit('szt');
+    setAddModalVisible(true);
+  };
+
+  const handleAddItem = () => {
+    const trimmedName = newName.trim();
+    if (!trimmedName) return;
+    const qty = parseFloat(newQty);
+    if (isNaN(qty) || qty <= 0) {
+      Alert.alert('Blad', 'Podaj poprawna ilosc');
+      return;
+    }
+
+    // Check if item already on list
+    const existing = items.find(
+      (i) => i.productName.toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (existing) {
+      Alert.alert('Produkt juz na liscie', `"${existing.productName}" jest juz na liscie zakupow.`);
+      return;
+    }
+
+    // Try to match to an existing product for the productId
+    const matchedProduct = allProducts.find(
+      (p) => p.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    setItems((prev) => [
+      ...prev,
+      {
+        productId: matchedProduct?.id ?? generateId(),
+        productName: matchedProduct?.name ?? trimmedName,
+        quantity: qty,
+        unit: newUnit,
+        checked: false,
+      },
+    ]);
+    setAddModalVisible(false);
+  };
+
   const handleCopy = async () => {
     const text = formatShoppingListForClipboard(sortedItems);
     await Clipboard.setStringAsync(text);
@@ -51,13 +127,11 @@ export default function ShoppingListScreen() {
   const handleClear = () => {
     Alert.alert('Wyczysc selekcje', 'Czy na pewno chcesz wyczysc wszystkie wybrane przepisy?', [
       { text: 'Anuluj', style: 'cancel' },
-      {
-        text: 'Wyczysc',
-        style: 'destructive',
-        onPress: clearSelections,
-      },
+      { text: 'Wyczysc', style: 'destructive', onPress: clearSelections },
     ]);
   };
+
+  const productItems = allProducts.map((p) => ({ id: p.id, label: p.name }));
 
   return (
     <>
@@ -76,35 +150,26 @@ export default function ShoppingListScreen() {
           headerShadowVisible: false,
           headerRight: () => (
             <View style={styles.headerButtons}>
-              <Pressable
-                style={styles.headerButton}
-                onPress={handleCopy}
-              >
+              <Pressable style={styles.headerButton} onPress={handleCopy}>
                 <IconSymbol name="doc.on.doc" size={19} color="#fff" />
               </Pressable>
-              <Pressable
-                style={styles.headerButton}
-                onPress={handleClear}
-              >
+              <Pressable style={styles.headerButton} onPress={handleClear}>
                 <IconSymbol name="trash" size={19} color="rgba(255,255,255,0.85)" />
               </Pressable>
             </View>
           ),
         }}
       />
+
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {totalCount > 0 && (
           <View style={[styles.progressContainer, { backgroundColor: colors.tint }]}>
             <View style={styles.progressHeader}>
               <Text style={styles.progressLabel}>Postep zakupow</Text>
-              <Text style={styles.progressCount}>
-                {checkedCount} / {totalCount}
-              </Text>
+              <Text style={styles.progressCount}>{checkedCount} / {totalCount}</Text>
             </View>
             <View style={styles.progressTrack}>
-              <View
-                style={[styles.progressFill, { width: `${progress * 100}%` }]}
-              />
+              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
             </View>
           </View>
         )}
@@ -125,12 +190,114 @@ export default function ShoppingListScreen() {
               <ShoppingListItemComponent
                 item={item}
                 onToggle={() => toggleItem(item.productId)}
+                onDelete={() => deleteItem(item.productId)}
+                onUpdate={(qty, unit) => updateItem(item.productId, qty, unit)}
               />
             )}
             contentContainerStyle={styles.listContent}
           />
         )}
+
+        {/* Add item button */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.addButton,
+            { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+          ]}
+          onPress={openAddModal}
+        >
+          <IconSymbol name="plus" size={22} color="#fff" />
+        </Pressable>
       </View>
+
+      {/* Add item modal */}
+      <Modal
+        visible={addModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAddModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setAddModalVisible(false)} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalKAV}
+        >
+          <View style={[styles.modalSheet, { backgroundColor: colors.cardBackground }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Dodaj produkt</Text>
+
+            <View style={[styles.modalField, { zIndex: 20 }]}>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>NAZWA</Text>
+              <AutocompleteInput
+                value={newName}
+                onChangeText={setNewName}
+                onSelect={(item) => {
+                  setNewName(item.label);
+                  const product = allProducts.find((p) => p.id === item.id);
+                  if (product) setNewUnit(product.defaultUnit);
+                }}
+                items={productItems}
+                placeholder="np. Cukier"
+              />
+            </View>
+
+            <View style={styles.modalRow}>
+              <View style={[styles.modalField, { flex: 1 }]}>
+                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>ILOSC</Text>
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    { color: colors.text, borderColor: colors.border, backgroundColor: colors.background },
+                  ]}
+                  value={newQty}
+                  onChangeText={setNewQty}
+                  keyboardType="decimal-pad"
+                  selectTextOnFocus
+                />
+              </View>
+
+              <View style={[styles.modalField, { flex: 1.6 }]}>
+                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>JEDNOSTKA</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.unitScroll}>
+                  {UNIT_OPTIONS.map((opt) => (
+                    <Pressable
+                      key={opt.value}
+                      style={[
+                        styles.unitPill,
+                        {
+                          backgroundColor: newUnit === opt.value ? colors.tint : colors.background,
+                          borderColor: colors.tint,
+                        },
+                      ]}
+                      onPress={() => setNewUnit(opt.value)}
+                    >
+                      <Text
+                        style={[
+                          styles.unitPillText,
+                          { color: newUnit === opt.value ? '#fff' : colors.tint },
+                        ]}
+                      >
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.modalSave,
+                { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+              ]}
+              onPress={handleAddItem}
+            >
+              <Text style={styles.modalSaveText}>Dodaj do listy</Text>
+            </Pressable>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </>
   );
 }
@@ -194,7 +361,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingTop: 10,
-    paddingBottom: 32,
+    paddingBottom: 100,
   },
   emptyContainer: {
     flex: 1,
@@ -218,5 +385,94 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginTop: 4,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 28,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#047857',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalKAV: {
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 36,
+    paddingTop: 12,
+    gap: 16,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 4,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: -0.3,
+  },
+  modalField: {
+    gap: 6,
+  },
+  modalLabel: {
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.8,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+  },
+  modalRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  unitScroll: {
+    flexGrow: 0,
+  },
+  unitPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    marginRight: 6,
+  },
+  unitPillText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  modalSave: {
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  modalSaveText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
