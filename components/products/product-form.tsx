@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { UNIT_OPTIONS } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
+import { useProducts } from '@/hooks/use-products';
 
 interface ProductFormProps {
   product?: Product;
@@ -17,6 +18,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { findProductByName } = useProducts();
 
   const [name, setName] = useState(product?.name ?? '');
   const [aliases, setAliases] = useState(product?.aliases?.join(', ') ?? '');
@@ -26,6 +28,12 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
     const trimmedName = name.trim();
     if (!trimmedName) {
       Alert.alert('Blad', 'Nazwa produktu jest wymagana');
+      return;
+    }
+
+    const existing = findProductByName(trimmedName);
+    if (existing && existing.id !== product?.id) {
+      Alert.alert('Produkt juz istnieje', `Produkt o nazwie "${existing.name}" juz istnieje.`);
       return;
     }
 
