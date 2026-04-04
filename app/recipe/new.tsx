@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -14,8 +16,14 @@ export default function NewRecipeScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const formRef = useRef<RecipeFormHandle>(null);
 
+  const screenGradient =
+    colorScheme === 'dark'
+      ? ([colors.background, colors.background] as const)
+      : ([colors.backgroundSecondary, colors.surfacePrimary] as const);
+
   return (
-    <>
+    <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+      <AmbientBackground variant="recipes" />
       <Stack.Screen
         options={{
           title: 'Nowy przepis',
@@ -46,8 +54,8 @@ export default function NewRecipeScreen() {
           ),
         }}
       />
-      <RecipeForm ref={formRef} onSave={addRecipe} />
-    </>
+      <RecipeForm ref={formRef} onSave={addRecipe} style={{ backgroundColor: 'transparent' }} />
+    </LinearGradient>
   );
 }
 

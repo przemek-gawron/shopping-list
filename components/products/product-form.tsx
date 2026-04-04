@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Product, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -12,9 +12,10 @@ interface ProductFormProps {
   product?: Product;
   onSave: (product: Product) => void;
   onDelete?: () => void;
+  style?: ViewStyle;
 }
 
-export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
+export function ProductForm({ product, onSave, onDelete, style }: ProductFormProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -67,7 +68,7 @@ export function ProductForm({ product, onSave, onDelete }: ProductFormProps) {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }, style]}>
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.text }]}>Nazwa</Text>
         <TextInput

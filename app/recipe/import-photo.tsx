@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { ImportPhotoPicker } from '@/components/recipes/import-photo-picker';
 import {
@@ -127,8 +129,14 @@ export default function ImportPhotoScreen() {
     }
   };
 
+  const screenGradient =
+    colorScheme === 'dark'
+      ? ([colors.background, colors.background] as const)
+      : ([colors.backgroundSecondary, colors.surfacePrimary] as const);
+
   return (
-    <>
+    <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+      <AmbientBackground variant="recipes" />
       <Stack.Screen
         options={{
           title: step === 'review' ? 'Sprawdź przepis' : 'Importuj ze zdjęcia',
@@ -154,7 +162,7 @@ export default function ImportPhotoScreen() {
       />
 
       {step === 'pick' && (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.container}>
           <View style={[styles.card, { backgroundColor: colors.surfaceElevated, borderColor: colors.borderSubtle }]}>
             <ImportPhotoPicker
               photos={photos}
@@ -182,7 +190,7 @@ export default function ImportPhotoScreen() {
       )}
 
       {step === 'processing' && (
-        <View style={[styles.container, styles.centered, { backgroundColor: colors.background }]}>
+        <View style={[styles.container, styles.centered]}>
           <ActivityIndicator size="large" color={colors.tint} />
           <Text style={[styles.processingText, { color: colors.text }]}>Analizuję zdjęcia...</Text>
           <Text style={[styles.processingSubtext, { color: colors.textSecondary }]}>
@@ -197,9 +205,10 @@ export default function ImportPhotoScreen() {
           recipe={prefilledRecipe}
           onSave={addRecipe}
           onSaved={() => router.replace('/')}
+          style={{ backgroundColor: 'transparent' }}
         />
       )}
-    </>
+    </LinearGradient>
   );
 }
 

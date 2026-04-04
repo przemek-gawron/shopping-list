@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Recipe, Ingredient } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -14,6 +14,7 @@ interface RecipeFormProps {
   onSave: (recipe: Recipe) => void;
   onDelete?: () => void;
   onSaved?: () => void;
+  style?: ViewStyle;
 }
 
 type IngredientWithName = Ingredient & { productName: string };
@@ -23,7 +24,7 @@ export interface RecipeFormHandle {
 }
 
 export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function RecipeForm(
-  { recipe, onSave, onDelete, onSaved },
+  { recipe, onSave, onDelete, onSaved, style },
   ref
 ) {
   const router = useRouter();
@@ -133,7 +134,7 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }, style]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={100}
     >
