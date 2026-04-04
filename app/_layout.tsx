@@ -53,6 +53,7 @@ export default function RootLayout() {
             <Stack.Screen name="recipe/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="recipe/[id]" options={{ presentation: 'modal' }} />
             <Stack.Screen name="shopping-list" options={{ headerBackTitle: 'Przepisy' }} />
+            <Stack.Screen name="recipe/import-photo" options={{ presentation: 'modal' }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

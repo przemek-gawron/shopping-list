@@ -43,6 +43,14 @@
           "imageWidth": 500,
           "backgroundColor": "#1B4332"
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Wybierz zdjęcie przepisu z biblioteki.",
+          "cameraPermission": "Zrób zdjęcie przepisu."
+        }
       ]
     ],
     "experiments": {
