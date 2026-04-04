@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -28,6 +28,7 @@ type Step = 'pick' | 'processing' | 'review';
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
 export default function ImportPhotoScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -176,7 +177,11 @@ export default function ImportPhotoScreen() {
       )}
 
       {step === 'review' && prefilledRecipe && (
-        <RecipeForm recipe={prefilledRecipe} onSave={addRecipe} />
+        <RecipeForm
+          recipe={prefilledRecipe}
+          onSave={addRecipe}
+          onSaved={() => router.replace('/')}
+        />
       )}
     </>
   );

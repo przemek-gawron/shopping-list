@@ -13,11 +13,12 @@ interface RecipeFormProps {
   recipe?: Recipe;
   onSave: (recipe: Recipe) => void;
   onDelete?: () => void;
+  onSaved?: () => void;
 }
 
 type IngredientWithName = Ingredient & { productName: string };
 
-export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
+export function RecipeForm({ recipe, onSave, onDelete, onSaved }: RecipeFormProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -96,6 +97,11 @@ export function RecipeForm({ recipe, onSave, onDelete }: RecipeFormProps) {
       description: description.trim() || undefined,
       ingredients: recipeIngredients,
     });
+
+    if (onSaved) {
+      onSaved();
+      return;
+    }
 
     router.back();
   };
