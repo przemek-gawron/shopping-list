@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { formatQuantity, UNIT_OPTIONS } from '@/constants/units';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TileDecoration } from '@/components/ui/tile-decoration';
 
 interface ShoppingListItemProps {
   item: ShoppingListItemType;
@@ -66,6 +67,7 @@ export function ShoppingListItem({ item, onToggle, onDelete, onUpdate }: Shoppin
           },
         ]}
       >
+        <TileDecoration variant="shopping" />
         <View style={styles.mainRow}>
           <Pressable
             style={({ pressed }) => [
@@ -172,11 +174,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
+    overflow: 'hidden',
   },
   mainRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    zIndex: 1,
   },
   checkbox: {
     width: 24,
@@ -213,6 +217,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
+    zIndex: 1,
   },
   editInput: {
     flex: 1,

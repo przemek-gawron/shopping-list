@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { CounterButton } from '@/components/ui/counter-button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TileDecoration } from '@/components/ui/tile-decoration';
 
 interface RecipeListItemProps {
   recipe: Recipe;
@@ -59,6 +60,7 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
         ]}
         onPress={handlePress}
       >
+        <TileDecoration variant="recipe" />
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
           {recipe.description ? (
@@ -94,11 +96,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+    overflow: 'hidden',
   },
   content: {
     flex: 1,
     gap: 4,
     marginRight: 12,
+    zIndex: 1,
   },
   title: {
     fontSize: 16,

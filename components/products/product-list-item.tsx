@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TileDecoration } from '@/components/ui/tile-decoration';
 
 interface ProductListItemProps {
   product: Product;
@@ -55,6 +56,7 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
         ]}
         onPress={handlePress}
       >
+        <TileDecoration variant="product" />
         <View style={styles.content}>
           <Text style={[styles.name, { color: colors.text }]}>{product.name}</Text>
           {product.aliases && product.aliases.length > 0 && (
@@ -87,10 +89,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+    overflow: 'hidden',
   },
   content: {
     flex: 1,
     gap: 3,
+    zIndex: 1,
   },
   name: {
     fontSize: 16,
