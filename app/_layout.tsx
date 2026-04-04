@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AppProvider } from '@/context/app-context';
+import { ShoppingListProvider } from '@/context/shopping-list-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,6 +44,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
+        <ShoppingListProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -54,6 +56,7 @@ export default function RootLayout() {
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
+        </ShoppingListProvider>
       </AppProvider>
     </GestureHandlerRootView>
   );

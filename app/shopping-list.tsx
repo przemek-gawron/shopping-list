@@ -16,6 +16,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useAppContext } from '@/context/app-context';
 import { useSelections } from '@/hooks/use-selections';
 import { useProducts } from '@/hooks/use-products';
+import { useShoppingListContext } from '@/context/shopping-list-context';
 import { generateShoppingList, formatShoppingListForClipboard } from '@/services/shopping-list-generator';
 import { ShoppingListItem as ShoppingListItemComponent } from '@/components/shopping-list/shopping-list-item';
 import { ShoppingListItem, Unit } from '@/types';
@@ -32,24 +33,21 @@ export default function ShoppingListScreen() {
   const { recipes, products } = useAppContext();
   const { selections, clearSelections } = useSelections();
   const { products: allProducts } = useProducts();
+  const {
+    manualItems, deletedIds, quantityOverrides, checkedIds,
+    addManualItem, deleteItem, updateItem, toggleItem, resetAll,
+  } = useShoppingListContext();
 
   const generatedItems = useMemo(
     () => generateShoppingList(recipes, selections, products),
     [recipes, selections, products]
   );
 
-  // User modifications — survive re-renders when selections change
-  const [manualItems, setManualItems] = useState<ShoppingListItem[]>([]);
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const [quantityOverrides, setQuantityOverrides] = useState<Record<string, { quantity: number; unit: Unit }>>({});
-  const [checkedIds, setCheckedIds] = useState<string[]>([]);
-
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [newName, setNewName] = useState('');
   const [newQty, setNewQty] = useState('1');
   const [newUnit, setNewUnit] = useState<Unit>('szt');
 
-  // Merge generated + manual, applying overrides and filters
   const items = useMemo<ShoppingListItem[]>(() => {
     const apply = (item: ShoppingListItem): ShoppingListItem => ({
       ...item,
@@ -75,25 +73,9 @@ export default function ShoppingListScreen() {
     return [...unchecked, ...checked];
   }, [items]);
 
-  const checkedCount = checkedIds.filter((id) =>
-    items.some((i) => i.productId === id)
-  ).length;
+  const checkedCount = items.filter((i) => i.checked).length;
   const totalCount = items.length;
   const progress = totalCount > 0 ? checkedCount / totalCount : 0;
-
-  const toggleItem = (productId: string) => {
-    setCheckedIds((prev) =>
-      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
-    );
-  };
-
-  const deleteItem = (productId: string) => {
-    setDeletedIds((prev) => [...prev, productId]);
-  };
-
-  const updateItem = (productId: string, quantity: number, unit: Unit) => {
-    setQuantityOverrides((prev) => ({ ...prev, [productId]: { quantity, unit } }));
-  };
 
   const openAddModal = () => {
     setNewName('');
@@ -111,7 +93,6 @@ export default function ShoppingListScreen() {
       return;
     }
 
-    // Check if item already on list
     const existing = items.find(
       (i) => i.productName.toLowerCase() === trimmedName.toLowerCase()
     );
@@ -120,21 +101,17 @@ export default function ShoppingListScreen() {
       return;
     }
 
-    // Try to match to an existing product for the productId
     const matchedProduct = allProducts.find(
       (p) => p.name.toLowerCase() === trimmedName.toLowerCase()
     );
 
-    setManualItems((prev) => [
-      ...prev,
-      {
-        productId: matchedProduct?.id ?? generateId(),
-        productName: matchedProduct?.name ?? trimmedName,
-        quantity: qty,
-        unit: newUnit,
-        checked: false,
-      },
-    ]);
+    addManualItem({
+      productId: matchedProduct?.id ?? generateId(),
+      productName: matchedProduct?.name ?? trimmedName,
+      quantity: qty,
+      unit: newUnit,
+      checked: false,
+    });
     setAddModalVisible(false);
   };
 
@@ -152,10 +129,7 @@ export default function ShoppingListScreen() {
         style: 'destructive',
         onPress: () => {
           clearSelections();
-          setManualItems([]);
-          setDeletedIds([]);
-          setQuantityOverrides({});
-          setCheckedIds([]);
+          resetAll();
         },
       },
     ]);
