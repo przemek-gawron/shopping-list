@@ -8,6 +8,7 @@ import { useAppContext } from '@/context/app-context';
 import { RecipeListItem } from '@/components/recipes/recipe-list-item';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { GradientHeader } from '@/components/ui/gradient-header';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -35,6 +36,7 @@ export default function RecipesScreen() {
   if (isLoading) {
     return (
       <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+        <AmbientBackground variant="recipes" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.tint} />
         </View>
@@ -44,66 +46,67 @@ export default function RecipesScreen() {
 
   return (
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')}>
-        {recipes.length > 0 && (
-          <View style={[styles.searchContainer, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
-            <IconSymbol name="magnifyingglass" size={16} color={colors.onPrimaryMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.onPrimary }]}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Szukaj przepisu..."
-              placeholderTextColor="rgba(255,255,255,0.5)"
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <IconSymbol name="xmark.circle.fill" size={16} color={colors.onPrimaryMuted} />
-              </Pressable>
-            )}
-          </View>
-        )}
-      </GradientHeader>
-
-      {recipes.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>📋</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak przepisow</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-            Dodaj pierwszy przepis, aby zaczac planowac zakupy
-          </Text>
-        </View>
-      ) : filteredRecipes.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>🔍</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-            {`Nie znaleziono przepisow dla „${searchQuery}”`}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredRecipes}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <RecipeListItem
-              recipe={item}
-              count={getSelectionCount(item.id)}
-              onCountChange={(count) => setSelection(item.id, count)}
-              onDelete={() => deleteRecipe(item.id)}
-            />
+      <AmbientBackground variant="recipes" />
+      <View style={styles.container}>
+        <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')}>
+          {recipes.length > 0 && (
+            <View style={[styles.searchContainer, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
+              <IconSymbol name="magnifyingglass" size={16} color={colors.onPrimaryMuted} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.onPrimary }]}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Szukaj przepisu..."
+                placeholderTextColor="rgba(255,255,255,0.5)"
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')}>
+                  <IconSymbol name="xmark.circle.fill" size={16} color={colors.onPrimaryMuted} />
+                </Pressable>
+              )}
+            </View>
           )}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
+        </GradientHeader>
 
-      {hasSelections && (
-        <FloatingActionButton
-          onPress={() => router.push('/shopping-list')}
-          badge={totalSelections}
-        />
-      )}
-    </View>
+        {recipes.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>📋</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak przepisow</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+              Dodaj pierwszy przepis, aby zaczac planowac zakupy
+            </Text>
+          </View>
+        ) : filteredRecipes.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>🔍</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+              {`Nie znaleziono przepisow dla „${searchQuery}”`}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredRecipes}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <RecipeListItem
+                recipe={item}
+                count={getSelectionCount(item.id)}
+                onCountChange={(count) => setSelection(item.id, count)}
+                onDelete={() => deleteRecipe(item.id)}
+              />
+            )}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
+
+        {hasSelections && (
+          <FloatingActionButton
+            onPress={() => router.push('/shopping-list')}
+            badge={totalSelections}
+          />
+        )}
+      </View>
     </LinearGradient>
   );
 }

@@ -57,6 +57,16 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           const iconColor = focused ? colors.onPrimary : colors.tintSecondary;
           const inactiveBackground =
             colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.38)';
+          const contentBackground = focused
+            ? colors.tint + 'D9'
+            : colorScheme === 'dark'
+              ? 'rgba(15, 23, 42, 0.34)'
+              : 'rgba(255,255,255,0.62)';
+          const iconBackground = focused
+            ? 'rgba(255,255,255,0.18)'
+            : colorScheme === 'dark'
+              ? 'rgba(255,255,255,0.1)'
+              : 'rgba(4, 120, 87, 0.12)';
 
           const onPress = () => {
             if (Platform.OS === 'ios') {
@@ -85,10 +95,12 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
             <View
               style={[
                 styles.tabButtonContent,
-                focused && styles.tabButtonContentFocused,
+                {
+                  backgroundColor: contentBackground,
+                  borderColor: focused ? colors.tint + '55' : colors.borderSubtle,
+                },
                 !supportsLiquidGlass && {
                   backgroundColor: focused ? colors.tint : inactiveBackground,
-                  borderColor: focused ? colors.tint : colors.borderSubtle,
                   shadowColor: focused ? colors.shadowColor : 'transparent',
                 },
               ]}
@@ -96,7 +108,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               <View
                 style={[
                   styles.iconWrapper,
-                  { backgroundColor: focused ? colors.overlayOnPrimarySubtle : 'transparent' },
+                  { backgroundColor: iconBackground },
                 ]}
               >
                 {options.tabBarIcon?.({
@@ -108,7 +120,14 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               <Text
                 style={[
                   styles.label,
-                  { color: focused ? colors.onPrimary : colors.textSecondary },
+                  {
+                    color: focused ? colors.onPrimary : colors.text,
+                    textShadowColor: focused
+                      ? 'rgba(0,0,0,0.16)'
+                      : colorScheme === 'dark'
+                        ? 'transparent'
+                        : 'rgba(255,255,255,0.72)',
+                  },
                 ]}
               >
                 {label}
@@ -237,15 +256,13 @@ const styles = StyleSheet.create({
   tabButtonContent: {
     flex: 1,
     borderRadius: 22,
+    borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 10,
-  },
-  tabButtonContentFocused: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   iconWrapper: {
     width: 28,
@@ -258,5 +275,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
     letterSpacing: -0.1,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 });

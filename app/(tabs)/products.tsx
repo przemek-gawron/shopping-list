@@ -6,6 +6,7 @@ import { useProducts } from '@/hooks/use-products';
 import { useAppContext } from '@/context/app-context';
 import { ProductListItem } from '@/components/products/product-list-item';
 import { GradientHeader } from '@/components/ui/gradient-header';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 
@@ -23,6 +24,7 @@ export default function ProductsScreen() {
   if (isLoading) {
     return (
       <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
+        <AmbientBackground variant="products" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.tint} />
         </View>
@@ -32,28 +34,29 @@ export default function ProductsScreen() {
 
   return (
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <GradientHeader title="Produkty" onAdd={() => router.push('/product/new')} />
+      <AmbientBackground variant="products" />
+      <View style={styles.container}>
+        <GradientHeader title="Produkty" onAdd={() => router.push('/product/new')} />
 
-      {products.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>📦</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak produktow</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-            Dodaj produkty, aby moc tworzyc przepisy
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ProductListItem product={item} onDelete={() => deleteProduct(item.id)} />
-          )}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
-    </View>
+        {products.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>📦</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak produktow</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+              Dodaj produkty, aby moc tworzyc przepisy
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={products}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ProductListItem product={item} onDelete={() => deleteProduct(item.id)} />
+            )}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
+      </View>
     </LinearGradient>
   );
 }

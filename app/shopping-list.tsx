@@ -23,6 +23,7 @@ import { ShoppingListItem, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AmbientBackground } from '@/components/ui/ambient-background';
 import { UNIT_OPTIONS } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
@@ -173,6 +174,7 @@ export default function ShoppingListScreen() {
       />
 
       <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <AmbientBackground variant="shopping" />
         {totalCount > 0 && (
           <View style={[styles.progressContainer, { backgroundColor: colors.headerChrome, shadowColor: colors.shadowColor }]}>
             <View style={styles.progressHeader}>
