@@ -40,9 +40,7 @@ const styles = StyleSheet.create({
   headerButton: {
     width: 36,
     height: 36,
-    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
   },
 });
