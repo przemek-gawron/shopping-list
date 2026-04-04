@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Recipe, Ingredient } from '@/types';
@@ -18,7 +18,14 @@ interface RecipeFormProps {
 
 type IngredientWithName = Ingredient & { productName: string };
 
-export function RecipeForm({ recipe, onSave, onDelete, onSaved }: RecipeFormProps) {
+export interface RecipeFormHandle {
+  submit: () => void;
+}
+
+export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function RecipeForm(
+  { recipe, onSave, onDelete, onSaved },
+  ref
+) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -120,6 +127,10 @@ export function RecipeForm({ recipe, onSave, onDelete, onSaved }: RecipeFormProp
     ]);
   };
 
+  useImperativeHandle(ref, () => ({
+    submit: handleSave,
+  }));
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -203,7 +214,7 @@ export function RecipeForm({ recipe, onSave, onDelete, onSaved }: RecipeFormProp
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

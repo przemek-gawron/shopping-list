@@ -1,7 +1,7 @@
-import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { RecipeForm } from '@/components/recipes/recipe-form';
+import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -12,6 +12,7 @@ export default function NewRecipeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const formRef = useRef<RecipeFormHandle>(null);
 
   return (
     <>
@@ -22,25 +23,56 @@ export default function NewRecipeScreen() {
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
           headerRight: () => (
-            <Pressable
-              style={({ pressed }) => [styles.headerButton, { opacity: pressed ? 0.7 : 1 }]}
-              onPress={() => router.push('/recipe/import-photo')}
-            >
-              <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
-            </Pressable>
+            <View style={styles.headerActions}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.saveButton,
+                  { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
+                ]}
+                onPress={() => formRef.current?.submit()}
+              >
+                <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.headerButton,
+                  { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
+                ]}
+                onPress={() => router.push('/recipe/import-photo')}
+              >
+                <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
+              </Pressable>
+            </View>
           ),
         }}
       />
-      <RecipeForm onSave={addRecipe} />
+      <RecipeForm ref={formRef} onSave={addRecipe} />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerButton: {
     width: 36,
     height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  saveButton: {
+    minHeight: 34,
+    paddingHorizontal: 12,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
   },
 });

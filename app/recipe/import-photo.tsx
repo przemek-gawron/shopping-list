@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { RecipeForm } from '@/components/recipes/recipe-form';
+import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { ImportPhotoPicker } from '@/components/recipes/import-photo-picker';
 import {
   importRecipeFromPhotos,
@@ -31,6 +31,7 @@ export default function ImportPhotoScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const formRef = useRef<RecipeFormHandle>(null);
 
   const { findProductByName, addProduct } = useProducts();
   const { addRecipe } = useRecipes();
@@ -135,6 +136,20 @@ export default function ImportPhotoScreen() {
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
           headerShadowVisible: false,
+          headerRight:
+            step === 'review'
+              ? () => (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.headerSaveButton,
+                      { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
+                    ]}
+                    onPress={() => formRef.current?.submit()}
+                  >
+                    <Text style={[styles.headerSaveText, { color: colors.onPrimary }]}>Zapisz</Text>
+                  </Pressable>
+                )
+              : undefined,
         }}
       />
 
@@ -178,6 +193,7 @@ export default function ImportPhotoScreen() {
 
       {step === 'review' && prefilledRecipe && (
         <RecipeForm
+          ref={formRef}
           recipe={prefilledRecipe}
           onSave={addRecipe}
           onSaved={() => router.replace('/')}
@@ -217,6 +233,17 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  headerSaveButton: {
+    minHeight: 34,
+    paddingHorizontal: 12,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerSaveText: {
+    fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
   },
   processingText: {
