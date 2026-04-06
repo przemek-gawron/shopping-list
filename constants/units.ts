@@ -15,8 +15,8 @@ export const UNIT_DEFINITIONS: Record<Unit, UnitDefinition> = {
   ml: { category: 'volume', baseUnit: 'ml', toBase: 1, displayName: 'ml' },
   l: { category: 'volume', baseUnit: 'ml', toBase: 1000, displayName: 'l' },
   szt: { category: 'count', baseUnit: 'szt', toBase: 1, displayName: 'szt' },
-  lyzka: { category: 'spoon', baseUnit: 'lyzka', toBase: 1, displayName: '🥄' },
-  lyzeczka: { category: 'spoon', baseUnit: 'lyzeczka', toBase: 1, displayName: '🫗' },
+  lyzka: { category: 'spoon', baseUnit: 'lyzka', toBase: 1, displayName: 'łyżka' },
+  lyzeczka: { category: 'spoon', baseUnit: 'lyzeczka', toBase: 1, displayName: '🥄' },
   szklanka: { category: 'volume', baseUnit: 'ml', toBase: 250, displayName: '🥛' },
 };
 
