@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCategories } from '@/hooks/use-categories';
@@ -10,6 +10,7 @@ import { CategoryCard } from '@/components/categories/category-card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { GradientHeader } from '@/components/ui/gradient-header';
 import { AmbientBackground } from '@/components/ui/ambient-background';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { t } from '@/i18n';
@@ -51,7 +52,24 @@ export default function CategoriesScreen() {
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
       <AmbientBackground variant="categories" />
       <View style={styles.container}>
-        <GradientHeader title={t('categories_header')} onAdd={() => router.push('/category/manage')} />
+        <GradientHeader
+          title={t('categories_header')}
+          onAdd={() => router.push('/category/manage')}
+          rightElement={
+            <Pressable
+              style={({ pressed }) => [
+                styles.importPdfButton,
+                { backgroundColor: colors.overlayOnPrimary, opacity: pressed ? 0.7 : 1 },
+              ]}
+              onPress={() => router.push('/recipe/import-meal-plan')}
+            >
+              <IconSymbol name="doc.fill" size={16} color={colors.onPrimary} />
+              <Text style={[styles.importPdfLabel, { color: colors.onPrimary }]}>
+                {t('meal_plan_import_button_label')}
+              </Text>
+            </Pressable>
+          }
+        />
 
         {categories.length === 0 ? (
           <View style={styles.emptyContainer}>
@@ -129,5 +147,17 @@ const styles = StyleSheet.create({
   row: {
     gap: 12,
     marginBottom: 12,
+  },
+  importPdfButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 19,
+  },
+  importPdfLabel: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
   },
 });

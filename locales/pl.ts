@@ -158,6 +158,30 @@ export default {
   ai_grouper_other: 'Inne',
   ai_grouper_checked: 'Kupione',
 
+  // Meal plan PDF import screen
+  meal_plan_import_pick_title: 'Importuj plan posiłków',
+  meal_plan_import_review_title: 'Sprawdź przepisy',
+  meal_plan_import_pick_hint: 'Importuj plan posiłków z PDF',
+  meal_plan_import_pick_subtitle: 'Wybierz plik PDF z planem posiłków. AI automatycznie wyodrębni wszystkie przepisy i przypisze je do odpowiednich kategorii.',
+  meal_plan_import_pick_button: 'Wybierz plik PDF',
+  meal_plan_import_processing: 'Analizuję plan posiłków...',
+  meal_plan_import_processing_sub: 'To może potrwać kilkanaście sekund',
+  meal_plan_import_found: {
+    one: 'Znaleziono {{count}} przepis',
+    few: 'Znaleziono {{count}} przepisy',
+    many: 'Znaleziono {{count}} przepisów',
+    other: 'Znaleziono {{count}} przepisów',
+  },
+  meal_plan_import_save_all: {
+    one: 'Dodaj {{count}} przepis',
+    few: 'Dodaj {{count}} przepisy',
+    many: 'Dodaj {{count}} przepisów',
+    other: 'Dodaj {{count}} przepisów',
+  },
+  meal_plan_import_not_recognized_title: 'Nie rozpoznano planu',
+  meal_plan_import_not_recognized_message: 'Nie udało się wyodrębnić przepisów z pliku PDF. Sprawdź czy plik zawiera plan posiłków.',
+  meal_plan_import_button_label: 'Importuj PDF',
+
   // AI language instruction (injected into prompts)
   ai_language_name: 'Polish',
   ai_language_instruction: 'Use Polish for all text (title, description, ingredient names).',

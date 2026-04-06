@@ -2,8 +2,10 @@ import type pl from './pl';
 
 // TypeScript will flag missing keys if the shape diverges from the Polish source.
 // Plural objects may have fewer forms (English only needs one/other).
-const en: Omit<typeof pl, 'category_recipe_count'> & {
+const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | 'meal_plan_import_save_all'> & {
   category_recipe_count: { one: string; other: string };
+  meal_plan_import_found: { one: string; other: string };
+  meal_plan_import_save_all: { one: string; other: string };
 } = {
   // Tabs
   tabs_categories: 'Categories',
@@ -161,6 +163,26 @@ const en: Omit<typeof pl, 'category_recipe_count'> & {
   // AI grouper section headers (must match what AI returns)
   ai_grouper_other: 'Other',
   ai_grouper_checked: 'Checked',
+
+  // Meal plan PDF import screen
+  meal_plan_import_pick_title: 'Import meal plan',
+  meal_plan_import_review_title: 'Review recipes',
+  meal_plan_import_pick_hint: 'Import meal plan from PDF',
+  meal_plan_import_pick_subtitle: 'Select a PDF file with your meal plan. AI will automatically extract all recipes and assign them to the correct categories.',
+  meal_plan_import_pick_button: 'Select PDF file',
+  meal_plan_import_processing: 'Analyzing meal plan...',
+  meal_plan_import_processing_sub: 'This may take a few seconds',
+  meal_plan_import_found: {
+    one: 'Found {{count}} recipe',
+    other: 'Found {{count}} recipes',
+  },
+  meal_plan_import_save_all: {
+    one: 'Add {{count}} recipe',
+    other: 'Add {{count}} recipes',
+  },
+  meal_plan_import_not_recognized_title: 'Plan not recognized',
+  meal_plan_import_not_recognized_message: 'Failed to extract recipes from the PDF. Check if the file contains a meal plan.',
+  meal_plan_import_button_label: 'Import PDF',
 
   // AI language instruction (injected into prompts)
   ai_language_name: 'English',
