@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   View,
   FlatList,
+  SectionList,
   StyleSheet,
   Pressable,
   Text,
@@ -10,6 +11,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -18,6 +20,7 @@ import { useSelections } from '@/hooks/use-selections';
 import { useProducts } from '@/hooks/use-products';
 import { useShoppingListContext } from '@/context/shopping-list-context';
 import { generateShoppingList, formatShoppingListForClipboard } from '@/services/shopping-list-generator';
+import { groupShoppingItems, applyGroupsToItems } from '@/services/shopping-list-grouper';
 import { ShoppingListItem as ShoppingListItemComponent } from '@/components/shopping-list/shopping-list-item';
 import { ShoppingListItem, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -50,6 +53,12 @@ export default function ShoppingListScreen() {
   const [newUnit, setNewUnit] = useState<Unit>('szt');
   const [pendingCheckedIds, setPendingCheckedIds] = useState<string[]>([]);
   const toggleTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const [isGrouped, setIsGrouped] = useState(false);
+  const [isGrouping, setIsGrouping] = useState(false);
+  const [groupSections, setGroupSections] = useState<{ name: string; emoji: string; data: ShoppingListItem[] }[]>([]);
+
+  const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
   const items = useMemo<ShoppingListItem[]>(() => {
     const apply = (item: ShoppingListItem): ShoppingListItem => ({
@@ -140,6 +149,44 @@ export default function ShoppingListScreen() {
 
   const productItems = allProducts.map((p) => ({ id: p.id, label: p.name }));
 
+  // Reset grouping if the item list changes while grouped
+  useEffect(() => {
+    if (isGrouped) {
+      setIsGrouped(false);
+      setGroupSections([]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
+
+  const handleGroup = useCallback(async () => {
+    if (isGrouped) {
+      setIsGrouped(false);
+      setGroupSections([]);
+      return;
+    }
+
+    if (!API_KEY) {
+      Alert.alert('Brak klucza API', 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.');
+      return;
+    }
+
+    if (items.length === 0) return;
+
+    setIsGrouping(true);
+    try {
+      const productNames = items.map((i) => i.productName);
+      const groups = await groupShoppingItems(productNames, API_KEY);
+      const sections = applyGroupsToItems(groups, items);
+      setGroupSections(sections);
+      setIsGrouped(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert('Blad grupowania', msg);
+    } finally {
+      setIsGrouping(false);
+    }
+  }, [isGrouped, items, API_KEY]);
+
   useEffect(() => {
     const timeouts = toggleTimeoutsRef.current;
     return () => {
@@ -187,6 +234,24 @@ export default function ShoppingListScreen() {
           headerRight: () => (
             <View style={styles.headerButtons}>
               <Pressable
+                style={[
+                  styles.headerButton,
+                  { backgroundColor: isGrouped ? colors.tint : colors.overlayOnPrimarySubtle },
+                ]}
+                onPress={handleGroup}
+                disabled={isGrouping || items.length === 0}
+              >
+                {isGrouping ? (
+                  <ActivityIndicator size="small" color={colors.onPrimary} />
+                ) : (
+                  <IconSymbol
+                    name={isGrouped ? 'tag.fill' : 'tag'}
+                    size={19}
+                    color={colors.onPrimary}
+                  />
+                )}
+              </Pressable>
+              <Pressable
                 style={[styles.headerButton, { backgroundColor: colors.overlayOnPrimarySubtle }]}
                 onPress={handleCopy}
               >
@@ -225,6 +290,29 @@ export default function ShoppingListScreen() {
               Wybierz przepisy na ekranie glownym
             </Text>
           </View>
+        ) : isGrouped ? (
+          <SectionList
+            sections={groupSections}
+            keyExtractor={(item) => item.productId}
+            renderItem={({ item }) => (
+              <ShoppingListItemComponent
+                item={item}
+                isCompleting={pendingCheckedIds.includes(item.productId)}
+                onToggle={() => handleToggleWithAnimation(item)}
+                onDelete={() => deleteItem(item.productId)}
+                onUpdate={(qty, unit) => updateItem(item.productId, qty, unit)}
+              />
+            )}
+            renderSectionHeader={({ section }) => (
+              <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+                <Text style={styles.sectionEmoji}>{section.emoji}</Text>
+                <Text style={[styles.sectionTitle, { color: colors.tint }]}>{section.name}</Text>
+                <View style={[styles.sectionLine, { backgroundColor: colors.borderSubtle }]} />
+              </View>
+            )}
+            contentContainerStyle={styles.listContent}
+            stickySectionHeadersEnabled={false}
+          />
         ) : (
           <FlatList
             data={sortedItems}
@@ -512,5 +600,27 @@ const styles = StyleSheet.create({
   modalSaveText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  sectionEmoji: {
+    fontSize: 18,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  sectionLine: {
+    flex: 1,
+    height: 1,
+    marginLeft: 4,
   },
 });
