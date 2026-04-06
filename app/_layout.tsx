@@ -78,6 +78,7 @@ export default function RootLayout() {
               <Stack.Screen name="recipe/[id]" options={{ presentation: 'modal' }} />
               <Stack.Screen name="shopping-list" options={{ headerBackTitle: t('back_to_categories') }} />
               <Stack.Screen name="recipe/import-photo" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="recipe/import-meal-plan" options={{ headerBackTitle: t('back_to_categories') }} />
               <Stack.Screen name="category/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="category/manage" />
             </Stack>
