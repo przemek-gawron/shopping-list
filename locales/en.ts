@@ -164,6 +164,12 @@ const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | '
   ai_grouper_other: 'Other',
   ai_grouper_checked: 'Checked',
 
+  // Categories edit mode
+  categories_edit_button: 'Edit',
+  categories_edit_done: 'Done',
+  categories_delete_title: 'Delete category',
+  categories_delete_message: 'Are you sure you want to delete "{{name}}"? Recipes in this category will be moved to "Other".',
+
   // Meal plan PDF import screen
   meal_plan_import_pick_title: 'Import meal plan',
   meal_plan_import_review_title: 'Review recipes',

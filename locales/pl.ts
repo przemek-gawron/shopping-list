@@ -158,6 +158,12 @@ export default {
   ai_grouper_other: 'Inne',
   ai_grouper_checked: 'Kupione',
 
+  // Categories edit mode
+  categories_edit_button: 'Edytuj',
+  categories_edit_done: 'Gotowe',
+  categories_delete_title: 'Usuń kategorię',
+  categories_delete_message: 'Czy na pewno chcesz usunąć „{{name}}"? Przepisy z tej kategorii zostaną przeniesione do „Inne".',
+
   // Meal plan PDF import screen
   meal_plan_import_pick_title: 'Importuj plan posiłków',
   meal_plan_import_review_title: 'Sprawdź przepisy',
