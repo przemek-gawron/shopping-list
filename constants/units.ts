@@ -15,21 +15,14 @@ export const UNIT_DEFINITIONS: Record<Unit, UnitDefinition> = {
   ml: { category: 'volume', baseUnit: 'ml', toBase: 1, displayName: 'ml' },
   l: { category: 'volume', baseUnit: 'ml', toBase: 1000, displayName: 'l' },
   szt: { category: 'count', baseUnit: 'szt', toBase: 1, displayName: 'szt' },
-  lyzka: { category: 'spoon', baseUnit: 'lyzka', toBase: 1, displayName: 'lyzka' },
-  lyzeczka: { category: 'spoon', baseUnit: 'lyzeczka', toBase: 1, displayName: 'lyzeczka' },
-  szklanka: { category: 'volume', baseUnit: 'ml', toBase: 250, displayName: 'szklanka' },
+  lyzka: { category: 'spoon', baseUnit: 'lyzka', toBase: 1, displayName: '🥄' },
+  lyzeczka: { category: 'spoon', baseUnit: 'lyzeczka', toBase: 1, displayName: '🫗' },
+  szklanka: { category: 'volume', baseUnit: 'ml', toBase: 250, displayName: '🥛' },
 };
 
-export const UNIT_OPTIONS: { value: Unit; label: string }[] = [
-  { value: 'g', label: 'g' },
-  { value: 'kg', label: 'kg' },
-  { value: 'ml', label: 'ml' },
-  { value: 'l', label: 'l' },
-  { value: 'szt', label: 'szt' },
-  { value: 'lyzka', label: 'lyzka' },
-  { value: 'lyzeczka', label: 'lyzeczka' },
-  { value: 'szklanka', label: 'szklanka' },
-];
+export const UNIT_OPTIONS: { value: Unit; label: string }[] = Object.entries(UNIT_DEFINITIONS).map(
+  ([value, def]) => ({ value: value as Unit, label: def.displayName })
+);
 
 export function convertToBase(quantity: number, unit: Unit): { value: number; baseUnit: Unit } {
   const def = UNIT_DEFINITIONS[unit];

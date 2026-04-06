@@ -4,7 +4,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ingredient } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { UNIT_OPTIONS } from '@/constants/units';
+import { UNIT_OPTIONS, UNIT_DEFINITIONS } from '@/constants/units';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 import { useProducts } from '@/hooks/use-products';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -97,7 +97,7 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
                 onChange({ ...ingredient, unit: UNIT_OPTIONS[nextIndex].value });
               }}
             >
-              <Text style={[styles.unitText, { color: colors.tint }]}>{ingredient.unit}</Text>
+              <Text style={[styles.unitText, { color: colors.tint }]}>{UNIT_DEFINITIONS[ingredient.unit].displayName}</Text>
             </Pressable>
           </View>
         </View>
