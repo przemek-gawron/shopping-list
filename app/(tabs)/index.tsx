@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet, Text, ActivityIndicator, Pressable, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator, Pressable, Alert, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from 'expo-glass-effect';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import { useCategories } from '@/hooks/use-categories';
 import { useRecipes } from '@/hooks/use-recipes';
@@ -26,6 +28,10 @@ export default function CategoriesScreen() {
   const { recipes } = useRecipes();
   const { totalSelections, hasSelections } = useSelections();
   const [editMode, setEditMode] = useState(false);
+  const insets = useSafeAreaInsets();
+  const bottomOffset = Math.max(insets.bottom, 12) + 88;
+  const supportsLiquidGlass =
+    Platform.OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
   const recipeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -126,42 +132,19 @@ export default function CategoriesScreen() {
           title={t('categories_header')}
           onAdd={editMode ? undefined : () => router.push('/category/manage')}
           rightElement={
-            editMode ? (
+            editMode ? undefined : (
               <Pressable
                 style={({ pressed }) => [
-                  styles.editDoneButton,
+                  styles.importPdfButton,
                   { backgroundColor: colors.overlayOnPrimary, opacity: pressed ? 0.7 : 1 },
                 ]}
-                onPress={() => setEditMode(false)}
+                onPress={() => router.push('/recipe/import-meal-plan')}
               >
-                <Text style={[styles.editDoneText, { color: colors.onPrimary }]}>
-                  {t('categories_edit_done')}
+                <IconSymbol name="doc.fill" size={16} color={colors.onPrimary} />
+                <Text style={[styles.importPdfLabel, { color: colors.onPrimary }]}>
+                  {t('meal_plan_import_button_label')}
                 </Text>
               </Pressable>
-            ) : (
-              <View style={styles.headerButtons}>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.iconButton,
-                    { backgroundColor: colors.overlayOnPrimary, opacity: pressed ? 0.7 : 1 },
-                  ]}
-                  onPress={() => setEditMode(true)}
-                >
-                  <IconSymbol name="pencil" size={17} color={colors.onPrimary} />
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.importPdfButton,
-                    { backgroundColor: colors.overlayOnPrimary, opacity: pressed ? 0.7 : 1 },
-                  ]}
-                  onPress={() => router.push('/recipe/import-meal-plan')}
-                >
-                  <IconSymbol name="doc.fill" size={16} color={colors.onPrimary} />
-                  <Text style={[styles.importPdfLabel, { color: colors.onPrimary }]}>
-                    {t('meal_plan_import_button_label')}
-                  </Text>
-                </Pressable>
-              </View>
             )
           }
         />
@@ -206,6 +189,36 @@ export default function CategoriesScreen() {
             badge={totalSelections}
           />
         )}
+
+        {/* Left-side edit / done FAB */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.editFabWrapper,
+            { bottom: bottomOffset, transform: [{ scale: pressed ? 0.94 : 1 }] },
+          ]}
+          onPress={() => setEditMode((v) => !v)}
+        >
+          {supportsLiquidGlass ? (
+            <GlassView
+              isInteractive
+              glassEffectStyle="regular"
+              colorScheme={colorScheme === 'dark' ? 'dark' : 'light'}
+              tintColor={colors.tint}
+              style={[
+                styles.editFabGlass,
+                { borderColor: colors.tint + '55', shadowColor: colors.shadowColor },
+              ]}
+            >
+              <View style={[styles.editFabContent, { backgroundColor: colorScheme === 'dark' ? 'rgba(15,23,42,0.22)' : 'rgba(4,120,87,0.2)' }]}>
+                <IconSymbol name={editMode ? 'checkmark' : 'pencil'} size={24} color={colors.onPrimary} />
+              </View>
+            </GlassView>
+          ) : (
+            <View style={[styles.editFabContent, { backgroundColor: colors.tint, shadowColor: colors.shadowColor }]}>
+              <IconSymbol name={editMode ? 'checkmark' : 'pencil'} size={24} color={colors.onPrimary} />
+            </View>
+          )}
+        </Pressable>
       </View>
     </LinearGradient>
   );
@@ -285,18 +298,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
   },
-  // Header buttons
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  // Left edit FAB
+  editFabWrapper: {
+    position: 'absolute',
+    left: 24,
+    width: 58,
+    height: 58,
   },
-  iconButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  editFabGlass: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  editFabContent: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 8,
   },
   importPdfButton: {
     flexDirection: 'row',
@@ -309,14 +338,5 @@ const styles = StyleSheet.create({
   importPdfLabel: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-  },
-  editDoneButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 19,
-  },
-  editDoneText: {
-    fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
   },
 });
