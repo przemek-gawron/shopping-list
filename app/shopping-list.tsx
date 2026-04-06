@@ -235,7 +235,7 @@ export default function ShoppingListScreen() {
             <View style={styles.headerButtons}>
               <Pressable
                 style={[
-                  styles.headerButton,
+                  styles.groupButton,
                   { backgroundColor: isGrouped ? colors.tint : colors.overlayOnPrimarySubtle },
                 ]}
                 onPress={handleGroup}
@@ -244,11 +244,12 @@ export default function ShoppingListScreen() {
                 {isGrouping ? (
                   <ActivityIndicator size="small" color={colors.onPrimary} />
                 ) : (
-                  <IconSymbol
-                    name={isGrouped ? 'tag.fill' : 'tag'}
-                    size={19}
-                    color={colors.onPrimary}
-                  />
+                  <IconSymbol name="sparkles" size={15} color={colors.onPrimary} />
+                )}
+                {!isGrouping && (
+                  <Text style={[styles.groupButtonText, { color: colors.onPrimary }]}>
+                    {isGrouped ? 'Rozgrupuj' : 'Grupuj'}
+                  </Text>
                 )}
               </Pressable>
               <Pressable
@@ -446,6 +447,18 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row',
     gap: 6,
+  },
+  groupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+  },
+  groupButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
   },
   headerButton: {
     width: 36,
