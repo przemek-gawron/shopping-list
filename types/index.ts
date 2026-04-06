@@ -19,6 +19,14 @@ export interface Recipe {
   title: string;
   description?: string;
   ingredients: Ingredient[];
+  categoryId: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  emoji: string;
+  sortOrder: number;
 }
 
 export interface RecipeSelection {

@@ -1,15 +1,17 @@
-import { Product, Recipe, RecipeSelection } from '@/types';
+import { Product, Recipe, RecipeSelection, Category } from '@/types';
+import { ALL_DEFAULT_CATEGORIES, UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
 
 export interface AppState {
   products: Product[];
   recipes: Recipe[];
   selections: RecipeSelection[];
+  categories: Category[];
   isLoading: boolean;
 }
 
 export type AppAction =
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'LOAD_DATA'; payload: { products: Product[]; recipes: Recipe[]; selections: RecipeSelection[] } }
+  | { type: 'LOAD_DATA'; payload: { products: Product[]; recipes: Recipe[]; selections: RecipeSelection[]; categories: Category[] } }
   | { type: 'ADD_PRODUCT'; payload: Product }
   | { type: 'UPDATE_PRODUCT'; payload: Product }
   | { type: 'DELETE_PRODUCT'; payload: string }
@@ -17,12 +19,16 @@ export type AppAction =
   | { type: 'UPDATE_RECIPE'; payload: Recipe }
   | { type: 'DELETE_RECIPE'; payload: string }
   | { type: 'SET_SELECTION'; payload: { recipeId: string; count: number } }
-  | { type: 'CLEAR_SELECTIONS' };
+  | { type: 'CLEAR_SELECTIONS' }
+  | { type: 'ADD_CATEGORY'; payload: Category }
+  | { type: 'UPDATE_CATEGORY'; payload: Category }
+  | { type: 'DELETE_CATEGORY'; payload: string };
 
 export const initialState: AppState = {
   products: [],
   recipes: [],
   selections: [],
+  categories: [],
   isLoading: true,
 };
 
@@ -31,14 +37,24 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
 
-    case 'LOAD_DATA':
+    case 'LOAD_DATA': {
+      const categories = action.payload.categories.length > 0
+        ? action.payload.categories
+        : ALL_DEFAULT_CATEGORIES;
+
+      const recipes = action.payload.recipes.map((r) =>
+        r.categoryId ? r : { ...r, categoryId: UNCATEGORIZED_CATEGORY_ID }
+      );
+
       return {
         ...state,
         products: action.payload.products,
-        recipes: action.payload.recipes,
+        recipes,
         selections: action.payload.selections,
+        categories,
         isLoading: false,
       };
+    }
 
     case 'ADD_PRODUCT':
       return { ...state, products: [...state.products, action.payload] };
@@ -96,6 +112,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'CLEAR_SELECTIONS':
       return { ...state, selections: [] };
+
+    case 'ADD_CATEGORY':
+      return { ...state, categories: [...state.categories, action.payload] };
+
+    case 'UPDATE_CATEGORY':
+      return {
+        ...state,
+        categories: state.categories.map((c) => (c.id === action.payload.id ? action.payload : c)),
+      };
+
+    case 'DELETE_CATEGORY': {
+      const categoryId = action.payload;
+      return {
+        ...state,
+        categories: state.categories.filter((c) => c.id !== categoryId),
+        recipes: state.recipes.map((r) =>
+          r.categoryId === categoryId ? { ...r, categoryId: UNCATEGORIZED_CATEGORY_ID } : r
+        ),
+      };
+    }
 
     default:
       return state;

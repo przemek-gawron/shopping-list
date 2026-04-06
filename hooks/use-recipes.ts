@@ -14,11 +14,20 @@ export function useRecipes() {
     [recipes]
   );
 
+  const getRecipesByCategory = useCallback(
+    (categoryId: string) =>
+      [...recipes]
+        .filter((r) => r.categoryId === categoryId)
+        .sort((a, b) => a.title.localeCompare(b.title, 'pl')),
+    [recipes]
+  );
+
   return {
     recipes: sortedRecipes,
     addRecipe,
     updateRecipe,
     deleteRecipe,
     getRecipeById,
+    getRecipesByCategory,
   };
 }

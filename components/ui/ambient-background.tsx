@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-type AmbientBackgroundVariant = 'recipes' | 'products' | 'shopping';
+type AmbientBackgroundVariant = 'recipes' | 'products' | 'shopping' | 'categories';
 
 interface AmbientBackgroundProps {
   variant?: AmbientBackgroundVariant;
@@ -30,6 +30,12 @@ const positions = {
     gridSecondary: { bottom: 196, left: -98, transform: [{ rotate: '9deg' }] as const },
     glowPrimary: { top: 18, right: -40 },
     glowSecondary: { bottom: 116, left: -24 },
+  },
+  categories: {
+    gridPrimary: { top: 64, left: -80, transform: [{ rotate: '10deg' }] as const },
+    gridSecondary: { bottom: 180, right: -90, transform: [{ rotate: '-15deg' }] as const },
+    glowPrimary: { top: -28, left: -48 },
+    glowSecondary: { bottom: 126, right: -32 },
   },
 };
 

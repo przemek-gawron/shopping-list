@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-type TileDecorationVariant = 'recipe' | 'product' | 'shopping';
+type TileDecorationVariant = 'recipe' | 'product' | 'shopping' | 'category';
 
 interface TileDecorationProps {
   variant?: TileDecorationVariant;
@@ -31,6 +31,12 @@ const placements = {
     waveOne: { top: -14 },
     waveTwo: { top: 14 },
     waveThree: { top: 40 },
+  },
+  category: {
+    wash: { top: 0, right: -20, bottom: 0, left: -20 },
+    waveOne: { top: -18 },
+    waveTwo: { top: 10 },
+    waveThree: { top: 36 },
   },
 };
 

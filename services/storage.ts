@@ -1,10 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Product, Recipe, RecipeSelection } from '@/types';
+import { Product, Recipe, RecipeSelection, Category } from '@/types';
 
 const KEYS = {
   PRODUCTS: 'shopping-list:products',
   RECIPES: 'shopping-list:recipes',
   SELECTIONS: 'shopping-list:selections',
+  CATEGORIES: 'shopping-list:categories',
 };
 
 export async function loadProducts(): Promise<Product[]> {
@@ -58,5 +59,23 @@ export async function saveSelections(selections: RecipeSelection[]): Promise<voi
     await AsyncStorage.setItem(KEYS.SELECTIONS, JSON.stringify(selections));
   } catch (error) {
     console.error('Failed to save selections:', error);
+  }
+}
+
+export async function loadCategories(): Promise<Category[]> {
+  try {
+    const data = await AsyncStorage.getItem(KEYS.CATEGORIES);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Failed to load categories:', error);
+    return [];
+  }
+}
+
+export async function saveCategories(categories: Category[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(KEYS.CATEGORIES, JSON.stringify(categories));
+  } catch (error) {
+    console.error('Failed to save categories:', error);
   }
 }

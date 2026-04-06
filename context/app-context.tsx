@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode } from 'react';
-import { Product, Recipe, RecipeSelection } from '@/types';
+import { Product, Recipe, RecipeSelection, Category } from '@/types';
 import { appReducer, AppState, initialState } from './app-reducer';
-import { loadProducts, loadRecipes, loadSelections, saveProducts, saveRecipes, saveSelections } from '@/services/storage';
+import { loadProducts, loadRecipes, loadSelections, loadCategories, saveProducts, saveRecipes, saveSelections, saveCategories } from '@/services/storage';
 
 interface AppContextValue extends AppState {
   addProduct: (product: Product) => void;
@@ -13,6 +13,9 @@ interface AppContextValue extends AppState {
   setSelection: (recipeId: string, count: number) => void;
   clearSelections: () => void;
   getSelectionCount: (recipeId: string) => number;
+  addCategory: (category: Category) => void;
+  updateCategory: (category: Category) => void;
+  deleteCategory: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -22,12 +25,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadData() {
-      const [products, recipes, selections] = await Promise.all([
+      const [products, recipes, selections, categories] = await Promise.all([
         loadProducts(),
         loadRecipes(),
         loadSelections(),
+        loadCategories(),
       ]);
-      dispatch({ type: 'LOAD_DATA', payload: { products, recipes, selections } });
+      dispatch({ type: 'LOAD_DATA', payload: { products, recipes, selections, categories } });
     }
     loadData();
   }, []);
@@ -49,6 +53,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveSelections(state.selections);
     }
   }, [state.selections, state.isLoading]);
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      saveCategories(state.categories);
+    }
+  }, [state.categories, state.isLoading]);
 
   const addProduct = useCallback((product: Product) => {
     dispatch({ type: 'ADD_PRODUCT', payload: product });
@@ -90,6 +100,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [state.selections]
   );
 
+  const addCategory = useCallback((category: Category) => {
+    dispatch({ type: 'ADD_CATEGORY', payload: category });
+  }, []);
+
+  const updateCategory = useCallback((category: Category) => {
+    dispatch({ type: 'UPDATE_CATEGORY', payload: category });
+  }, []);
+
+  const deleteCategory = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_CATEGORY', payload: id });
+  }, []);
+
   const value: AppContextValue = {
     ...state,
     addProduct,
@@ -101,6 +123,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSelection,
     clearSelections,
     getSelectionCount,
+    addCategory,
+    updateCategory,
+    deleteCategory,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

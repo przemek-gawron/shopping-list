@@ -26,9 +26,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Przepisy',
+          title: 'Kategorie',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="book.fill" color={color} focused={focused} />
+            <TabIcon name="square.grid.2x2.fill" color={color} focused={focused} />
           ),
         }}
       />

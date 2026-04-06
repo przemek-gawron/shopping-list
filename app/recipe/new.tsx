@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { AmbientBackground } from '@/components/ui/ambient-background';
@@ -10,6 +10,7 @@ import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function NewRecipeScreen() {
+  const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
   const { addRecipe } = useRecipes();
   const router = useRouter();
   const colorScheme = useColorScheme();
@@ -46,7 +47,7 @@ export default function NewRecipeScreen() {
                   styles.headerButton,
                   { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
                 ]}
-                onPress={() => router.push('/recipe/import-photo')}
+                onPress={() => router.push(categoryId ? `/recipe/import-photo?categoryId=${categoryId}` : '/recipe/import-photo')}
               >
                 <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
               </Pressable>
@@ -54,7 +55,7 @@ export default function NewRecipeScreen() {
           ),
         }}
       />
-      <RecipeForm ref={formRef} onSave={addRecipe} style={{ backgroundColor: 'transparent' }} />
+      <RecipeForm ref={formRef} onSave={addRecipe} defaultCategoryId={categoryId} style={{ backgroundColor: 'transparent' }} />
     </LinearGradient>
   );
 }

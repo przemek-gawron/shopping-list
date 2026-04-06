@@ -13,13 +13,14 @@ import { IconSymbol } from './icon-symbol';
 interface FloatingActionButtonProps {
   onPress: () => void;
   badge?: number;
+  hasTabBar?: boolean;
 }
 
-export function FloatingActionButton({ onPress, badge }: FloatingActionButtonProps) {
+export function FloatingActionButton({ onPress, badge, hasTabBar = true }: FloatingActionButtonProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
-  const bottomOffset = Math.max(insets.bottom, 12) + 88;
+  const bottomOffset = Math.max(insets.bottom, 12) + (hasTabBar ? 88 : 16);
   const supportsLiquidGlass =
     Platform.OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 

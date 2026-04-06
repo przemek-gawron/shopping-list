@@ -8,12 +8,14 @@ import { generateId } from '@/utils/id-generator';
 import { IngredientRow } from './ingredient-row';
 import { useProducts } from '@/hooks/use-products';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
 
 interface RecipeFormProps {
   recipe?: Recipe;
   onSave: (recipe: Recipe) => void;
   onDelete?: () => void;
   onSaved?: () => void;
+  defaultCategoryId?: string;
   style?: ViewStyle;
 }
 
@@ -24,7 +26,7 @@ export interface RecipeFormHandle {
 }
 
 export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function RecipeForm(
-  { recipe, onSave, onDelete, onSaved, style },
+  { recipe, onSave, onDelete, onSaved, defaultCategoryId, style },
   ref
 ) {
   const router = useRouter();
@@ -104,6 +106,7 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
       title: trimmedTitle,
       description: description.trim() || undefined,
       ingredients: recipeIngredients,
+      categoryId: recipe?.categoryId ?? defaultCategoryId ?? UNCATEGORIZED_CATEGORY_ID,
     });
 
     if (onSaved) {

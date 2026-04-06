@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -24,12 +24,14 @@ import { useProducts } from '@/hooks/use-products';
 import { useRecipes } from '@/hooks/use-recipes';
 import { generateId } from '@/utils/id-generator';
 import { Recipe, Ingredient, Product } from '@/types';
+import { UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
 
 type Step = 'pick' | 'processing' | 'review';
 
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
 export default function ImportPhotoScreen() {
+  const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -112,6 +114,7 @@ export default function ImportPhotoScreen() {
         title: parsed.title,
         description: parsed.description,
         ingredients: resolvedIngredients,
+        categoryId: categoryId ?? UNCATEGORIZED_CATEGORY_ID,
       });
 
       setStep('review');
@@ -205,6 +208,7 @@ export default function ImportPhotoScreen() {
           recipe={prefilledRecipe}
           onSave={addRecipe}
           onSaved={() => router.replace('/')}
+          defaultCategoryId={categoryId}
           style={{ backgroundColor: 'transparent' }}
         />
       )}

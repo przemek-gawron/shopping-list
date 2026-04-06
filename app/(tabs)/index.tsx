@@ -1,32 +1,34 @@
-import React, { useState, useMemo } from 'react';
-import { View, FlatList, StyleSheet, Pressable, Text, ActivityIndicator, TextInput } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useCategories } from '@/hooks/use-categories';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useSelections } from '@/hooks/use-selections';
 import { useAppContext } from '@/context/app-context';
-import { RecipeListItem } from '@/components/recipes/recipe-list-item';
+import { CategoryCard } from '@/components/categories/category-card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { GradientHeader } from '@/components/ui/gradient-header';
 import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
-export default function RecipesScreen() {
+export default function CategoriesScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
-  const { recipes, deleteRecipe } = useRecipes();
-  const { totalSelections, hasSelections, setSelection, getSelectionCount } = useSelections();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { categories } = useCategories();
+  const { recipes } = useRecipes();
+  const { totalSelections, hasSelections } = useSelections();
 
-  const filteredRecipes = useMemo(() => {
-    if (!searchQuery.trim()) return recipes;
-    const query = searchQuery.toLowerCase();
-    return recipes.filter((recipe) => recipe.title.toLowerCase().includes(query));
-  }, [recipes, searchQuery]);
+  const recipeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const recipe of recipes) {
+      counts[recipe.categoryId] = (counts[recipe.categoryId] ?? 0) + 1;
+    }
+    return counts;
+  }, [recipes]);
 
   const screenGradient =
     colorScheme === 'dark'
@@ -36,7 +38,7 @@ export default function RecipesScreen() {
   if (isLoading) {
     return (
       <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
-        <AmbientBackground variant="recipes" />
+        <AmbientBackground variant="categories" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.tint} />
         </View>
@@ -46,54 +48,29 @@ export default function RecipesScreen() {
 
   return (
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
-      <AmbientBackground variant="recipes" />
+      <AmbientBackground variant="categories" />
       <View style={styles.container}>
-        <GradientHeader title="Przepisy" onAdd={() => router.push('/recipe/new')}>
-          {recipes.length > 0 && (
-            <View style={[styles.searchContainer, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
-              <IconSymbol name="magnifyingglass" size={16} color={colors.onPrimaryMuted} />
-              <TextInput
-                style={[styles.searchInput, { color: colors.onPrimary }]}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Szukaj przepisu..."
-                placeholderTextColor="rgba(255,255,255,0.5)"
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery('')}>
-                  <IconSymbol name="xmark.circle.fill" size={16} color={colors.onPrimaryMuted} />
-                </Pressable>
-              )}
-            </View>
-          )}
-        </GradientHeader>
+        <GradientHeader title="Kategorie" onAdd={() => router.push('/category/manage')} />
 
-        {recipes.length === 0 ? (
+        {categories.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>📋</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak przepisow</Text>
+            <Text style={styles.emptyEmoji}>📂</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak kategorii</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              Dodaj pierwszy przepis, aby zaczac planowac zakupy
-            </Text>
-          </View>
-        ) : filteredRecipes.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>🔍</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
-            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              {`Nie znaleziono przepisow dla „${searchQuery}”`}
+              Dodaj pierwsza kategorie, aby zaczac organizowac przepisy
             </Text>
           </View>
         ) : (
           <FlatList
-            data={filteredRecipes}
+            data={categories}
             keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
             renderItem={({ item }) => (
-              <RecipeListItem
-                recipe={item}
-                count={getSelectionCount(item.id)}
-                onCountChange={(count) => setSelection(item.id, count)}
-                onDelete={() => deleteRecipe(item.id)}
+              <CategoryCard
+                category={item}
+                recipeCount={recipeCounts[item.id] ?? 0}
+                onPress={() => router.push(`/category/${item.id}`)}
               />
             )}
             contentContainerStyle={styles.listContent}
@@ -120,21 +97,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
-    gap: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    padding: 0,
-    fontFamily: 'Inter_400Regular',
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -159,7 +121,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   listContent: {
+    paddingHorizontal: 16,
     paddingBottom: 170,
     paddingTop: 10,
+  },
+  row: {
+    gap: 12,
+    marginBottom: 12,
   },
 });
