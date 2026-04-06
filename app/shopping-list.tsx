@@ -219,7 +219,7 @@ export default function ShoppingListScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Lista zakupow',
+          title: 'Zakupy',
           headerStyle: {
             backgroundColor:
               colorScheme === 'dark' ? colors.headerBackgroundDark : colors.headerChrome,
