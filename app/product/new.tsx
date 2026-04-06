@@ -6,6 +6,7 @@ import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useProducts } from '@/hooks/use-products';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function NewProductScreen() {
   const { addProduct } = useProducts();
@@ -22,7 +23,7 @@ export default function NewProductScreen() {
       <AmbientBackground variant="products" />
       <Stack.Screen
         options={{
-          title: 'Nowy produkt',
+          title: t('product_new_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },

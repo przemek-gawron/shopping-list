@@ -1,40 +1,43 @@
 import { ShoppingListItem } from '@/types';
+import { t } from '@/i18n';
 import { ApiKeyError, ApiError } from './claude-recipe-importer';
 
 export { ApiKeyError, ApiError };
 
-const GROUP_ITEMS_TOOL = {
-  name: 'group_shopping_items',
-  description: 'Group shopping list items into logical food categories',
-  input_schema: {
-    type: 'object' as const,
-    required: ['groups'],
-    properties: {
-      groups: {
-        type: 'array',
-        items: {
-          type: 'object',
-          required: ['name', 'emoji', 'items'],
-          properties: {
-            name: {
-              type: 'string',
-              description: 'Category name in Polish, e.g. Warzywa, Owoce, Nabiał',
-            },
-            emoji: {
-              type: 'string',
-              description: 'A single emoji representing the category',
-            },
-            items: {
-              type: 'array',
-              items: { type: 'string' },
-              description: 'Product names that belong to this category (exact names from input)',
+function buildGroupItemsTool() {
+  return {
+    name: 'group_shopping_items',
+    description: 'Group shopping list items into logical food categories',
+    input_schema: {
+      type: 'object' as const,
+      required: ['groups'],
+      properties: {
+        groups: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['name', 'emoji', 'items'],
+            properties: {
+              name: {
+                type: 'string',
+                description: t('ai_grouper_category_description'),
+              },
+              emoji: {
+                type: 'string',
+                description: 'A single emoji representing the category',
+              },
+              items: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Product names that belong to this category (exact names from input)',
+              },
             },
           },
         },
       },
     },
-  },
-};
+  };
+}
 
 export interface ProductGroup {
   name: string;
@@ -56,12 +59,12 @@ export async function groupShoppingItems(
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
-      tools: [GROUP_ITEMS_TOOL],
+      tools: [buildGroupItemsTool()],
       tool_choice: { type: 'tool', name: 'group_shopping_items' },
       messages: [
         {
           role: 'user',
-          content: `Group these shopping list items into logical food categories in Polish. Use categories like: Warzywa, Owoce, Nabiał, Mięso i Ryby, Pieczywo, Przyprawy i Sosy, Napoje, Inne. Only use a category if it has at least one item. Include every item in exactly one group. Call the group_shopping_items tool.\n\nItems:\n${productNames.join('\n')}`,
+          content: t('ai_grouper_instruction', { items: productNames.join('\n') }),
         },
       ],
     }),
@@ -102,20 +105,21 @@ export function applyGroupsToItems(
     })
     .filter((s) => s.data.length > 0);
 
-  // Any unchecked items not matched by AI fall into Inne
+  // Any unchecked items not matched by AI fall into the fallback group
+  const fallbackName = t('ai_grouper_other');
   const unmatched = unchecked.filter((i) => !assigned.has(i.productId));
   if (unmatched.length > 0) {
-    const inne = sections.find((s) => s.name === 'Inne');
-    if (inne) {
-      inne.data.push(...unmatched);
+    const fallback = sections.find((s) => s.name === fallbackName);
+    if (fallback) {
+      fallback.data.push(...unmatched);
     } else {
-      sections.push({ name: 'Inne', emoji: '📋', data: unmatched });
+      sections.push({ name: fallbackName, emoji: '📋', data: unmatched });
     }
   }
 
   // Checked items go to a separate section at the bottom
   if (checked.length > 0) {
-    sections.push({ name: 'Kupione', emoji: '✅', data: checked });
+    sections.push({ name: t('ai_grouper_checked'), emoji: '✅', data: checked });
   }
 
   return sections;

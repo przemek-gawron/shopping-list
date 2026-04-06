@@ -10,6 +10,7 @@ import {
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { t } from '@/i18n';
 
 interface ImportPhotoPickerProps {
   photos: string[];
@@ -38,7 +39,7 @@ export function ImportPhotoPicker({
           onPress={onAddFromCamera}
         >
           <IconSymbol name="camera" size={20} color={colors.tint} />
-          <Text style={[styles.sourceButtonText, { color: colors.tint }]}>Aparat</Text>
+          <Text style={[styles.sourceButtonText, { color: colors.tint }]}>{t('photo_camera')}</Text>
         </Pressable>
 
         <Pressable
@@ -49,7 +50,7 @@ export function ImportPhotoPicker({
           onPress={onAddFromLibrary}
         >
           <IconSymbol name="photo.on.rectangle" size={20} color={colors.tint} />
-          <Text style={[styles.sourceButtonText, { color: colors.tint }]}>Biblioteka</Text>
+          <Text style={[styles.sourceButtonText, { color: colors.tint }]}>{t('photo_library')}</Text>
         </Pressable>
       </View>
 
@@ -77,7 +78,7 @@ export function ImportPhotoPicker({
 
       {photos.length === 0 && (
         <Text style={[styles.hint, { color: colors.textSecondary }]}>
-          Dodaj jedno lub więcej zdjęć przepisu
+          {t('photo_hint')}
         </Text>
       )}
     </View>

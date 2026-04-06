@@ -4,6 +4,7 @@ import { Category } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { TileDecoration } from '@/components/ui/tile-decoration';
+import { t } from '@/i18n';
 
 interface CategoryCardProps {
   category: Category;
@@ -38,7 +39,7 @@ export function CategoryCard({ category, recipeCount, onPress }: CategoryCardPro
         </Text>
         <View style={[styles.chip, { backgroundColor: colors.tint }]}>
           <Text style={[styles.chipText, { color: colors.onPrimary }]}>
-            {recipeCount} {recipeCount === 1 ? 'przepis' : recipeCount < 5 ? 'przepisy' : 'przepisów'}
+            {t('category_recipe_count', { count: recipeCount })}
           </Text>
         </View>
       </View>

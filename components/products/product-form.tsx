@@ -4,9 +4,10 @@ import { useRouter } from 'expo-router';
 import { Product, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { UNIT_OPTIONS } from '@/constants/units';
+import { UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
 import { useProducts } from '@/hooks/use-products';
+import { t } from '@/i18n';
 
 interface ProductFormProps {
   product?: Product;
@@ -28,13 +29,13 @@ export function ProductForm({ product, onSave, onDelete, style }: ProductFormPro
   const handleSave = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert('Blad', 'Nazwa produktu jest wymagana');
+      Alert.alert(t('shopping_list_qty_error_title'), t('product_form_name_required'));
       return;
     }
 
     const existing = findProductByName(trimmedName);
     if (existing && existing.id !== product?.id) {
-      Alert.alert('Produkt juz istnieje', `Produkt o nazwie "${existing.name}" juz istnieje.`);
+      Alert.alert(t('product_form_exists_title'), t('product_form_exists_message', { name: existing.name }));
       return;
     }
 
@@ -54,10 +55,10 @@ export function ProductForm({ product, onSave, onDelete, style }: ProductFormPro
   };
 
   const handleDelete = () => {
-    Alert.alert('Usun produkt', `Czy na pewno chcesz usunac "${name}"?`, [
-      { text: 'Anuluj', style: 'cancel' },
+    Alert.alert(t('product_form_delete_title'), t('product_form_delete_message', { name }), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Usun',
+        text: t('delete'),
         style: 'destructive',
         onPress: () => {
           onDelete?.();
@@ -70,30 +71,30 @@ export function ProductForm({ product, onSave, onDelete, style }: ProductFormPro
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }, style]}>
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.text }]}>Nazwa</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{t('product_form_name_label')}</Text>
         <TextInput
           style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={name}
           onChangeText={setName}
-          placeholder="np. Marchewka"
+          placeholder={t('product_form_name_placeholder')}
           placeholderTextColor={colors.textSecondary}
           autoFocus={!product}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.text }]}>Aliasy (oddzielone przecinkami)</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{t('product_form_aliases_label')}</Text>
         <TextInput
           style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={aliases}
           onChangeText={setAliases}
-          placeholder="np. marchew, karota"
+          placeholder={t('product_form_aliases_placeholder')}
           placeholderTextColor={colors.textSecondary}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.text }]}>Domyslna jednostka</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{t('product_form_unit_label')}</Text>
         <View style={styles.unitContainer}>
           {UNIT_OPTIONS.map((option) => (
             <Pressable
@@ -114,7 +115,7 @@ export function ProductForm({ product, onSave, onDelete, style }: ProductFormPro
                   { color: defaultUnit === option.value ? colors.onPrimary : colors.tint },
                 ]}
               >
-                {option.label}
+                {getUnitLabel(option.value)}
               </Text>
             </Pressable>
           ))}
@@ -125,12 +126,12 @@ export function ProductForm({ product, onSave, onDelete, style }: ProductFormPro
         style={[styles.saveButton, { backgroundColor: colors.tint }]}
         onPress={handleSave}
       >
-        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
+        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('product_form_save')}</Text>
       </Pressable>
 
       {onDelete && (
         <Pressable style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>Usun produkt</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>{t('product_form_delete_button')}</Text>
         </Pressable>
       )}
     </ScrollView>

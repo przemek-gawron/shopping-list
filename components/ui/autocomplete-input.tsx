@@ -3,6 +3,7 @@ import { View, TextInput, ScrollView, Text, StyleSheet, Pressable } from 'react-
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from './icon-symbol';
+import { t } from '@/i18n';
 
 interface AutocompleteItem {
   id: string;
@@ -26,7 +27,7 @@ export function AutocompleteInput({
   items,
   placeholder,
   onCreateNew,
-  createNewLabel = 'Dodaj nowy',
+  createNewLabel,
 }: AutocompleteInputProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -112,7 +113,7 @@ export function AutocompleteInput({
             >
               <IconSymbol name="plus.circle.fill" size={18} color={colors.tint} />
               <Text style={[styles.createNewText, { color: colors.tint }]}>
-                {`${createNewLabel}: „${trimmedValue}”`}
+                {`${createNewLabel ?? t('ingredient_add_new')}: „${trimmedValue}”`}
               </Text>
             </Pressable>
           )}

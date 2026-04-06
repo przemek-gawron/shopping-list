@@ -12,6 +12,7 @@ import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { t } from '@/i18n';
 
 export default function CategoryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,7 +43,7 @@ export default function CategoryDetailScreen() {
       <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
         <View style={styles.centered}>
           <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-            Nie znaleziono kategorii
+            {t('category_not_found')}
           </Text>
         </View>
       </LinearGradient>
@@ -77,7 +78,7 @@ export default function CategoryDetailScreen() {
                   style={[styles.searchInput, { color: colors.onPrimary }]}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  placeholder="Szukaj przepisu..."
+                  placeholder={t('category_search_placeholder')}
                   placeholderTextColor="rgba(255,255,255,0.5)"
                 />
                 {searchQuery.length > 0 && (
@@ -92,17 +93,17 @@ export default function CategoryDetailScreen() {
           {categoryRecipes.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyEmoji}>{category.emoji}</Text>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak przepisow</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('category_recipes_empty_title')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-                Dodaj pierwszy przepis do tej kategorii
+                {t('category_recipes_empty_subtitle')}
               </Text>
             </View>
           ) : filteredRecipes.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyEmoji}>🔍</Text>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak wynikow</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('category_search_empty_title')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-                {`Nie znaleziono przepisow dla „${searchQuery}"`}
+                {t('category_search_empty_subtitle', { query: searchQuery })}
               </Text>
             </View>
           ) : (

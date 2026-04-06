@@ -5,6 +5,7 @@ import { ProductForm } from '@/components/products/product-form';
 import { useProducts } from '@/hooks/use-products';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,10 +18,10 @@ export default function EditProductScreen() {
   if (!product) {
     return (
       <>
-        <Stack.Screen options={{ title: 'Produkt' }} />
+        <Stack.Screen options={{ title: t('product_screen_title') }} />
         <View style={[styles.container, { backgroundColor: colors.background }]}>
           <Text style={[styles.errorText, { color: colors.text }]}>
-            Nie znaleziono produktu
+            {t('product_not_found')}
           </Text>
         </View>
       </>
@@ -31,7 +32,7 @@ export default function EditProductScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Edytuj produkt',
+          title: t('product_edit_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },

@@ -8,6 +8,7 @@ import { Colors } from '@/constants/theme';
 import { CounterButton } from '@/components/ui/counter-button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TileDecoration } from '@/components/ui/tile-decoration';
+import { t } from '@/i18n';
 
 interface RecipeListItemProps {
   recipe: Recipe;
@@ -27,16 +28,16 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
   };
 
   const handleDelete = () => {
-    Alert.alert('Usun przepis', `Czy na pewno chcesz usunac "${recipe.title}"?`, [
-      { text: 'Anuluj', style: 'cancel' },
-      { text: 'Usun', style: 'destructive', onPress: onDelete },
+    Alert.alert(t('recipe_form_delete_title'), t('recipe_form_delete_message', { title: recipe.title }), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('delete'), style: 'destructive', onPress: onDelete },
     ]);
   };
 
   const renderRightActions = () => (
     <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={handleDelete}>
       <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
-      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>{t('swipe_delete')}</Text>
     </Pressable>
   );
 
@@ -70,7 +71,7 @@ export function RecipeListItem({ recipe, count, onCountChange, onDelete }: Recip
           ) : null}
           <View style={[styles.chip, { backgroundColor: colors.tint }]}>
             <Text style={[styles.chipText, { color: colors.onPrimary }]}>
-              {recipe.ingredients.length} skł.
+              {recipe.ingredients.length} {t('recipe_ingredients_abbr')}
             </Text>
           </View>
         </View>

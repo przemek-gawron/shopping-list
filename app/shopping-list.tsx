@@ -27,9 +27,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AmbientBackground } from '@/components/ui/ambient-background';
-import { UNIT_OPTIONS } from '@/constants/units';
+import { UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
+import { t } from '@/i18n';
 
 export default function ShoppingListScreen() {
   const colorScheme = useColorScheme();
@@ -101,7 +102,7 @@ export default function ShoppingListScreen() {
     if (!trimmedName) return;
     const qty = parseFloat(newQty);
     if (isNaN(qty) || qty <= 0) {
-      Alert.alert('Blad', 'Podaj poprawna ilosc');
+      Alert.alert(t('shopping_list_qty_error_title'), t('shopping_list_qty_error_message'));
       return;
     }
 
@@ -109,7 +110,7 @@ export default function ShoppingListScreen() {
       (i) => i.productName.toLowerCase() === trimmedName.toLowerCase()
     );
     if (existing) {
-      Alert.alert('Produkt juz na liscie', `"${existing.productName}" jest juz na liscie zakupow.`);
+      Alert.alert(t('shopping_list_duplicate_title'), t('shopping_list_duplicate_message', { name: existing.productName }));
       return;
     }
 
@@ -130,14 +131,14 @@ export default function ShoppingListScreen() {
   const handleCopy = async () => {
     const text = formatShoppingListForClipboard(sortedItems);
     await Clipboard.setStringAsync(text);
-    Alert.alert('Skopiowano', 'Lista zakupow zostala skopiowana do schowka');
+    Alert.alert(t('shopping_list_copy_title'), t('shopping_list_copy_message'));
   };
 
   const handleClear = () => {
-    Alert.alert('Wyczysc selekcje', 'Czy na pewno chcesz wyczysc wszystkie wybrane przepisy?', [
-      { text: 'Anuluj', style: 'cancel' },
+    Alert.alert(t('shopping_list_clear_title'), t('shopping_list_clear_message'), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Wyczysc',
+        text: t('shopping_list_clear_confirm'),
         style: 'destructive',
         onPress: () => {
           clearSelections();
@@ -166,7 +167,7 @@ export default function ShoppingListScreen() {
     }
 
     if (!API_KEY) {
-      Alert.alert('Brak klucza API', 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.');
+      Alert.alert(t('shopping_list_api_key_title'), t('shopping_list_api_key_message'));
       return;
     }
 
@@ -181,7 +182,7 @@ export default function ShoppingListScreen() {
       setIsGrouped(true);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      Alert.alert('Blad grupowania', msg);
+      Alert.alert(t('shopping_list_group_error_title'), msg);
     } finally {
       setIsGrouping(false);
     }
@@ -219,7 +220,7 @@ export default function ShoppingListScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Zakupy',
+          title: t('shopping_list_title'),
           headerStyle: {
             backgroundColor:
               colorScheme === 'dark' ? colors.headerBackgroundDark : colors.headerChrome,
@@ -248,7 +249,7 @@ export default function ShoppingListScreen() {
                 )}
                 {!isGrouping && (
                   <Text style={[styles.groupButtonText, { color: colors.onPrimary }]}>
-                    {isGrouped ? 'Rozgrupuj' : 'Grupuj'}
+                    {isGrouped ? t('shopping_list_ungroup') : t('shopping_list_group')}
                   </Text>
                 )}
               </Pressable>
@@ -274,7 +275,7 @@ export default function ShoppingListScreen() {
         {totalCount > 0 && (
           <View style={[styles.progressContainer, { backgroundColor: colors.headerChrome, shadowColor: colors.shadowColor }]}>
             <View style={styles.progressHeader}>
-              <Text style={[styles.progressLabel, { color: colors.onPrimaryMuted }]}>Postep zakupow</Text>
+              <Text style={[styles.progressLabel, { color: colors.onPrimaryMuted }]}>{t('shopping_list_progress_label')}</Text>
               <Text style={[styles.progressCount, { color: colors.onPrimary }]}>{checkedCount} / {totalCount}</Text>
             </View>
             <View style={[styles.progressTrack, { backgroundColor: colors.overlayOnPrimarySubtle }]}>
@@ -286,9 +287,9 @@ export default function ShoppingListScreen() {
         {sortedItems.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>🛒</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Lista jest pusta</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('shopping_list_empty_title')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              Wybierz przepisy na ekranie glownym
+              {t('shopping_list_empty_subtitle')}
             </Text>
           </View>
         ) : isGrouped ? (
@@ -365,10 +366,10 @@ export default function ShoppingListScreen() {
           <View style={[styles.modalSheet, { backgroundColor: colors.cardBackground }]}>
             <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
 
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Dodaj produkt</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('shopping_list_add_title')}</Text>
 
             <View style={[styles.modalField, { zIndex: 20 }]}>
-              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>NAZWA</Text>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('shopping_list_name_label')}</Text>
               <AutocompleteInput
                 value={newName}
                 onChangeText={setNewName}
@@ -378,12 +379,12 @@ export default function ShoppingListScreen() {
                   if (product) setNewUnit(product.defaultUnit);
                 }}
                 items={productItems}
-                placeholder="np. Cukier"
+                placeholder={t('shopping_list_name_placeholder')}
               />
             </View>
 
             <View style={styles.modalField}>
-              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>ILOSC</Text>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('shopping_list_qty_label')}</Text>
               <TextInput
                 style={[
                   styles.modalInput,
@@ -397,7 +398,7 @@ export default function ShoppingListScreen() {
             </View>
 
             <View style={styles.modalField}>
-              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>JEDNOSTKA</Text>
+              <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('shopping_list_unit_label')}</Text>
               <View style={styles.unitWrap}>
                 {UNIT_OPTIONS.map((opt) => (
                   <Pressable
@@ -417,7 +418,7 @@ export default function ShoppingListScreen() {
                         { color: newUnit === opt.value ? colors.onPrimary : colors.tint },
                       ]}
                     >
-                      {opt.label}
+                      {getUnitLabel(opt.value)}
                     </Text>
                   </Pressable>
                 ))}
@@ -431,7 +432,7 @@ export default function ShoppingListScreen() {
               ]}
               onPress={handleAddItem}
             >
-              <Text style={[styles.modalSaveText, { color: colors.onPrimary }]}>Dodaj do listy</Text>
+              <Text style={[styles.modalSaveText, { color: colors.onPrimary }]}>{t('shopping_list_add_button')}</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>

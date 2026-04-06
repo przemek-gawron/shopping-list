@@ -1,5 +1,14 @@
 import { Product, Recipe, RecipeSelection, Category } from '@/types';
-import { ALL_DEFAULT_CATEGORIES, UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
+import { getAllDefaultCategories, getDefaultCategories, getUncategorizedCategory, UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
+
+// Map known default category IDs to their translated names so that categories
+// stored in AsyncStorage (possibly in a different language) always display in
+// the current device locale. User-created categories are unaffected.
+function resolveDefaultCategoryName(category: Category): Category {
+  const defaults = [...getDefaultCategories(), getUncategorizedCategory()];
+  const match = defaults.find((d) => d.id === category.id);
+  return match ? { ...category, name: match.name } : category;
+}
 
 export interface AppState {
   products: Product[];
@@ -38,9 +47,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, isLoading: action.payload };
 
     case 'LOAD_DATA': {
-      const categories = action.payload.categories.length > 0
+      const categories = (action.payload.categories.length > 0
         ? action.payload.categories
-        : ALL_DEFAULT_CATEGORIES;
+        : getAllDefaultCategories()
+      ).map(resolveDefaultCategoryName);
 
       const recipes = action.payload.recipes.map((r) =>
         r.categoryId ? r : { ...r, categoryId: UNCATEGORIZED_CATEGORY_ID }

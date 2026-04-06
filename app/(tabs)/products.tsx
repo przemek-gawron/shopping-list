@@ -9,6 +9,7 @@ import { GradientHeader } from '@/components/ui/gradient-header';
 import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function ProductsScreen() {
   const router = useRouter();
@@ -36,14 +37,14 @@ export default function ProductsScreen() {
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
       <AmbientBackground variant="products" />
       <View style={styles.container}>
-        <GradientHeader title="Produkty" onAdd={() => router.push('/product/new')} />
+        <GradientHeader title={t('products_header')} onAdd={() => router.push('/product/new')} />
 
         {products.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>📦</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak produktow</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('products_empty_title')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              Dodaj produkty, aby moc tworzyc przepisy
+              {t('products_empty_subtitle')}
             </Text>
           </View>
         ) : (

@@ -4,9 +4,10 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { ShoppingListItem as ShoppingListItemType, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { formatQuantity, UNIT_OPTIONS } from '@/constants/units';
+import { formatQuantity, UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TileDecoration } from '@/components/ui/tile-decoration';
+import { t } from '@/i18n';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -80,7 +81,7 @@ export function ShoppingListItem({
   const renderRightActions = () => (
     <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={onDelete}>
       <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
-      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>{t('swipe_delete')}</Text>
     </Pressable>
   );
 
@@ -192,7 +193,7 @@ export function ShoppingListItem({
               style={[styles.unitButton, { backgroundColor: colors.tint + '18', borderColor: colors.tint }]}
               onPress={cycleUnit}
             >
-              <Text style={[styles.unitButtonText, { color: colors.tint }]}>{editUnit}</Text>
+              <Text style={[styles.unitButtonText, { color: colors.tint }]}>{getUnitLabel(editUnit)}</Text>
             </Pressable>
             <Pressable
               style={[styles.iconButton, { backgroundColor: colors.tint }]}

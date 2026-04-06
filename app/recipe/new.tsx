@@ -8,6 +8,7 @@ import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { t } from '@/i18n';
 
 export default function NewRecipeScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
@@ -27,7 +28,7 @@ export default function NewRecipeScreen() {
       <AmbientBackground variant="recipes" />
       <Stack.Screen
         options={{
-          title: 'Nowy przepis',
+          title: t('recipe_new_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
@@ -40,7 +41,7 @@ export default function NewRecipeScreen() {
                 ]}
                 onPress={() => formRef.current?.submit()}
               >
-                <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
+                <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('recipe_save')}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [

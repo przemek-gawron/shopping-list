@@ -5,6 +5,7 @@ import { RecipeForm } from '@/components/recipes/recipe-form';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function EditRecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,10 +18,10 @@ export default function EditRecipeScreen() {
   if (!recipe) {
     return (
       <>
-        <Stack.Screen options={{ title: 'Przepis' }} />
+        <Stack.Screen options={{ title: t('recipe_screen_title') }} />
         <View style={[styles.container, { backgroundColor: colors.background }]}>
           <Text style={[styles.errorText, { color: colors.text }]}>
-            Nie znaleziono przepisu
+            {t('recipe_not_found')}
           </Text>
         </View>
       </>
@@ -31,7 +32,7 @@ export default function EditRecipeScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Edytuj przepis',
+          title: t('recipe_edit_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },

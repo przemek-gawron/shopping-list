@@ -9,6 +9,7 @@ import { IngredientRow } from './ingredient-row';
 import { useProducts } from '@/hooks/use-products';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
+import { t } from '@/i18n';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -72,7 +73,7 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
   const handleSave = () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      Alert.alert('Blad', 'Tytul przepisu jest wymagany');
+      Alert.alert(t('shopping_list_qty_error_title'), t('recipe_form_title_required'));
       return;
     }
 
@@ -90,7 +91,7 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
     );
 
     if (validIngredients.length === 0) {
-      Alert.alert('Blad', 'Dodaj co najmniej jeden skladnik z listy produktow');
+      Alert.alert(t('shopping_list_qty_error_title'), t('recipe_form_ingredients_required'));
       return;
     }
 
@@ -118,10 +119,10 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
   };
 
   const handleDelete = () => {
-    Alert.alert('Usun przepis', `Czy na pewno chcesz usunac "${title}"?`, [
-      { text: 'Anuluj', style: 'cancel' },
+    Alert.alert(t('recipe_form_delete_title'), t('recipe_form_delete_message', { title }), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Usun',
+        text: t('delete'),
         style: 'destructive',
         onPress: () => {
           onDelete?.();
@@ -148,24 +149,24 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.text }]}>Tytul</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{t('recipe_form_title_label')}</Text>
         <TextInput
           style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={title}
           onChangeText={setTitle}
-          placeholder="np. Kurczak curry"
+          placeholder={t('recipe_form_title_placeholder')}
           placeholderTextColor={colors.textSecondary}
           autoFocus={!recipe}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.text }]}>Opis (opcjonalny)</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{t('recipe_form_description_label')}</Text>
         <TextInput
           style={[styles.input, styles.textArea, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
           value={description}
           onChangeText={setDescription}
-          placeholder="Krotki opis przepisu..."
+          placeholder={t('recipe_form_description_placeholder')}
           placeholderTextColor={colors.textSecondary}
           multiline
           numberOfLines={3}
@@ -174,19 +175,19 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
 
       <View style={styles.field}>
         <View style={styles.ingredientsHeader}>
-          <Text style={[styles.label, { color: colors.text }]}>Skladniki</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('recipe_form_ingredients_label')}</Text>
           <Pressable
             style={[styles.addIngredientButton, { backgroundColor: colors.tint }]}
             onPress={addIngredient}
           >
             <IconSymbol name="plus" size={16} color={colors.onPrimary} />
-            <Text style={[styles.addIngredientText, { color: colors.onPrimary }]}>Dodaj</Text>
+            <Text style={[styles.addIngredientText, { color: colors.onPrimary }]}>{t('recipe_form_add_ingredient')}</Text>
           </Pressable>
         </View>
 
         {ingredients.length === 0 ? (
           <Text style={[styles.noIngredients, { color: colors.icon }]}>
-            {`Brak skladnikow. Kliknij „Dodaj”, aby dodac skladnik.`}
+            {t('recipe_form_no_ingredients')}
           </Text>
         ) : (
           ingredients.map((ing, index) => (
@@ -205,12 +206,12 @@ export const RecipeForm = forwardRef<RecipeFormHandle, RecipeFormProps>(function
         style={[styles.saveButton, { backgroundColor: colors.tint }]}
         onPress={handleSave}
       >
-        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
+        <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('recipe_form_save')}</Text>
       </Pressable>
 
       {onDelete && (
         <Pressable style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>Usun przepis</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>{t('recipe_form_delete_button')}</Text>
         </Pressable>
       )}
 

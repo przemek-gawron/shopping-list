@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Unit } from '@/types';
+import { t } from '@/i18n';
 
 export interface ParsedRecipe {
   title: string;
@@ -64,45 +65,48 @@ async function encodeImageToBase64(uri: string): Promise<string> {
   });
 }
 
-const SAVE_RECIPE_TOOL = {
-  name: 'save_recipe',
-  description: 'Save the extracted recipe data',
-  input_schema: {
-    type: 'object' as const,
-    required: ['title', 'ingredients'],
-    properties: {
-      title: {
-        type: 'string',
-        description: 'Recipe title in Polish',
-      },
-      description: {
-        type: 'string',
-        description: 'Brief description or notes (optional)',
-      },
-      ingredients: {
-        type: 'array',
-        items: {
-          type: 'object',
-          required: ['name', 'quantity', 'unit'],
-          properties: {
-            name: {
-              type: 'string',
-              description: 'Ingredient name in Polish, lowercase',
-            },
-            quantity: {
-              type: 'number',
-              description: 'Numeric quantity',
-            },
-            unit: {
-              type: 'string',
-              description: 'Unit: g, kg, ml, l, szt, lyzka, lyzeczka, or szklanka',
+function buildSaveRecipeTool() {
+  const lang = t('ai_language_name');
+  return {
+    name: 'save_recipe',
+    description: 'Save the extracted recipe data',
+    input_schema: {
+      type: 'object' as const,
+      required: ['title', 'ingredients'],
+      properties: {
+        title: {
+          type: 'string',
+          description: `Recipe title in ${lang}`,
+        },
+        description: {
+          type: 'string',
+          description: 'Brief description or notes (optional)',
+        },
+        ingredients: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['name', 'quantity', 'unit'],
+            properties: {
+              name: {
+                type: 'string',
+                description: `Ingredient name in ${lang}, lowercase`,
+              },
+              quantity: {
+                type: 'number',
+                description: 'Numeric quantity',
+              },
+              unit: {
+                type: 'string',
+                description: 'Unit: g, kg, ml, l, szt, lyzka, lyzeczka, or szklanka',
+              },
             },
           },
         },
       },
     },
-  },
-};
+  };
+}
 
 export async function importRecipeFromPhotos(
   photoUris: string[],
@@ -125,7 +129,7 @@ export async function importRecipeFromPhotos(
 
   imageContents.push({
     type: 'text',
-    text: 'Extract the recipe from the image(s) above. Use Polish for all text (title, description, ingredient names). Use only these units: g, kg, ml, l, szt, lyzka, lyzeczka, szklanka. Call the save_recipe tool with the extracted data.',
+    text: `Extract the recipe from the image(s) above. ${t('ai_language_instruction')} Use only these units: g, kg, ml, l, szt, lyzka, lyzeczka, szklanka. Call the save_recipe tool with the extracted data.`,
   });
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -138,7 +142,7 @@ export async function importRecipeFromPhotos(
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
-      tools: [SAVE_RECIPE_TOOL],
+      tools: [buildSaveRecipeTool()],
       tool_choice: { type: 'tool', name: 'save_recipe' },
       messages: [
         {

@@ -7,6 +7,7 @@ import { useCategories } from '@/hooks/use-categories';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { generateId } from '@/utils/id-generator';
+import { t } from '@/i18n';
 
 const EMOJI_OPTIONS = ['🍳', '🥪', '🍲', '🍰', '🥗', '🍝', '🥘', '🍜', '🥞', '🍕', '🥙', '🍱', '🫕', '🥣', '🍛', '📋'];
 
@@ -31,7 +32,7 @@ export default function ManageCategoryScreen() {
   const handleSave = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert('Blad', 'Nazwa kategorii jest wymagana');
+      Alert.alert(t('shopping_list_qty_error_title'), t('category_name_required'));
       return;
     }
 
@@ -57,12 +58,12 @@ export default function ManageCategoryScreen() {
   const handleDelete = () => {
     if (!existingCategory) return;
     Alert.alert(
-      'Usun kategorie',
-      `Czy na pewno chcesz usunac "${existingCategory.name}"? Przepisy z tej kategorii zostana przeniesione do "Inne".`,
+      t('category_delete_title'),
+      t('category_delete_message', { name: existingCategory.name }),
       [
-        { text: 'Anuluj', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Usun',
+          text: t('delete'),
           style: 'destructive',
           onPress: () => {
             deleteCategory(existingCategory.id);
@@ -78,7 +79,7 @@ export default function ManageCategoryScreen() {
       <AmbientBackground variant="categories" />
       <Stack.Screen
         options={{
-          title: isEditing ? 'Edytuj kategorie' : 'Nowa kategoria',
+          title: isEditing ? t('category_edit_title') : t('category_new_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
@@ -90,7 +91,7 @@ export default function ManageCategoryScreen() {
               ]}
               onPress={handleSave}
             >
-              <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>Zapisz</Text>
+              <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('category_save')}</Text>
             </Pressable>
           ),
         }}
@@ -106,19 +107,19 @@ export default function ManageCategoryScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.text }]}>Nazwa</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('category_name_label')}</Text>
             <TextInput
               style={[styles.input, { color: colors.text, borderColor: colors.borderSubtle, backgroundColor: colors.surfaceElevated }]}
               value={name}
               onChangeText={setName}
-              placeholder="np. Śniadania"
+              placeholder={t('category_name_placeholder')}
               placeholderTextColor={colors.textSecondary}
               autoFocus={!isEditing}
             />
           </View>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.text }]}>Ikona</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('category_icon_label')}</Text>
             <View style={styles.emojiGrid}>
               {EMOJI_OPTIONS.map((e) => (
                 <Pressable
@@ -140,7 +141,7 @@ export default function ManageCategoryScreen() {
 
           {isEditing && (
             <Pressable style={styles.deleteButton} onPress={handleDelete}>
-              <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>Usun kategorie</Text>
+              <Text style={[styles.deleteButtonText, { color: colors.destructive }]}>{t('category_delete_button')}</Text>
             </Pressable>
           )}
         </ScrollView>

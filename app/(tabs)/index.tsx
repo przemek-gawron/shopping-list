@@ -12,6 +12,7 @@ import { GradientHeader } from '@/components/ui/gradient-header';
 import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function CategoriesScreen() {
   const router = useRouter();
@@ -50,14 +51,14 @@ export default function CategoriesScreen() {
     <LinearGradient colors={screenGradient} style={{ flex: 1 }}>
       <AmbientBackground variant="categories" />
       <View style={styles.container}>
-        <GradientHeader title="Kategorie" onAdd={() => router.push('/category/manage')} />
+        <GradientHeader title={t('categories_header')} onAdd={() => router.push('/category/manage')} />
 
         {categories.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>📂</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Brak kategorii</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('categories_empty_title')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              Dodaj pierwsza kategorie, aby zaczac organizowac przepisy
+              {t('categories_empty_subtitle')}
             </Text>
           </View>
         ) : (

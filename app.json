@@ -51,7 +51,8 @@
           "photosPermission": "Wybierz zdjęcie przepisu z biblioteki.",
           "cameraPermission": "Zrób zdjęcie przepisu."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

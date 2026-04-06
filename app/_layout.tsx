@@ -14,6 +14,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { t } from '@/i18n';
 import { AppProvider } from '@/context/app-context';
 import { ShoppingListProvider } from '@/context/shopping-list-context';
 import { Colors } from '@/constants/theme';
@@ -75,7 +76,7 @@ export default function RootLayout() {
               <Stack.Screen name="product/[id]" options={{ presentation: 'modal' }} />
               <Stack.Screen name="recipe/new" options={{ presentation: 'modal' }} />
               <Stack.Screen name="recipe/[id]" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="shopping-list" options={{ headerBackTitle: 'Kategorie' }} />
+              <Stack.Screen name="shopping-list" options={{ headerBackTitle: t('back_to_categories') }} />
               <Stack.Screen name="recipe/import-photo" options={{ presentation: 'modal' }} />
               <Stack.Screen name="category/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="category/manage" />

@@ -25,6 +25,7 @@ import { useRecipes } from '@/hooks/use-recipes';
 import { generateId } from '@/utils/id-generator';
 import { Recipe, Ingredient, Product } from '@/types';
 import { UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
+import { t } from '@/i18n';
 
 type Step = 'pick' | 'processing' | 'review';
 
@@ -75,7 +76,7 @@ export default function ImportPhotoScreen() {
     console.log('[ImportPhoto] API_KEY present:', !!API_KEY, 'length:', API_KEY.length);
 
     if (!API_KEY) {
-      Alert.alert('Brak klucza API', 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.');
+      Alert.alert(t('recipe_import_api_key_title'), t('recipe_import_api_key_message'));
       return;
     }
 
@@ -121,12 +122,12 @@ export default function ImportPhotoScreen() {
     } catch (error) {
       console.error('[ImportPhoto] error:', error);
       if (error instanceof ApiKeyError) {
-        Alert.alert('Nieprawidłowy klucz API', 'Sprawdź wartość EXPO_PUBLIC_ANTHROPIC_API_KEY.');
+        Alert.alert(t('recipe_import_invalid_key_title'), t('recipe_import_invalid_key_message'));
       } else if (error instanceof ParseError) {
-        Alert.alert('Nie rozpoznano przepisu', 'Nie udało się rozpoznać przepisu na zdjęciu. Spróbuj z innym zdjęciem.');
+        Alert.alert(t('recipe_import_not_recognized_title'), t('recipe_import_not_recognized_message'));
       } else {
         const msg = error instanceof Error ? error.message : String(error);
-        Alert.alert('Błąd importu', msg);
+        Alert.alert(t('recipe_import_error_title'), msg);
       }
       setStep('pick');
     }
@@ -142,7 +143,7 @@ export default function ImportPhotoScreen() {
       <AmbientBackground variant="recipes" />
       <Stack.Screen
         options={{
-          title: step === 'review' ? 'Sprawdź przepis' : 'Importuj ze zdjęcia',
+          title: step === 'review' ? t('recipe_import_review_title') : t('recipe_import_pick_title'),
           headerStyle: { backgroundColor: colors.headerChrome },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
@@ -157,7 +158,7 @@ export default function ImportPhotoScreen() {
                     ]}
                     onPress={() => formRef.current?.submit()}
                   >
-                    <Text style={[styles.headerSaveText, { color: colors.onPrimary }]}>Zapisz</Text>
+                    <Text style={[styles.headerSaveText, { color: colors.onPrimary }]}>{t('recipe_save')}</Text>
                   </Pressable>
                 )
               : undefined,
@@ -185,7 +186,7 @@ export default function ImportPhotoScreen() {
               disabled={photos.length === 0}
             >
               <Text style={[styles.analyzeButtonText, { color: photos.length > 0 ? '#fff' : colors.textSecondary }]}>
-                Analizuj zdjęcia
+                {t('recipe_import_analyze')}
               </Text>
             </Pressable>
           </View>
@@ -195,9 +196,9 @@ export default function ImportPhotoScreen() {
       {step === 'processing' && (
         <View style={[styles.container, styles.centered]}>
           <ActivityIndicator size="large" color={colors.tint} />
-          <Text style={[styles.processingText, { color: colors.text }]}>Analizuję zdjęcia...</Text>
+          <Text style={[styles.processingText, { color: colors.text }]}>{t('recipe_import_processing')}</Text>
           <Text style={[styles.processingSubtext, { color: colors.textSecondary }]}>
-            To może potrwać kilka sekund
+            {t('recipe_import_processing_sub')}
           </Text>
         </View>
       )}

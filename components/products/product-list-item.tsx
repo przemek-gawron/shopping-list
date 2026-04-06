@@ -7,6 +7,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TileDecoration } from '@/components/ui/tile-decoration';
+import { t } from '@/i18n';
+import { getUnitLabel } from '@/constants/units';
 
 interface ProductListItemProps {
   product: Product;
@@ -23,16 +25,16 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
   };
 
   const handleDelete = () => {
-    Alert.alert('Usun produkt', `Czy na pewno chcesz usunac "${product.name}"?`, [
-      { text: 'Anuluj', style: 'cancel' },
-      { text: 'Usun', style: 'destructive', onPress: onDelete },
+    Alert.alert(t('product_form_delete_title'), t('product_form_delete_message', { name: product.name }), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('delete'), style: 'destructive', onPress: onDelete },
     ]);
   };
 
   const renderRightActions = () => (
     <Pressable style={[styles.deleteAction, { backgroundColor: colors.destructive }]} onPress={handleDelete}>
       <IconSymbol name="trash.fill" size={20} color={colors.onPrimary} />
-      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>Usun</Text>
+      <Text style={[styles.deleteText, { color: colors.onPrimary }]}>{t('swipe_delete')}</Text>
     </Pressable>
   );
 
@@ -66,7 +68,7 @@ export function ProductListItem({ product, onDelete }: ProductListItemProps) {
           )}
         </View>
         <View style={[styles.unitBadge, { backgroundColor: colors.tint }]}>
-          <Text style={[styles.unit, { color: colors.onPrimary }]}>{product.defaultUnit}</Text>
+          <Text style={[styles.unit, { color: colors.onPrimary }]}>{getUnitLabel(product.defaultUnit)}</Text>
         </View>
       </Pressable>
     </Swipeable>

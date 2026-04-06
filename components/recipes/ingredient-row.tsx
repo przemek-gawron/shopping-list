@@ -4,11 +4,12 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ingredient } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { UNIT_OPTIONS, UNIT_DEFINITIONS } from '@/constants/units';
+import { UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 import { useProducts } from '@/hooks/use-products';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { generateId } from '@/utils/id-generator';
+import { t } from '@/i18n';
 
 interface IngredientRowProps {
   ingredient: Ingredient & { productName: string };
@@ -71,9 +72,9 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
                 onChangeText={(text) => onChange({ ...ingredient, productName: text, productId: '' })}
                 onSelect={handleProductSelect}
                 items={productItems}
-                placeholder="Produkt"
+                placeholder={t('ingredient_product_placeholder')}
                 onCreateNew={handleCreateNewProduct}
-                createNewLabel="Dodaj"
+                createNewLabel={t('ingredient_add_new')}
               />
             </View>
 
@@ -97,7 +98,7 @@ export function IngredientRow({ ingredient, onChange, onRemove }: IngredientRowP
                 onChange({ ...ingredient, unit: UNIT_OPTIONS[nextIndex].value });
               }}
             >
-              <Text style={[styles.unitText, { color: colors.tint }]}>{UNIT_DEFINITIONS[ingredient.unit].displayName}</Text>
+              <Text style={[styles.unitText, { color: colors.tint }]}>{getUnitLabel(ingredient.unit)}</Text>
             </Pressable>
           </View>
         </View>

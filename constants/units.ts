@@ -1,4 +1,5 @@
 import { Unit } from '@/types';
+import { t } from '@/i18n';
 
 export type UnitCategory = 'weight' | 'volume' | 'count' | 'spoon';
 
@@ -20,8 +21,13 @@ export const UNIT_DEFINITIONS: Record<Unit, UnitDefinition> = {
   szklanka: { category: 'volume', baseUnit: 'ml', toBase: 250, displayName: '🥛' },
 };
 
+export function getUnitLabel(unit: Unit): string {
+  if (unit === 'lyzka') return t('unit_lyzka');
+  return UNIT_DEFINITIONS[unit].displayName;
+}
+
 export const UNIT_OPTIONS: { value: Unit; label: string }[] = Object.entries(UNIT_DEFINITIONS).map(
-  ([value, def]) => ({ value: value as Unit, label: def.displayName })
+  ([value]) => ({ value: value as Unit, label: getUnitLabel(value as Unit) })
 );
 
 export function convertToBase(quantity: number, unit: Unit): { value: number; baseUnit: Unit } {
