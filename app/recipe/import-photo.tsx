@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,11 +16,8 @@ import { Colors } from '@/constants/theme';
 import { AmbientBackground } from '@/components/ui/ambient-background';
 import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { ImportPhotoPicker } from '@/components/recipes/import-photo-picker';
-import {
-  importRecipeFromPhotos,
-  ApiKeyError,
-  ParseError,
-} from '@/services/claude-recipe-importer';
+import { importRecipeFromPhotos, ParseError } from '@/services/claude-recipe-importer';
+import { isBackendConfigured } from '@/services/backend-client';
 import { useProducts } from '@/hooks/use-products';
 import { useRecipes } from '@/hooks/use-recipes';
 import { generateId } from '@/utils/id-generator';
@@ -28,8 +26,6 @@ import { UNCATEGORIZED_CATEGORY_ID } from '@/constants/categories';
 import { t } from '@/i18n';
 
 type Step = 'pick' | 'processing' | 'review';
-
-const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
 export default function ImportPhotoScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
@@ -45,26 +41,54 @@ export default function ImportPhotoScreen() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [prefilledRecipe, setPrefilledRecipe] = useState<Recipe | null>(null);
 
+  const showPermissionAlert = useCallback(
+    (title: string, message: string) => {
+      Alert.alert(title, message, [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('photo_permission_open_settings'), onPress: () => void Linking.openSettings() },
+      ]);
+    },
+    []
+  );
+
   const handleAddFromCamera = useCallback(async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      quality: 0.9,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setPhotos((prev) => [...prev, result.assets[0].uri]);
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== ImagePicker.PermissionStatus.GRANTED) {
+        showPermissionAlert(t('photo_permission_camera_title'), t('photo_permission_camera_message'));
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.9,
+      });
+      if (!result.canceled && result.assets[0]) {
+        setPhotos((prev) => [...prev, result.assets[0].uri]);
+      }
+    } catch {
+      showPermissionAlert(t('photo_permission_camera_title'), t('photo_permission_camera_message'));
     }
-  }, []);
+  }, [showPermissionAlert]);
 
   const handleAddFromLibrary = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      quality: 0.9,
-    });
-    if (!result.canceled) {
-      setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== ImagePicker.PermissionStatus.GRANTED) {
+        showPermissionAlert(t('photo_permission_library_title'), t('photo_permission_library_message'));
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: true,
+        quality: 0.9,
+      });
+      if (!result.canceled) {
+        setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+      }
+    } catch {
+      showPermissionAlert(t('photo_permission_library_title'), t('photo_permission_library_message'));
     }
-  }, []);
+  }, [showPermissionAlert]);
 
   const handleRemovePhoto = useCallback((index: number) => {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
@@ -73,17 +97,15 @@ export default function ImportPhotoScreen() {
   const handleAnalyze = async () => {
     if (photos.length === 0) return;
 
-    console.log('[ImportPhoto] API_KEY present:', !!API_KEY, 'length:', API_KEY.length);
-
-    if (!API_KEY) {
-      Alert.alert(t('recipe_import_api_key_title'), t('recipe_import_api_key_message'));
+    if (!isBackendConfigured()) {
+      Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
     }
 
     setStep('processing');
 
     try {
-      const parsed = await importRecipeFromPhotos(photos, API_KEY);
+      const parsed = await importRecipeFromPhotos(photos);
 
       const resolvedIngredients: Ingredient[] = [];
       const newProducts: Product[] = [];
@@ -121,9 +143,7 @@ export default function ImportPhotoScreen() {
       setStep('review');
     } catch (error) {
       console.error('[ImportPhoto] error:', error);
-      if (error instanceof ApiKeyError) {
-        Alert.alert(t('recipe_import_invalid_key_title'), t('recipe_import_invalid_key_message'));
-      } else if (error instanceof ParseError) {
+      if (error instanceof ParseError) {
         Alert.alert(t('recipe_import_not_recognized_title'), t('recipe_import_not_recognized_message'));
       } else {
         const msg = error instanceof Error ? error.message : String(error);

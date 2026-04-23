@@ -55,8 +55,9 @@ export default {
   shopping_list_clear_title: 'Wyczyść selekcję',
   shopping_list_clear_message: 'Czy na pewno chcesz wyczyścić wszystkie wybrane przepisy?',
   shopping_list_clear_confirm: 'Wyczyść',
-  shopping_list_api_key_title: 'Brak klucza API',
-  shopping_list_api_key_message: 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.',
+  backend_not_configured_title: 'Brak backendu',
+  backend_not_configured_message:
+    'Ustaw EXPO_PUBLIC_BACKEND_URL w pliku .env (np. http://localhost:3000 lub IP komputera w sieci) i uruchom serwer: cd backend && npm run dev. Klucz Anthropic trzymaj tylko w backend/.env jako ANTHROPIC_API_KEY.',
   shopping_list_group_error_title: 'Błąd grupowania',
   shopping_list_add_title: 'Dodaj produkt',
   shopping_list_name_label: 'NAZWA',
@@ -85,10 +86,6 @@ export default {
   recipe_import_analyze: 'Analizuj zdjęcia',
   recipe_import_processing: 'Analizuję zdjęcia...',
   recipe_import_processing_sub: 'To może potrwać kilka sekund',
-  recipe_import_api_key_title: 'Brak klucza API',
-  recipe_import_api_key_message: 'Skonfiguruj klucz EXPO_PUBLIC_ANTHROPIC_API_KEY.',
-  recipe_import_invalid_key_title: 'Nieprawidłowy klucz API',
-  recipe_import_invalid_key_message: 'Sprawdź wartość EXPO_PUBLIC_ANTHROPIC_API_KEY.',
   recipe_import_not_recognized_title: 'Nie rozpoznano przepisu',
   recipe_import_not_recognized_message: 'Nie udało się rozpoznać przepisu na zdjęciu. Spróbuj z innym zdjęciem.',
   recipe_import_error_title: 'Błąd importu',
@@ -97,6 +94,13 @@ export default {
   photo_camera: 'Aparat',
   photo_library: 'Biblioteka',
   photo_hint: 'Dodaj jedno lub więcej zdjęć przepisu',
+  photo_permission_camera_title: 'Brak dostępu do aparatu',
+  photo_permission_camera_message:
+    'Aplikacja potrzebuje dostępu do aparatu, aby zrobić zdjęcie przepisu. Zezwól w ustawieniach systemu.',
+  photo_permission_library_title: 'Brak dostępu do zdjęć',
+  photo_permission_library_message:
+    'Aplikacja potrzebuje dostępu do biblioteki zdjęć, aby wybrać zdjęcie przepisu. Zezwól w ustawieniach systemu.',
+  photo_permission_open_settings: 'Ustawienia',
 
   // Recipe form component
   recipe_form_title_label: 'Tytuł',

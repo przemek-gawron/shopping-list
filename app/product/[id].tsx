@@ -18,7 +18,8 @@ export default function EditProductScreen() {
   if (!product) {
     return (
       <>
-        <Stack.Screen options={{ title: t('product_screen_title') }} />
+        <Stack.Screen
+         options={{ title: t('product_screen_title') }} />
         <View style={[styles.container, { backgroundColor: colors.background }]}>
           <Text style={[styles.errorText, { color: colors.text }]}>
             {t('product_not_found')}

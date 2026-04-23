@@ -1,43 +1,9 @@
 import { ShoppingListItem } from '@/types';
 import { t } from '@/i18n';
-import { ApiKeyError, ApiError } from './claude-recipe-importer';
+import { ApiKeyError, ApiError } from '@/services/ai-errors';
+import { backendPost } from '@/services/backend-client';
 
 export { ApiKeyError, ApiError };
-
-function buildGroupItemsTool() {
-  return {
-    name: 'group_shopping_items',
-    description: 'Group shopping list items into logical food categories',
-    input_schema: {
-      type: 'object' as const,
-      required: ['groups'],
-      properties: {
-        groups: {
-          type: 'array',
-          items: {
-            type: 'object',
-            required: ['name', 'emoji', 'items'],
-            properties: {
-              name: {
-                type: 'string',
-                description: t('ai_grouper_category_description'),
-              },
-              emoji: {
-                type: 'string',
-                description: 'A single emoji representing the category',
-              },
-              items: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Product names that belong to this category (exact names from input)',
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-}
 
 export interface ProductGroup {
   name: string;
@@ -45,42 +11,18 @@ export interface ProductGroup {
   items: string[];
 }
 
-export async function groupShoppingItems(
-  productNames: string[],
-  apiKey: string
-): Promise<ProductGroup[]> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      tools: [buildGroupItemsTool()],
-      tool_choice: { type: 'tool', name: 'group_shopping_items' },
-      messages: [
-        {
-          role: 'user',
-          content: t('ai_grouper_instruction', { items: productNames.join('\n') }),
-        },
-      ],
-    }),
+export async function groupShoppingItems(productNames: string[]): Promise<ProductGroup[]> {
+  const { groups } = await backendPost<{ groups: ProductGroup[] }>('/api/shopping-list/group', {
+    productNames,
+    categoryDescription: t('ai_grouper_category_description'),
+    instruction: t('ai_grouper_instruction', { items: productNames.join('\n') }),
   });
 
-  if (response.status === 401) throw new ApiKeyError();
-  if (!response.ok) throw new ApiError(response.status, `API error: ${response.status}`);
-
-  const data = await response.json();
-  const toolUse = data.content?.find((c: { type: string }) => c.type === 'tool_use');
-
-  if (!toolUse?.input?.groups) {
+  if (!Array.isArray(groups)) {
     throw new Error('Claude did not return groups');
   }
 
-  return toolUse.input.groups as ProductGroup[];
+  return groups;
 }
 
 export function applyGroupsToItems(

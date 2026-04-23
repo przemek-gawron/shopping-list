@@ -61,8 +61,9 @@ const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | '
   shopping_list_clear_title: 'Clear selection',
   shopping_list_clear_message: 'Are you sure you want to clear all selected recipes?',
   shopping_list_clear_confirm: 'Clear',
-  shopping_list_api_key_title: 'No API key',
-  shopping_list_api_key_message: 'Configure the EXPO_PUBLIC_ANTHROPIC_API_KEY key.',
+  backend_not_configured_title: 'Backend not configured',
+  backend_not_configured_message:
+    'Set EXPO_PUBLIC_BACKEND_URL in .env (e.g. http://localhost:3000 or your computer LAN IP) and run the server: cd backend && npm run dev. Keep the Anthropic API key only in backend/.env as ANTHROPIC_API_KEY.',
   shopping_list_group_error_title: 'Grouping error',
   shopping_list_add_title: 'Add product',
   shopping_list_name_label: 'NAME',
@@ -91,10 +92,6 @@ const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | '
   recipe_import_analyze: 'Analyze photos',
   recipe_import_processing: 'Analyzing photos...',
   recipe_import_processing_sub: 'This may take a few seconds',
-  recipe_import_api_key_title: 'No API key',
-  recipe_import_api_key_message: 'Configure the EXPO_PUBLIC_ANTHROPIC_API_KEY key.',
-  recipe_import_invalid_key_title: 'Invalid API key',
-  recipe_import_invalid_key_message: 'Check the value of EXPO_PUBLIC_ANTHROPIC_API_KEY.',
   recipe_import_not_recognized_title: 'Recipe not recognized',
   recipe_import_not_recognized_message: 'Failed to recognize recipe in the photo. Try a different photo.',
   recipe_import_error_title: 'Import error',
@@ -103,6 +100,13 @@ const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | '
   photo_camera: 'Camera',
   photo_library: 'Library',
   photo_hint: 'Add one or more recipe photos',
+  photo_permission_camera_title: 'Camera access needed',
+  photo_permission_camera_message:
+    'Allow camera access to take a photo of your recipe. You can enable it in system settings.',
+  photo_permission_library_title: 'Photo library access needed',
+  photo_permission_library_message:
+    'Allow photo library access to pick recipe images. You can enable it in system settings.',
+  photo_permission_open_settings: 'Settings',
 
   // Recipe form component
   recipe_form_title_label: 'Title',

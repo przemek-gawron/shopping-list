@@ -19,9 +19,9 @@ import {
   importMealPlanFromPdf,
   getCategoryIdForMealType,
   ParsedMealPlanRecipe,
-  ApiKeyError,
   ParseError,
 } from '@/services/claude-meal-plan-importer';
+import { isBackendConfigured } from '@/services/backend-client';
 import { useProducts } from '@/hooks/use-products';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useCategories } from '@/hooks/use-categories';
@@ -30,8 +30,6 @@ import { Recipe, Ingredient, Product } from '@/types';
 import { t } from '@/i18n';
 
 type Step = 'pick' | 'processing' | 'review';
-
-const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
 export default function ImportMealPlanScreen() {
   const router = useRouter();
@@ -62,22 +60,20 @@ export default function ImportMealPlanScreen() {
     const asset = result.assets[0];
     setPdfName(asset.name ?? 'plan.pdf');
 
-    if (!API_KEY) {
-      Alert.alert(t('recipe_import_api_key_title'), t('recipe_import_api_key_message'));
+    if (!isBackendConfigured()) {
+      Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
     }
 
     setStep('processing');
 
     try {
-      const recipes = await importMealPlanFromPdf(asset.uri, API_KEY);
+      const recipes = await importMealPlanFromPdf(asset.uri);
       setParsedRecipes(recipes);
       setStep('review');
     } catch (error) {
       console.error('[ImportMealPlan] error:', error);
-      if (error instanceof ApiKeyError) {
-        Alert.alert(t('recipe_import_invalid_key_title'), t('recipe_import_invalid_key_message'));
-      } else if (error instanceof ParseError) {
+      if (error instanceof ParseError) {
         Alert.alert(t('meal_plan_import_not_recognized_title'), t('meal_plan_import_not_recognized_message'));
       } else {
         const msg = error instanceof Error ? error.message : String(error);

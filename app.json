@@ -17,7 +17,9 @@
         "backgroundColor": "#1B4332"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby zaimportować przepis ze zdjęcia.",
+        "NSCameraUsageDescription": "Aplikacja potrzebuje aparatu, aby zrobić zdjęcie przepisu."
       }
     },
     "android": {

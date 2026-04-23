@@ -2,6 +2,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Unit } from '@/types';
 import { t } from '@/i18n';
+import { backendPost } from '@/services/backend-client';
+import { ApiKeyError, ApiError, ParseError } from '@/services/ai-errors';
 
 export interface ParsedRecipe {
   title: string;
@@ -13,26 +15,7 @@ export interface ParsedRecipe {
   }>;
 }
 
-export class ApiKeyError extends Error {
-  constructor() {
-    super('Invalid API key');
-    this.name = 'ApiKeyError';
-  }
-}
-
-export class ApiError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
-
-export class ParseError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ParseError';
-  }
-}
+export { ApiKeyError, ApiError, ParseError };
 
 const UNIT_MAP: Record<string, Unit> = {
   g: 'g', gram: 'g', gramy: 'g', gramów: 'g', grams: 'g',
@@ -65,110 +48,27 @@ async function encodeImageToBase64(uri: string): Promise<string> {
   });
 }
 
-function buildSaveRecipeTool() {
-  const lang = t('ai_language_name');
-  return {
-    name: 'save_recipe',
-    description: 'Save the extracted recipe data',
-    input_schema: {
-      type: 'object' as const,
-      required: ['title', 'ingredients'],
-      properties: {
-        title: {
-          type: 'string',
-          description: `Recipe title in ${lang}`,
-        },
-        description: {
-          type: 'string',
-          description: 'Brief description or notes (optional)',
-        },
-        ingredients: {
-          type: 'array',
-          items: {
-            type: 'object',
-            required: ['name', 'quantity', 'unit'],
-            properties: {
-              name: {
-                type: 'string',
-                description: `Ingredient name in ${lang}, lowercase`,
-              },
-              quantity: {
-                type: 'number',
-                description: 'Numeric quantity',
-              },
-              unit: {
-                type: 'string',
-                description: 'Unit: g, kg, ml, l, szt, lyzka, lyzeczka, or szklanka',
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-}
-
-export async function importRecipeFromPhotos(
-  photoUris: string[],
-  apiKey: string
-): Promise<ParsedRecipe> {
-  const imageContents: object[] = [];
+export async function importRecipeFromPhotos(photoUris: string[]): Promise<ParsedRecipe> {
+  const images: Array<{ mediaType: 'image/jpeg'; data: string }> = [];
 
   for (const uri of photoUris) {
     const resizedUri = await resizeImage(uri);
     const base64 = await encodeImageToBase64(resizedUri);
-    imageContents.push({
-      type: 'image',
-      source: {
-        type: 'base64',
-        media_type: 'image/jpeg',
-        data: base64,
-      },
+    images.push({
+      mediaType: 'image/jpeg',
+      data: base64,
     });
   }
 
-  imageContents.push({
-    type: 'text',
-    text: `Extract the recipe from the image(s) above. ${t('ai_language_instruction')} Use only these units: g, kg, ml, l, szt, lyzka, lyzeczka, szklanka. Call the save_recipe tool with the extracted data.`,
+  const input = await backendPost<{
+    title: string;
+    description?: string;
+    ingredients: Array<{ name: string; quantity: number; unit: string }>;
+  }>('/api/recipes/import-from-photos', {
+    images,
+    languageName: t('ai_language_name'),
+    languageInstruction: t('ai_language_instruction'),
   });
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      tools: [buildSaveRecipeTool()],
-      tool_choice: { type: 'tool', name: 'save_recipe' },
-      messages: [
-        {
-          role: 'user',
-          content: imageContents,
-        },
-      ],
-    }),
-  });
-
-  if (response.status === 401) {
-    throw new ApiKeyError();
-  }
-
-  if (!response.ok) {
-    throw new ApiError(response.status, `API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const toolUse = data.content?.find((c: { type: string }) => c.type === 'tool_use');
-
-  if (!toolUse || !toolUse.input) {
-    throw new ParseError('Claude did not return a recipe');
-  }
-
-  const input = toolUse.input;
 
   if (!Array.isArray(input.ingredients) || input.ingredients.length === 0) {
     throw new ParseError('No ingredients found in the recipe');
@@ -177,7 +77,7 @@ export async function importRecipeFromPhotos(
   return {
     title: input.title ?? 'Przepis',
     description: input.description,
-    ingredients: input.ingredients.map((ing: { name: string; quantity: number; unit: string }) => ({
+    ingredients: input.ingredients.map((ing) => ({
       name: String(ing.name).toLowerCase(),
       quantity: Number(ing.quantity) || 1,
       unit: normalizeUnit(String(ing.unit)),

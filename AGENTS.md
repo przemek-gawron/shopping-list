@@ -8,8 +8,8 @@ It manages products, recipes, recipe serving counts, and a generated shopping li
 - State: React Context + reducer
 - Persistence: AsyncStorage with `shopping-list:*` keys
 - Primary UI language: Polish
-- Backend: none
-- External API: Anthropic is used only for photo-based recipe import
+- Backend: Node.js + Express proxy in `backend/` (Anthropic API key only on the server)
+- External API: Anthropic is used for photo recipe import, PDF meal-plan import, and shopping-list grouping — always via the backend proxy
 ## Rules Sources
 - Root guidance file: `AGENTS.md`
 - Cursor rules: none found in `.cursor/rules/`
@@ -156,6 +156,7 @@ After non-trivial code changes, run:
 ```bash
 npm run lint
 npx tsc --noEmit
+cd backend && npm run lint && npx tsc --noEmit
 ```
 If you cannot run one of them, say so explicitly.
 ## Current Gaps
@@ -163,3 +164,12 @@ If you cannot run one of them, say so explicitly.
 - No single-test command exists yet
 - No dedicated production build script exists yet
 Do not invent commands that are not present in the repo. If you add new tooling, update this file to document the exact commands.
+
+### Backend (AI proxy)
+
+```bash
+cd backend && npm install
+cd backend && npm run dev
+```
+
+See [backend/README.md](backend/README.md) for environment variables and API routes.

@@ -21,6 +21,7 @@ import { useProducts } from '@/hooks/use-products';
 import { useShoppingListContext } from '@/context/shopping-list-context';
 import { generateShoppingList, formatShoppingListForClipboard } from '@/services/shopping-list-generator';
 import { groupShoppingItems, applyGroupsToItems } from '@/services/shopping-list-grouper';
+import { isBackendConfigured } from '@/services/backend-client';
 import { ShoppingListItem as ShoppingListItemComponent } from '@/components/shopping-list/shopping-list-item';
 import { ShoppingListItem, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -58,8 +59,6 @@ export default function ShoppingListScreen() {
   const [isGrouped, setIsGrouped] = useState(false);
   const [isGrouping, setIsGrouping] = useState(false);
   const [groupSections, setGroupSections] = useState<{ name: string; emoji: string; data: ShoppingListItem[] }[]>([]);
-
-  const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 
   const items = useMemo<ShoppingListItem[]>(() => {
     const apply = (item: ShoppingListItem): ShoppingListItem => ({
@@ -166,8 +165,8 @@ export default function ShoppingListScreen() {
       return;
     }
 
-    if (!API_KEY) {
-      Alert.alert(t('shopping_list_api_key_title'), t('shopping_list_api_key_message'));
+    if (!isBackendConfigured()) {
+      Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
     }
 
@@ -176,7 +175,7 @@ export default function ShoppingListScreen() {
     setIsGrouping(true);
     try {
       const productNames = items.map((i) => i.productName);
-      const groups = await groupShoppingItems(productNames, API_KEY);
+      const groups = await groupShoppingItems(productNames);
       const sections = applyGroupsToItems(groups, items);
       setGroupSections(sections);
       setIsGrouped(true);
@@ -186,7 +185,7 @@ export default function ShoppingListScreen() {
     } finally {
       setIsGrouping(false);
     }
-  }, [isGrouped, items, API_KEY]);
+  }, [isGrouped, items]);
 
   useEffect(() => {
     const timeouts = toggleTimeoutsRef.current;
