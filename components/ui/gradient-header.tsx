@@ -38,7 +38,15 @@ export function GradientHeader({ title, onAdd, rightElement, children }: Gradien
       />
 
       <View style={styles.titleRow}>
-        <Text style={[styles.title, { color: colors.onPrimary }]}>{title}</Text>
+        <View style={styles.titleContainer}>
+          <Text
+            style={[styles.title, { color: colors.onPrimary }]}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </Text>
+        </View>
         <View style={styles.actions}>
           {rightElement}
           {onAdd && (
@@ -67,9 +75,13 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
     marginBottom: 4,
+  },
+  titleContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   title: {
     fontSize: 32,
@@ -79,6 +91,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 0,
     gap: 8,
   },
   addButton: {
