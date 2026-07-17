@@ -21,3 +21,13 @@ export class ParseError extends Error {
     this.name = 'ParseError';
   }
 }
+
+/** Thrown when the user must be signed in to use AI (guest or no token). */
+export class UnauthenticatedError extends Error {
+  constructor(
+    public readonly reason: 'guest' | 'no_token'
+  ) {
+    super(reason === 'guest' ? 'Sign in to use this feature' : 'Not signed in');
+    this.name = 'UnauthenticatedError';
+  }
+}

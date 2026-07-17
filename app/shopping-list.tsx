@@ -13,7 +13,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { useAppContext } from '@/context/app-context';
 import { useSelections } from '@/hooks/use-selections';
@@ -31,11 +31,15 @@ import { AmbientBackground } from '@/components/ui/ambient-background';
 import { UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
+import { useAuth } from '@/context/auth-context';
+import { UnauthenticatedError } from '@/services/ai-errors';
 import { t } from '@/i18n';
 
 export default function ShoppingListScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { isGuest } = useAuth();
+  const router = useRouter();
   const { recipes, products } = useAppContext();
   const { selections, clearSelections } = useSelections();
   const { products: allProducts } = useProducts();
@@ -165,6 +169,14 @@ export default function ShoppingListScreen() {
       return;
     }
 
+    if (isGuest) {
+      Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+      ]);
+      return;
+    }
+
     if (!isBackendConfigured()) {
       Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
@@ -180,12 +192,19 @@ export default function ShoppingListScreen() {
       setGroupSections(sections);
       setIsGrouped(true);
     } catch (e) {
+      if (e instanceof UnauthenticatedError) {
+        Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+        ]);
+        return;
+      }
       const msg = e instanceof Error ? e.message : String(e);
       Alert.alert(t('shopping_list_group_error_title'), msg);
     } finally {
       setIsGrouping(false);
     }
-  }, [isGrouped, items]);
+  }, [isGrouped, isGuest, items, router]);
 
   useEffect(() => {
     const timeouts = toggleTimeoutsRef.current;
@@ -233,25 +252,27 @@ export default function ShoppingListScreen() {
           headerShadowVisible: false,
           headerRight: () => (
             <View style={styles.headerButtons}>
-              <Pressable
-                style={[
-                  styles.groupButton,
-                  { backgroundColor: isGrouped ? colors.tint : colors.overlayOnPrimarySubtle },
-                ]}
-                onPress={handleGroup}
-                disabled={isGrouping || items.length === 0}
-              >
-                {isGrouping ? (
-                  <ActivityIndicator size="small" color={colors.onPrimary} />
-                ) : (
-                  <IconSymbol name="sparkles" size={15} color={colors.onPrimary} />
-                )}
-                {!isGrouping && (
-                  <Text style={[styles.groupButtonText, { color: colors.onPrimary }]}>
-                    {isGrouped ? t('shopping_list_ungroup') : t('shopping_list_group')}
-                  </Text>
-                )}
-              </Pressable>
+              {!isGuest && (
+                <Pressable
+                  style={[
+                    styles.groupButton,
+                    { backgroundColor: isGrouped ? colors.tint : colors.overlayOnPrimarySubtle },
+                  ]}
+                  onPress={handleGroup}
+                  disabled={isGrouping || items.length === 0}
+                >
+                  {isGrouping ? (
+                    <ActivityIndicator size="small" color={colors.onPrimary} />
+                  ) : (
+                    <IconSymbol name="sparkles" size={15} color={colors.onPrimary} />
+                  )}
+                  {!isGrouping && (
+                    <Text style={[styles.groupButtonText, { color: colors.onPrimary }]}>
+                      {isGrouped ? t('shopping_list_ungroup') : t('shopping_list_group')}
+                    </Text>
+                  )}
+                </Pressable>
+              )}
               <Pressable
                 style={[styles.headerButton, { backgroundColor: colors.overlayOnPrimarySubtle }]}
                 onPress={handleCopy}

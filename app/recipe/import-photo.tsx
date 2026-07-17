@@ -18,6 +18,8 @@ import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { ImportPhotoPicker } from '@/components/recipes/import-photo-picker';
 import { importRecipeFromPhotos, ParseError } from '@/services/claude-recipe-importer';
 import { isBackendConfigured } from '@/services/backend-client';
+import { UnauthenticatedError } from '@/services/ai-errors';
+import { useAuth } from '@/context/auth-context';
 import { useProducts } from '@/hooks/use-products';
 import { useRecipes } from '@/hooks/use-recipes';
 import { generateId } from '@/utils/id-generator';
@@ -36,6 +38,7 @@ export default function ImportPhotoScreen() {
 
   const { findProductByName, addProduct } = useProducts();
   const { addRecipe } = useRecipes();
+  const { isGuest } = useAuth();
 
   const [step, setStep] = useState<Step>('pick');
   const [photos, setPhotos] = useState<string[]>([]);
@@ -97,6 +100,14 @@ export default function ImportPhotoScreen() {
   const handleAnalyze = async () => {
     if (photos.length === 0) return;
 
+    if (isGuest) {
+      Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+      ]);
+      return;
+    }
+
     if (!isBackendConfigured()) {
       Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
@@ -143,7 +154,12 @@ export default function ImportPhotoScreen() {
       setStep('review');
     } catch (error) {
       console.error('[ImportPhoto] error:', error);
-      if (error instanceof ParseError) {
+      if (error instanceof UnauthenticatedError) {
+        Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+        ]);
+      } else if (error instanceof ParseError) {
         Alert.alert(t('recipe_import_not_recognized_title'), t('recipe_import_not_recognized_message'));
       } else {
         const msg = error instanceof Error ? error.message : String(error);

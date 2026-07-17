@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "shopping-list",
-    "slug": "shopping-list",
+    "slug": "przemek-gawron",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.shoppinglist",
+      "bundleIdentifier": "com.przemekgawron.shoppinglist",
       "splash": {
         "image": "./assets/images/splash.png",
         "resizeMode": "contain",
@@ -29,7 +29,10 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.shoppinglist"
+      "package": "com.przemekgawron.shoppinglist",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -54,7 +57,8 @@
           "cameraPermission": "Zrób zdjęcie przepisu."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -63,14 +67,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bf923191-7bfd-40a9-b9ee-a71aea2dce4d"
+        "projectId": "37626a9d-50f5-49a3-a5ec-1e221fe66265"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/bf923191-7bfd-40a9-b9ee-a71aea2dce4d"
-    }
+      "url": "https://u.expo.dev/37626a9d-50f5-49a3-a5ec-1e221fe66265"
+    },
+    "owner": "przemek-gawron-devs-team"
   }
 }

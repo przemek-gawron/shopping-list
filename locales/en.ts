@@ -1,12 +1,20 @@
 import type pl from './pl';
 
+/**
+ * Widen `typeof pl` string literal values to `string` so English copy is valid, while
+ * keeping the same key set and nested shapes as Polish.
+ */
+type EnglishMessages = {
+  [K in keyof typeof pl]: (typeof pl)[K] extends string
+    ? string
+    : (typeof pl)[K] extends { one: string; few: string; many: string; other: string }
+      ? { one: string; other: string } | { one: string; few: string; many: string; other: string }
+      : (typeof pl)[K];
+};
+
 // TypeScript will flag missing keys if the shape diverges from the Polish source.
 // Plural objects may have fewer forms (English only needs one/other).
-const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | 'meal_plan_import_save_all'> & {
-  category_recipe_count: { one: string; other: string };
-  meal_plan_import_found: { one: string; other: string };
-  meal_plan_import_save_all: { one: string; other: string };
-} = {
+const en: EnglishMessages = {
   // Tabs
   tabs_categories: 'Categories',
   tabs_products: 'Products',
@@ -199,6 +207,38 @@ const en: Omit<typeof pl, 'category_recipe_count' | 'meal_plan_import_found' | '
   ai_language_instruction: 'Use English for all text (title, description, ingredient names).',
   ai_grouper_instruction: 'Group these shopping list items into logical food categories in English. Use categories like: Vegetables, Fruits, Dairy, Meat & Fish, Bread, Condiments & Sauces, Drinks, Other. Only use a category if it has at least one item. Include every item in exactly one group. Call the group_shopping_items tool.\n\nItems:\n{{items}}',
   ai_grouper_category_description: 'Category name in English, e.g. Vegetables, Fruits, Dairy',
+
+  // Auth
+  auth_login_title: 'Log in',
+  auth_register_title: 'Sign up',
+  auth_email: 'Email',
+  auth_password: 'Password',
+  auth_display_name: 'Display name',
+  auth_sign_in: 'Sign in',
+  auth_sign_up: 'Create account',
+  auth_no_account: "Don't have an account?",
+  auth_has_account: 'Already have an account?',
+  auth_go_register: 'Sign up',
+  auth_go_login: 'Log in',
+  auth_or: 'or',
+  auth_google: 'Continue with Google',
+  auth_apple: 'Continue with Apple',
+  auth_facebook: 'Continue with Facebook',
+  auth_continue_guest: 'Continue as guest',
+  auth_loading: 'Loading…',
+  auth_error_generic: 'Something went wrong. Please try again.',
+  auth_error_title: 'Error',
+  auth_validation_fields: 'Fill in all fields',
+  auth_validation_password_short: 'Password must be at least 8 characters',
+  auth_apple_unavailable: 'Sign in with Apple is not available on this device',
+  auth_placeholder_email: 'email@example.com',
+  auth_placeholder_name: 'John',
+  auth_placeholder_password: 'min. 8 characters',
+  auth_ai_requires_login: 'Sign in to your account to use AI features',
+  auth_ai_requires_login_title: 'Sign in required',
+  auth_sign_out: 'Sign out',
+  auth_signed_in_as: 'Signed in',
+  auth_guest: 'Guest (no AI)',
 };
 
 export default en;

@@ -9,6 +9,7 @@ import { useCategories } from '@/hooks/use-categories';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useSelections } from '@/hooks/use-selections';
 import { useAppContext } from '@/context/app-context';
+import { useAuth } from '@/context/auth-context';
 import { CategoryCard } from '@/components/categories/category-card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { GradientHeader } from '@/components/ui/gradient-header';
@@ -24,6 +25,7 @@ export default function CategoriesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
+  const { isGuest } = useAuth();
   const { categories, updateCategory, deleteCategory } = useCategories();
   const { recipes } = useRecipes();
   const { totalSelections, hasSelections } = useSelections();
@@ -132,7 +134,7 @@ export default function CategoriesScreen() {
           title={t('categories_header')}
           onAdd={editMode ? undefined : () => router.push('/category/manage')}
           rightElement={
-            editMode ? undefined : (
+            editMode || isGuest ? undefined : (
               <Pressable
                 style={({ pressed }) => [
                   styles.importPdfButton,

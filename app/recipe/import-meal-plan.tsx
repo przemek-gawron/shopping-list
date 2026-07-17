@@ -22,6 +22,8 @@ import {
   ParseError,
 } from '@/services/claude-meal-plan-importer';
 import { isBackendConfigured } from '@/services/backend-client';
+import { UnauthenticatedError } from '@/services/ai-errors';
+import { useAuth } from '@/context/auth-context';
 import { useProducts } from '@/hooks/use-products';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useCategories } from '@/hooks/use-categories';
@@ -33,6 +35,7 @@ type Step = 'pick' | 'processing' | 'review';
 
 export default function ImportMealPlanScreen() {
   const router = useRouter();
+  const { isGuest } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -60,6 +63,14 @@ export default function ImportMealPlanScreen() {
     const asset = result.assets[0];
     setPdfName(asset.name ?? 'plan.pdf');
 
+    if (isGuest) {
+      Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+      ]);
+      return;
+    }
+
     if (!isBackendConfigured()) {
       Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
       return;
@@ -73,7 +84,12 @@ export default function ImportMealPlanScreen() {
       setStep('review');
     } catch (error) {
       console.error('[ImportMealPlan] error:', error);
-      if (error instanceof ParseError) {
+      if (error instanceof UnauthenticatedError) {
+        Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
+        ]);
+      } else if (error instanceof ParseError) {
         Alert.alert(t('meal_plan_import_not_recognized_title'), t('meal_plan_import_not_recognized_message'));
       } else {
         const msg = error instanceof Error ? error.message : String(error);
@@ -81,7 +97,7 @@ export default function ImportMealPlanScreen() {
       }
       setStep('pick');
     }
-  }, []);
+  }, [isGuest, router]);
 
   const handleSaveAll = useCallback(() => {
     for (const parsed of parsedRecipes) {

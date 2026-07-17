@@ -1,8 +1,10 @@
+import './db';
 import express from 'express';
 import cors from 'cors';
 import { config } from './config';
-import { requireClientToken } from './middleware/auth';
+import { requireAuth } from './middleware/auth';
 import { errorHandler } from './middleware/error-handler';
+import { authPublicRouter, meHandler } from './routes/auth';
 import recipesRouter from './routes/recipes-from-photos';
 import mealPlanRouter from './routes/meal-plan-from-pdf';
 import groupRouter from './routes/group-shopping-list';
@@ -41,7 +43,9 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true });
 });
 
-app.use('/api', requireClientToken);
+app.use('/api/auth', authPublicRouter);
+app.get('/api/auth/me', requireAuth, meHandler);
+app.use('/api', requireAuth);
 app.use('/api/recipes', recipesRouter);
 app.use('/api/meal-plans', mealPlanRouter);
 app.use('/api/shopping-list', groupRouter);
@@ -53,7 +57,18 @@ app.listen(config.port, () => {
   if (!config.anthropicApiKey) {
     console.warn('[backend] ANTHROPIC_API_KEY is not set — AI routes will return 503');
   }
-  if (!config.clientToken) {
-    console.warn('[backend] CLIENT_TOKEN is not set — API is open to any caller (dev only)');
+  if (!config.jwtSecret) {
+    console.warn('[backend] JWT_SECRET is not set — auth and AI API will fail');
+  }
+  if (config.googleClientIds.length === 0) {
+    console.warn('[backend] GOOGLE_CLIENT_IDS is empty — Google sign-in will not work');
+  }
+  if (!config.appleClientId) {
+    console.warn('[backend] APPLE_CLIENT_ID is not set — Apple sign-in will not work');
+  }
+  if (!config.facebookAppId || !config.facebookAppSecret) {
+    console.warn(
+      '[backend] FACEBOOK_APP_ID / FACEBOOK_APP_SECRET not set — Facebook sign-in will not work'
+    );
   }
 });

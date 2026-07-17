@@ -1,7 +1,18 @@
-import { ApiError, ParseError } from '@/services/ai-errors';
+import { ApiError, ParseError, UnauthenticatedError } from '@/services/ai-errors';
 
 function getBaseUrl(): string {
   return (process.env.EXPO_PUBLIC_BACKEND_URL ?? '').replace(/\/$/, '');
+}
+
+/** Set by `AuthProvider` on each state update. */
+let backendAuth: { token: string | null; isGuest: boolean } = { token: null, isGuest: false };
+
+export function setBackendAuthState(next: { token: string | null; isGuest: boolean }): void {
+  backendAuth = next;
+}
+
+export function getBackendAuthState(): { token: string | null; isGuest: boolean } {
+  return backendAuth;
 }
 
 export function isBackendConfigured(): boolean {
@@ -14,6 +25,14 @@ interface ErrorBody {
 }
 
 export async function backendPost<T>(path: string, body: unknown): Promise<T> {
+  const { token, isGuest } = backendAuth;
+  if (isGuest) {
+    throw new UnauthenticatedError('guest');
+  }
+  if (!token) {
+    throw new UnauthenticatedError('no_token');
+  }
+
   const base = getBaseUrl();
   if (!base) {
     throw new ApiError(0, 'EXPO_PUBLIC_BACKEND_URL is not configured');
@@ -22,11 +41,8 @@ export async function backendPost<T>(path: string, body: unknown): Promise<T> {
   const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
   };
-  const token = process.env.EXPO_PUBLIC_BACKEND_TOKEN?.trim();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
 
   const response = await fetch(url, {
     method: 'POST',

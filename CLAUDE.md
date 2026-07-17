@@ -23,9 +23,9 @@ There are no automated tests in this project.
 
 This is an **Expo + React Native** app (using Expo Router for file-based navigation) that lets users manage recipes and products, select how many servings of each recipe they want, then generate a consolidated shopping list.
 
-### Backend (AI proxy)
+### Backend (AI proxy + auth)
 
-Anthropic is not called from the app. A small **Express** server in [`backend/`](backend/) holds `ANTHROPIC_API_KEY` and exposes `/api/*` routes for image recipe import, PDF meal-plan import, and shopping-list grouping. Configure the app with `EXPO_PUBLIC_BACKEND_URL` (see [`backend/README.md`](backend/README.md)).
+Anthropic is not called from the app. A small **Express** server in [`backend/`](backend/) holds `ANTHROPIC_API_KEY` and user accounts in **SQLite**; clients obtain a **JWT** via `/api/auth/*` and send `Authorization: Bearer` on all AI routes. Configure the app with `EXPO_PUBLIC_BACKEND_URL` and OAuth client env vars (see [`backend/README.md`](backend/README.md)).
 
 ### State Management
 

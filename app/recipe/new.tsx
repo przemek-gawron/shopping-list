@@ -8,11 +8,13 @@ import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAuth } from '@/context/auth-context';
 import { t } from '@/i18n';
 
 export default function NewRecipeScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
   const { addRecipe } = useRecipes();
+  const { isGuest } = useAuth();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -43,15 +45,21 @@ export default function NewRecipeScreen() {
               >
                 <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('recipe_save')}</Text>
               </Pressable>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.headerButton,
-                  { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
-                ]}
-                onPress={() => router.push(categoryId ? `/recipe/import-photo?categoryId=${categoryId}` : '/recipe/import-photo')}
-              >
-                <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
-              </Pressable>
+              {!isGuest && (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.headerButton,
+                    { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
+                  ]}
+                  onPress={() =>
+                    router.push(
+                      categoryId ? `/recipe/import-photo?categoryId=${categoryId}` : '/recipe/import-photo'
+                    )
+                  }
+                >
+                  <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
+                </Pressable>
+              )}
             </View>
           ),
         }}

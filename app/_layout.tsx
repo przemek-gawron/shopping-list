@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,9 +14,11 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
+import { AuthNavigationGuard } from '@/components/auth/auth-navigation-guard';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { t } from '@/i18n';
 import { AppProvider } from '@/context/app-context';
+import { AuthProvider, useAuth } from '@/context/auth-context';
 import { ShoppingListProvider } from '@/context/shopping-list-context';
 import { Colors } from '@/constants/theme';
 
@@ -26,9 +29,27 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <RootLayoutInner fontsLoaded={fontsLoaded} />
+      </AuthProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function RootLayoutInner({ fontsLoaded }: { fontsLoaded: boolean }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[colorScheme ?? 'light'];
+  const { isLoading: authLoading } = useAuth();
 
   const navigationTheme = useMemo(
     () => ({
@@ -46,46 +67,47 @@ export default function RootLayout() {
     [isDark, colors]
   );
 
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
-
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    if (fontsLoaded && !authLoading) {
+      void SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, authLoading]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded || authLoading) {
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
+  }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppProvider>
         <ShoppingListProvider>
           <ThemeProvider value={navigationTheme}>
-            <Stack
-              screenOptions={{
-                contentStyle: { backgroundColor: colors.background },
-              }}
-            >
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="product/new" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="product/[id]" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="recipe/new" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="recipe/[id]" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="shopping-list" options={{ headerBackTitle: t('back_to_categories') }} />
-              <Stack.Screen name="recipe/import-photo" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="recipe/import-meal-plan" options={{ headerBackTitle: t('back_to_categories') }} />
-              <Stack.Screen name="category/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="category/manage" />
-            </Stack>
+            <AuthNavigationGuard>
+              <Stack
+                screenOptions={{
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              >
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="product/new" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="product/[id]" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="recipe/new" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="recipe/[id]" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="shopping-list" options={{ headerBackTitle: t('back_to_categories') }} />
+                <Stack.Screen name="recipe/import-photo" options={{ presentation: 'modal' }} />
+                <Stack.Screen
+                  name="recipe/import-meal-plan"
+                  options={{ headerBackTitle: t('back_to_categories') }}
+                />
+                <Stack.Screen name="category/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="category/manage" />
+              </Stack>
+            </AuthNavigationGuard>
             <StatusBar style="auto" />
           </ThemeProvider>
         </ShoppingListProvider>
       </AppProvider>
-    </GestureHandlerRootView>
+    </View>
   );
 }
