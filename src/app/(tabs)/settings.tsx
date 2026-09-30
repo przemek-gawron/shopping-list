@@ -10,7 +10,7 @@ import { Stepper } from '@/components/stepper';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing } from '@/constants/theme';
-import { parseRecipeFile } from '@/data/import';
+import { parseMealPlanDoc, parseRecipeFile } from '@/data/import';
 import { MAX_MEALS, useStore } from '@/data/store';
 import type { Language } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -43,17 +43,25 @@ export default function SettingsScreen() {
   };
 
   const onImport = async () => {
-    const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain'], copyToCacheDirectory: true });
+    const picked = await DocumentPicker.getDocumentAsync({
+      type: ['application/msword', 'application/json', 'text/plain'],
+      copyToCacheDirectory: true,
+    });
     if (picked.canceled || !picked.assets[0]) return;
     let file = null;
+    let unknown = 0;
     try {
-      file = parseRecipeFile(await new File(picked.assets[0].uri).text());
+      const source = new File(picked.assets[0].uri);
+      // a Word meal plan is parsed on the device; anything else must be a recipe JSON file
+      const doc = parseMealPlanDoc(new Uint8Array(await source.arrayBuffer()));
+      file = doc ? doc.file : parseRecipeFile(await source.text());
+      unknown = doc?.unknown ?? 0;
     } catch {
       // unreadable file: reported below
     }
     if (!file || file.recipes.length === 0) return Alert.alert(t('import_invalid'));
     const { added, updated } = importRecipes(file);
-    Alert.alert(t('import_done', { added, updated }));
+    Alert.alert(t('import_done', { added, updated }), unknown > 0 ? t('import_unknown', { count: unknown }) : undefined);
   };
 
   return (
