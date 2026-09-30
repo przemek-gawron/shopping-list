@@ -12,8 +12,8 @@
       "bundleIdentifier": "com.przemekgawron.shoppinglist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby zaimportować przepis ze zdjęcia.",
-        "NSCameraUsageDescription": "Aplikacja potrzebuje aparatu, aby zrobić zdjęcie przepisu."
+        "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby dodać zdjęcie do przepisu.",
+        "NSCameraUsageDescription": "Aplikacja potrzebuje aparatu, aby zrobić zdjęcie do przepisu."
       }
     },
     "android": {
@@ -22,10 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.przemekgawron.shoppinglist",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "package": "com.przemekgawron.shoppinglist"
     },
     "web": {
       "output": "static",
@@ -45,8 +42,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Wybierz zdjęcie przepisu z biblioteki.",
-          "cameraPermission": "Zrób zdjęcie przepisu."
+          "photosPermission": "Aplikacja potrzebuje dostępu do zdjęć, aby dodać zdjęcie do przepisu.",
+          "cameraPermission": "Aplikacja potrzebuje aparatu, aby zrobić zdjęcie do przepisu.",
+          "microphonePermission": false
         }
       ],
       "expo-localization"
