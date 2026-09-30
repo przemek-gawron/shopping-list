@@ -1,49 +1,29 @@
 # Lista zakupów
 
-Aplikacja mobilna (Expo + React Native) do zarządzania przepisami i produktami, wybierania liczby porcji oraz generowania **zbiorczej listy zakupów** z przeliczonymi składnikami. Interfejs jest w języku polskim; dane trzymane są lokalnie na urządzeniu (bez serwera).
+Aplikacja mobilna (Expo SDK 57 + React Native) do zapisywania przepisów, planowania posiłków i tworzenia listy zakupów. Działa w całości offline, bez konta i bez serwera. Dane są zapisane lokalnie na urządzeniu.
 
 ## Funkcje
 
-- **Przepisy** — dodawanie i edycja przepisów ze składnikami (ilość + jednostka).
-- **Produkty** — baza produktów powiązana z listą zakupów.
-- **Porcje** — dla każdego przepisu możesz ustawić liczbę porcji; lista zakupów sumuje składniki ze wszystkich wybranych przepisów.
-- **Lista zakupów** — agregacja składników z przeliczeniem jednostek (np. g/kg, ml/l) i sortowanie alfabetycznie (locale polski).
-
-## Stack techniczny
-
-- [Expo](https://expo.dev) (SDK 54) z [Expo Router](https://docs.expo.dev/router/introduction/) (nawigacja oparta o pliki w `app/`)
-- React 19, React Native, TypeScript
-- Stan aplikacji: **React Context + reducer** (`context/`), persystencja przez **AsyncStorage** (`services/storage.ts`)
-- Logika listy zakupów: `services/shopping-list-generator.ts`; jednostki i konwersje: `constants/units.ts`
+- **Przepisy i grupy** – przepisy ze składnikami, wyszukiwanie, grupowanie (np. śniadania, obiady), własne zdjęcie przepisu.
+- **Plan** – kalendarz tygodniowy z posiłkami na każdy dzień. Liczbę posiłków w ciągu dnia (np. 3, 4 albo 5) i ich nazwy ustawisz w Ustawieniach.
+- **Lista zakupów** – tworzona z zaznaczonych posiłków planu, ze zsumowanymi składnikami, pogrupowana według działów sklepu.
+- **Ustawienia** – liczba posiłków, przykładowe przepisy (PL/EN), wyczyszczenie wszystkich danych, język, opis aplikacji.
 
 ## Uruchomienie
 
 ```bash
 npm install
-npm start
+npm start          # w terminalu: i (iOS) lub a (Android) – otwiera w Expo Go
 ```
 
-Następnie wybierz platformę w terminalu lub użyj:
+Wymagany jest Expo Go zgodny z SDK 57. Wersję developerską (dev build) zbudujesz przez `npm run ios` / `npm run android`.
 
-| Skrypt | Działanie |
-|--------|-----------|
-| `npm run ios` | Symulator iOS |
-| `npm run android` | Emulator Android |
-| `npm run web` | Przeglądarka |
+## Skrypty
 
 ```bash
-npm run lint
+npx tsc --noEmit   # typy
+npm run lint       # lint
+npx expo-doctor    # kontrola zależności
 ```
 
-Uruchamia linter ESLint (Expo).
-
-## Struktura repozytorium (skrót)
-
-- `app/` — ekrany i trasy (zakładki Przepisy / Produkty, modale edycji, ekran listy zakupów)
-- `components/` — komponenty UI i domenowe (przepisy, produkty, lista zakupów)
-- `context/` — provider i reducer stanu globalnego
-- `hooks/` — hooki domenowe (`use-products`, `use-recipes`, `use-selections`)
-- `services/` — generator listy, zapis do pamięci lokalnej
-- `constants/` — motyw, jednostki miary
-
-Szczegóły poleceń i konwencji UI znajdziesz w pliku `CLAUDE.md` w repozytorium.
+Architektura i konwencje: [CLAUDE.md](CLAUDE.md).

@@ -5,73 +5,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Start development server
-npm start
-
-# Run on specific platform
-npm run ios       # iOS simulator
-npm run android   # Android emulator
-npm run web       # Web browser
-
-# Lint
-npm run lint
+npm start            # Expo dev server (open in Expo Go: press i / a)
+npm run ios          # iOS simulator (dev build)
+npm run android      # Android emulator (dev build)
+npx tsc --noEmit     # typecheck
+npm run lint         # expo lint
+npx expo-doctor      # dependency / config check
 ```
 
-There are no automated tests in this project.
+There are no automated tests. Run typecheck and lint before finishing a task. Use `npx expo install <pkg>` (not `npm i`) so versions match the Expo SDK (57).
 
-## Architecture
+## What the app is
 
-This is an **Expo + React Native** app (using Expo Router for file-based navigation) that lets users manage recipes and products, select how many servings of each recipe they want, then generate a consolidated shopping list.
+Offline-only Expo + React Native app (Expo Router, file-based). No backend, accounts or AI. Users:
 
-### Backend (AI proxy + auth)
+1. keep **recipes** (ingredients, optional photo) organised in **groups**,
+2. put recipes on a **weekly meal plan** (configurable meals per day: breakfast, lunch, ...),
+3. pick meals in the plan and generate a **shopping list**, grouped by store department.
 
-Anthropic is not called from the app. A small **Express** server in [`backend/`](backend/) holds `ANTHROPIC_API_KEY` and user accounts in **SQLite**; clients obtain a **JWT** via `/api/auth/*` and send `Authorization: Bearer` on all AI routes. Configure the app with `EXPO_PUBLIC_BACKEND_URL` and OAuth client env vars (see [`backend/README.md`](backend/README.md)).
+Settings hold the meals-per-day setting, example data, "clear everything", language and the About screen.
 
-### State Management
+## Architecture (`src/`, alias `@/*` -> `src/*`)
 
-All app state lives in a single **React context + reducer** pattern:
+- `data/types.ts` – domain types. `data/store.ts` – the single **zustand** store (persisted to AsyncStorage under `shopping-list:v2`) with all state and actions. `data/shopping.ts` – pure ingredient aggregation. `data/sample-data.ts` – example groups/products/recipes in PL and EN (fixed ids, so loading twice never duplicates).
+- `constants/theme.ts` – colors (`Colors.light/dark`), `Spacing`; use `useTheme()` and never hardcode colors. `constants/units.ts` – unit conversion. `constants/departments.ts` – store departments.
+- `i18n/` – `pl.ts`, `en.ts`; use the `useT()` hook (follows the language chosen in Settings). Every new string needs both languages.
+- `components/` – small UI kit (`Screen`, `Page`, `Card`, `Chip`, `Button`, `Field`, `Stepper`, ...).
+- `utils/photos.ts` – recipe photos are copied into the app document directory; recipes store only the file name.
 
-- `context/app-reducer.ts` — pure reducer with typed actions for products, recipes, and recipe selections
-- `context/app-context.tsx` — `AppProvider` wraps the app, persists state to AsyncStorage on every change, and exposes domain callbacks via `useAppContext()`
+Routes (`src/app`): `(tabs)` = `index` (recipes), `plan`, `list`, `settings` with a native bottom bar (`NativeTabs`); stack/modal screens `recipe/[id]`, `recipe/form`, `group/form`, `groups`, `product/form`, `products`, `plan/add`, `list/add`, `meals`, `about`.
 
-The state shape:
-```ts
-{ products: Product[], recipes: Recipe[], selections: RecipeSelection[], isLoading: boolean }
-```
+## Conventions
 
-Persistence is handled directly in `AppProvider` via `useEffect` hooks calling `services/storage.ts` (AsyncStorage under `shopping-list:*` keys). There is no external database or API.
-
-### Domain Logic
-
-- `services/shopping-list-generator.ts` — takes the current recipes, selections, and products and aggregates ingredients across all selected recipes (with unit conversion via `constants/units.ts`), producing a `ShoppingListItem[]` sorted alphabetically by Polish locale.
-- `constants/units.ts` — defines unit definitions and conversion functions (`convertToBase`, `convertFromBase`, `formatQuantity`). The supported units are: `g`, `kg`, `ml`, `l`, `szt`, `lyzka`, `lyzeczka`, `szklanka`.
-
-### Navigation (Expo Router)
-
-```
-app/
-  _layout.tsx           # Root: GestureHandlerRootView > AppProvider > Stack
-  (tabs)/
-    _layout.tsx         # Bottom tabs: Przepisy (index) | Produkty (products)
-    index.tsx           # Recipes list with search + per-recipe servings counter
-    products.tsx        # Products list
-  recipe/[id].tsx       # Edit recipe (modal)
-  recipe/new.tsx        # Add recipe (modal)
-  product/[id].tsx      # Edit product (modal)
-  product/new.tsx       # Add product (modal)
-  shopping-list.tsx     # Generated shopping list (reached via FAB on recipes tab)
-```
-
-### UI Conventions
-
-- Colors come from `constants/theme.ts` (`Colors.light` / `Colors.dark`) — always use `useColorScheme()` + `Colors[colorScheme ?? 'light']` for theming, never hardcode colors.
-- Font: Inter (loaded via `@expo-google-fonts/inter`) — use `Inter_400Regular`, `Inter_500Medium`, `Inter_600SemiBold`, or `Inter_700Bold` in `fontFamily`.
-- Platform-specific icon components: `components/ui/icon-symbol.ios.tsx` (SF Symbols) and `components/ui/icon-symbol.tsx` (fallback).
-- The app UI is in Polish.
-
-### Custom Hooks
-
-Domain-specific hooks in `hooks/` wrap `useAppContext()` to expose only relevant state/actions:
-- `use-products.ts` — products CRUD
-- `use-recipes.ts` — recipes CRUD
-- `use-selections.ts` — recipe selection counts + derived `totalSelections`/`hasSelections`
+- Plan entries of meal slots hidden by lowering meals-per-day stay stored but are not shown or used for the list.
+- The shopping list is a snapshot: generating it replaces the previous list.
+- Typed routes are generated by `expo start`; if `tsc` complains about routes, start the dev server once.
