@@ -36,6 +36,8 @@ export function Screen({ title, action, children, scroll = true }: Props) {
         {scroll ? (
           <ScrollView
             contentContainerStyle={[styles.content, { paddingBottom: bottom }]}
+            automaticallyAdjustKeyboardInsets
+            keyboardDismissMode="interactive"
             keyboardShouldPersistTaps="handled">
             {header}
             {children}
@@ -58,6 +60,9 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
     <ScrollView
       style={{ backgroundColor: theme.background }}
       contentInsetAdjustmentBehavior="automatic"
+      // keeps the focused field above the keyboard on iOS; Android resizes the window itself
+      automaticallyAdjustKeyboardInsets
+      keyboardDismissMode="interactive"
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
       {children}
