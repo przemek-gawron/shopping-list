@@ -19,6 +19,9 @@ export function IconSymbol({
       weight={weight}
       tintColor={color}
       resizeMode="scaleAspectFit"
+      // decorative: the parent button carries the accessible label
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       name={name}
       style={[
         {
