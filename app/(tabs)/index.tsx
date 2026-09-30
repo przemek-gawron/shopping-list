@@ -9,7 +9,6 @@ import { useCategories } from '@/hooks/use-categories';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useSelections } from '@/hooks/use-selections';
 import { useAppContext } from '@/context/app-context';
-import { useAuth } from '@/context/auth-context';
 import { CategoryCard } from '@/components/categories/category-card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { GradientHeader } from '@/components/ui/gradient-header';
@@ -25,7 +24,6 @@ export default function CategoriesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { isLoading } = useAppContext();
-  const { isGuest } = useAuth();
   const { categories, updateCategory, deleteCategory } = useCategories();
   const { recipes } = useRecipes();
   const { totalSelections, hasSelections } = useSelections();
@@ -133,22 +131,6 @@ export default function CategoriesScreen() {
         <GradientHeader
           title={t('categories_header')}
           onAdd={editMode ? undefined : () => router.push('/category/manage')}
-          rightElement={
-            editMode || isGuest ? undefined : (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.importPdfButton,
-                  { backgroundColor: colors.overlayOnPrimary, opacity: pressed ? 0.7 : 1 },
-                ]}
-                onPress={() => router.push('/recipe/import-meal-plan')}
-              >
-                <IconSymbol name="doc.fill" size={16} color={colors.onPrimary} />
-                <Text style={[styles.importPdfLabel, { color: colors.onPrimary }]}>
-                  {t('meal_plan_import_button_label')}
-                </Text>
-              </Pressable>
-            )
-          }
         />
 
         {categories.length === 0 ? (
@@ -328,17 +310,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.28,
     shadowRadius: 14,
     elevation: 8,
-  },
-  importPdfButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 19,
-  },
-  importPdfLabel: {
-    fontSize: 13,
-    fontFamily: 'Inter_500Medium',
   },
 });

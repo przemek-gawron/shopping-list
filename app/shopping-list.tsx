@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   View,
   FlatList,
-  SectionList,
   StyleSheet,
   Pressable,
   Text,
@@ -11,17 +10,14 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { useAppContext } from '@/context/app-context';
 import { useSelections } from '@/hooks/use-selections';
 import { useProducts } from '@/hooks/use-products';
 import { useShoppingListContext } from '@/context/shopping-list-context';
 import { generateShoppingList, formatShoppingListForClipboard } from '@/services/shopping-list-generator';
-import { groupShoppingItems, applyGroupsToItems } from '@/services/shopping-list-grouper';
-import { isBackendConfigured } from '@/services/backend-client';
 import { ShoppingListItem as ShoppingListItemComponent } from '@/components/shopping-list/shopping-list-item';
 import { ShoppingListItem, Unit } from '@/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -31,15 +27,11 @@ import { AmbientBackground } from '@/components/ui/ambient-background';
 import { UNIT_OPTIONS, getUnitLabel } from '@/constants/units';
 import { generateId } from '@/utils/id-generator';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
-import { useAuth } from '@/context/auth-context';
-import { UnauthenticatedError } from '@/services/ai-errors';
 import { t } from '@/i18n';
 
 export default function ShoppingListScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { isGuest } = useAuth();
-  const router = useRouter();
   const { recipes, products } = useAppContext();
   const { selections, clearSelections } = useSelections();
   const { products: allProducts } = useProducts();
@@ -59,10 +51,6 @@ export default function ShoppingListScreen() {
   const [newUnit, setNewUnit] = useState<Unit>('szt');
   const [pendingCheckedIds, setPendingCheckedIds] = useState<string[]>([]);
   const toggleTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-
-  const [isGrouped, setIsGrouped] = useState(false);
-  const [isGrouping, setIsGrouping] = useState(false);
-  const [groupSections, setGroupSections] = useState<{ name: string; emoji: string; data: ShoppingListItem[] }[]>([]);
 
   const items = useMemo<ShoppingListItem[]>(() => {
     const apply = (item: ShoppingListItem): ShoppingListItem => ({
@@ -153,59 +141,6 @@ export default function ShoppingListScreen() {
 
   const productItems = allProducts.map((p) => ({ id: p.id, label: p.name }));
 
-  // Reset grouping if the item list changes while grouped
-  useEffect(() => {
-    if (isGrouped) {
-      setIsGrouped(false);
-      setGroupSections([]);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.length]);
-
-  const handleGroup = useCallback(async () => {
-    if (isGrouped) {
-      setIsGrouped(false);
-      setGroupSections([]);
-      return;
-    }
-
-    if (isGuest) {
-      Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
-        { text: t('cancel'), style: 'cancel' },
-        { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
-      ]);
-      return;
-    }
-
-    if (!isBackendConfigured()) {
-      Alert.alert(t('backend_not_configured_title'), t('backend_not_configured_message'));
-      return;
-    }
-
-    if (items.length === 0) return;
-
-    setIsGrouping(true);
-    try {
-      const productNames = items.map((i) => i.productName);
-      const groups = await groupShoppingItems(productNames);
-      const sections = applyGroupsToItems(groups, items);
-      setGroupSections(sections);
-      setIsGrouped(true);
-    } catch (e) {
-      if (e instanceof UnauthenticatedError) {
-        Alert.alert(t('auth_ai_requires_login_title'), t('auth_ai_requires_login'), [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('auth_sign_in'), onPress: () => router.push('/(auth)/login') },
-        ]);
-        return;
-      }
-      const msg = e instanceof Error ? e.message : String(e);
-      Alert.alert(t('shopping_list_group_error_title'), msg);
-    } finally {
-      setIsGrouping(false);
-    }
-  }, [isGrouped, isGuest, items, router]);
-
   useEffect(() => {
     const timeouts = toggleTimeoutsRef.current;
     return () => {
@@ -252,27 +187,6 @@ export default function ShoppingListScreen() {
           headerShadowVisible: false,
           headerRight: () => (
             <View style={styles.headerButtons}>
-              {!isGuest && (
-                <Pressable
-                  style={[
-                    styles.groupButton,
-                    { backgroundColor: isGrouped ? colors.tint : colors.overlayOnPrimarySubtle },
-                  ]}
-                  onPress={handleGroup}
-                  disabled={isGrouping || items.length === 0}
-                >
-                  {isGrouping ? (
-                    <ActivityIndicator size="small" color={colors.onPrimary} />
-                  ) : (
-                    <IconSymbol name="sparkles" size={15} color={colors.onPrimary} />
-                  )}
-                  {!isGrouping && (
-                    <Text style={[styles.groupButtonText, { color: colors.onPrimary }]}>
-                      {isGrouped ? t('shopping_list_ungroup') : t('shopping_list_group')}
-                    </Text>
-                  )}
-                </Pressable>
-              )}
               <Pressable
                 style={[styles.headerButton, { backgroundColor: colors.overlayOnPrimarySubtle }]}
                 onPress={handleCopy}
@@ -312,29 +226,6 @@ export default function ShoppingListScreen() {
               {t('shopping_list_empty_subtitle')}
             </Text>
           </View>
-        ) : isGrouped ? (
-          <SectionList
-            sections={groupSections}
-            keyExtractor={(item) => item.productId}
-            renderItem={({ item }) => (
-              <ShoppingListItemComponent
-                item={item}
-                isCompleting={pendingCheckedIds.includes(item.productId)}
-                onToggle={() => handleToggleWithAnimation(item)}
-                onDelete={() => deleteItem(item.productId)}
-                onUpdate={(qty, unit) => updateItem(item.productId, qty, unit)}
-              />
-            )}
-            renderSectionHeader={({ section }) => (
-              <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-                <Text style={styles.sectionEmoji}>{section.emoji}</Text>
-                <Text style={[styles.sectionTitle, { color: colors.tint }]}>{section.name}</Text>
-                <View style={[styles.sectionLine, { backgroundColor: colors.borderSubtle }]} />
-              </View>
-            )}
-            contentContainerStyle={styles.listContent}
-            stickySectionHeadersEnabled={false}
-          />
         ) : (
           <FlatList
             data={sortedItems}
@@ -468,18 +359,6 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row',
     gap: 6,
-  },
-  groupButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 36,
-    paddingHorizontal: 12,
-    borderRadius: 18,
-  },
-  groupButtonText: {
-    fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
   },
   headerButton: {
     width: 36,
@@ -634,27 +513,5 @@ const styles = StyleSheet.create({
   modalSaveText: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 8,
-    gap: 8,
-  },
-  sectionEmoji: {
-    fontSize: 18,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontFamily: 'Inter_700Bold',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  sectionLine: {
-    flex: 1,
-    height: 1,
-    marginLeft: 4,
   },
 });

@@ -1,21 +1,17 @@
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { RecipeForm, RecipeFormHandle } from '@/components/recipes/recipe-form';
 import { AmbientBackground } from '@/components/ui/ambient-background';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useAuth } from '@/context/auth-context';
 import { t } from '@/i18n';
 
 export default function NewRecipeScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId?: string }>();
   const { addRecipe } = useRecipes();
-  const { isGuest } = useAuth();
-  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const formRef = useRef<RecipeFormHandle>(null);
@@ -45,21 +41,6 @@ export default function NewRecipeScreen() {
               >
                 <Text style={[styles.saveButtonText, { color: colors.onPrimary }]}>{t('recipe_save')}</Text>
               </Pressable>
-              {!isGuest && (
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.headerButton,
-                    { backgroundColor: colors.tintSecondary, opacity: pressed ? 0.7 : 1 },
-                  ]}
-                  onPress={() =>
-                    router.push(
-                      categoryId ? `/recipe/import-photo?categoryId=${categoryId}` : '/recipe/import-photo'
-                    )
-                  }
-                >
-                  <IconSymbol name="sparkles" size={22} color={colors.onPrimary} />
-                </Pressable>
-              )}
             </View>
           ),
         }}
@@ -74,13 +55,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  headerButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   saveButton: {
     minHeight: 34,
