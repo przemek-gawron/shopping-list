@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "shopping-list",
-    "slug": "przemek-gawron",
+    "slug": "shopping-list",
     "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -56,15 +56,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "37626a9d-50f5-49a3-a5ec-1e221fe66265"
+        "projectId": "f5026f73-6696-4235-82c6-5c7a04ff3587"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
+    "owner": "przemek-gawron-dev",
     "updates": {
-      "url": "https://u.expo.dev/37626a9d-50f5-49a3-a5ec-1e221fe66265"
-    },
-    "owner": "przemek-gawron-devs-team"
+      "url": "https://u.expo.dev/f5026f73-6696-4235-82c6-5c7a04ff3587"
+    }
   }
 }

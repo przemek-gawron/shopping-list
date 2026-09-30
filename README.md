@@ -30,7 +30,7 @@ Wymagany jest Expo Go zgodny z SDK 57. Wersję developerską (dev build) zbuduje
 
 ## Buildy i aktualizacje (EAS)
 
-Projekt EAS: `@przemek-gawron-devs-team/przemek-gawron`. Kanały: `preview` (instalacja wewnętrzna) i `production` (sklepy).
+Projekt EAS: `@przemek-gawron-dev/shopping-list`. Kanały: `preview` (instalacja wewnętrzna) i `production` (sklepy).
 
 ```bash
 npm run build:preview -- --platform ios       # albo android / all
