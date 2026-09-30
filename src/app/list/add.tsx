@@ -61,7 +61,7 @@ export default function ListAddScreen() {
       )}
       <Field label={t('quantity')} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" selectTextOnFocus />
       <View style={styles.section}>
-        <ThemedText type="label">{t('product_unit')}</ThemedText>
+        <ThemedText type="label">{t('unit')}</ThemedText>
         <View style={styles.wrap}>
           {UNITS.map((u) => (
             <Chip key={u} label={t(`unit_${u}`)} selected={unit === u} onPress={() => setUnit(u)} />

@@ -1,4 +1,7 @@
-export default {
+import type pl from './pl';
+
+// typed against the Polish file, so a missing or misspelled key fails the typecheck
+const en: Record<keyof typeof pl, string> = {
   app_name: 'Shopping List',
   back: 'Back',
   all: 'All',
@@ -14,6 +17,7 @@ export default {
   servings: 'Servings',
   recipe: 'Recipe',
   quantity: 'Quantity',
+  unit: 'Unit',
   group: 'Group',
   ingredients: 'Ingredients',
   no_ingredients: 'This recipe has no ingredients yet.',
@@ -175,3 +179,5 @@ export default {
   dept_drinks: 'Drinks',
   dept_other: 'Other',
 };
+
+export default en;

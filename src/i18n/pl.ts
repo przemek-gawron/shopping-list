@@ -14,6 +14,7 @@ export default {
   servings: 'Porcje',
   recipe: 'Przepis',
   quantity: 'Ilość',
+  unit: 'Jednostka',
   group: 'Grupa',
   ingredients: 'Składniki',
   no_ingredients: 'Ten przepis nie ma jeszcze składników.',
