@@ -28,6 +28,17 @@ npm start          # w terminalu: i (iOS) lub a (Android) – otwiera w Expo Go
 
 Wymagany jest Expo Go zgodny z SDK 57. Wersję developerską (dev build) zbudujesz przez `npm run ios` / `npm run android`.
 
+## Buildy i aktualizacje (EAS)
+
+Projekt EAS: `@przemek-gawron-devs-team/przemek-gawron`. Kanały: `preview` (instalacja wewnętrzna) i `production` (sklepy).
+
+```bash
+npm run build:preview -- --platform ios       # albo android / all
+npm run update:preview -- --message "opis"    # aktualizacja OTA dla buildów preview
+```
+
+Aktualizacja OTA trafia tylko do buildów o tej samej wersji aplikacji (`version` w `app.json`, teraz 2.0.0) i obejmuje wyłącznie kod JS oraz zasoby. Po zmianie natywnej (nowa biblioteka natywna, nowy SDK, zmiana `app.json` dotycząca uprawnień lub pluginów) podbij `version` i zrób nowy build. Aplikacja pobiera aktualizację przy starcie i stosuje ją przy następnym uruchomieniu.
+
 ## Skrypty
 
 ```bash
