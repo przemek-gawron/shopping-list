@@ -1,0 +1,192 @@
+import { router } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Chip } from '@/components/chip';
+import { Screen } from '@/components/screen';
+import { Stepper } from '@/components/stepper';
+import { ThemedText } from '@/components/themed-text';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Spacing } from '@/constants/theme';
+import { useSlotName } from '@/data/labels';
+import { useStore } from '@/data/store';
+import { useTheme } from '@/hooks/use-theme';
+import { useLocale, useT } from '@/i18n';
+import { addDays, formatDate, startOfWeek, today, weekDays } from '@/utils/dates';
+
+export default function PlanScreen() {
+  const theme = useTheme();
+  const t = useT();
+  const locale = useLocale();
+  const slotName = useSlotName();
+  const plan = useStore((s) => s.plan);
+  const recipes = useStore((s) => s.recipes);
+  const allSlots = useStore((s) => s.slots);
+  const mealCount = useStore((s) => s.mealCount);
+  const list = useStore((s) => s.list);
+  const updatePlanEntry = useStore((s) => s.updatePlanEntry);
+  const removePlanEntry = useStore((s) => s.removePlanEntry);
+  const generateList = useStore((s) => s.generateList);
+
+  const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
+  const [selectedDate, setSelectedDate] = useState(today());
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const weekStart = startOfWeek(selectedDate);
+  const days = weekDays(weekStart);
+  const visibleSlotIds = useMemo(() => new Set(slots.map((s) => s.id)), [slots]);
+  // entries of slots that are currently hidden stay stored but are not shown or shoppable
+  const shown = useMemo(() => plan.filter((e) => visibleSlotIds.has(e.slotId)), [plan, visibleSlotIds]);
+  const pickedShown = picked.filter((id) => shown.some((e) => e.id === id));
+
+  const weekLabel = `${formatDate(days[0], locale, { day: 'numeric', month: 'short' })} – ${formatDate(days[6], locale, { day: 'numeric', month: 'short' })}`;
+  const dayEntries = (date: string) => shown.filter((e) => e.date === date);
+
+  const select = (ids: string[]) => setPicked(ids);
+  const idsFor = (predicate: (date: string) => boolean) => shown.filter((e) => predicate(e.date)).map((e) => e.id);
+
+  const toggle = (id: string) =>
+    setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+
+  const generate = () => {
+    const run = () => {
+      generateList(pickedShown);
+      setPicked([]);
+      router.navigate('/list');
+    };
+    if (list.length === 0) return run();
+    Alert.alert(t('plan_replace_title'), t('plan_replace_message'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('plan_replace_confirm'), style: 'destructive', onPress: run },
+    ]);
+  };
+
+  return (
+    <Screen title={t('plan_title')}>
+      <View style={styles.weekNav}>
+        <Pressable hitSlop={10} onPress={() => setSelectedDate(addDays(selectedDate, -7))} accessibilityLabel={t('plan_prev_week')}>
+          <IconSymbol name="chevron.left" size={22} color={theme.tint} />
+        </Pressable>
+        <Pressable onPress={() => setSelectedDate(today())} accessibilityLabel={t('plan_today')}>
+          <ThemedText type="heading">{weekLabel}</ThemedText>
+        </Pressable>
+        <Pressable hitSlop={10} onPress={() => setSelectedDate(addDays(selectedDate, 7))} accessibilityLabel={t('plan_next_week')}>
+          <IconSymbol name="chevron.right" size={22} color={theme.tint} />
+        </Pressable>
+      </View>
+
+      <View style={styles.days}>
+        {days.map((date) => {
+          const isSelected = date === selectedDate;
+          const isToday = date === today();
+          const count = dayEntries(date).length;
+          return (
+            <Pressable
+              key={date}
+              onPress={() => setSelectedDate(date)}
+              accessibilityRole="button"
+              accessibilityLabel={formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
+              style={[
+                styles.day,
+                { backgroundColor: isSelected ? theme.tint : theme.cardBackground, borderColor: isToday ? theme.tint : theme.borderSubtle },
+              ]}>
+              <ThemedText type="caption" color={isSelected ? 'onPrimary' : 'textSecondary'}>
+                {formatDate(date, locale, { weekday: 'short' })}
+              </ThemedText>
+              <ThemedText style={styles.dayNumber} color={isSelected ? 'onPrimary' : 'text'}>
+                {new Date(date + 'T00:00:00').getDate()}
+              </ThemedText>
+              <View style={[styles.dot, { backgroundColor: count > 0 ? (isSelected ? theme.onPrimary : theme.tint) : 'transparent' }]} />
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <ThemedText type="heading">
+        {formatDate(selectedDate, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
+      </ThemedText>
+
+      {slots.map((slot, index) => {
+        const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
+        return (
+          <Card key={slot.id} style={styles.slot}>
+            <View style={styles.slotHeader}>
+              <ThemedText type="label">{slotName(slot, index)}</ThemedText>
+              <Pressable
+                hitSlop={8}
+                onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
+                accessibilityLabel={`${t('plan_add_meal')} – ${slotName(slot, index)}`}>
+                <ThemedText color="tint" style={styles.addLink}>
+                  + {t('plan_add_meal')}
+                </ThemedText>
+              </Pressable>
+            </View>
+            {entries.length === 0 && <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>}
+            {entries.map((entry) => {
+              const recipe = recipes.find((r) => r.id === entry.recipeId);
+              const isPicked = picked.includes(entry.id);
+              return (
+                <View key={entry.id} style={styles.entry}>
+                  <Pressable
+                    onPress={() => toggle(entry.id)}
+                    hitSlop={8}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isPicked }}
+                    accessibilityLabel={t('plan_pick_for_list')}
+                    style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
+                    {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
+                  </Pressable>
+                  <Pressable style={styles.entryTitle} onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
+                    <ThemedText style={styles.entryName} numberOfLines={2}>
+                      {recipe?.title ?? '?'}
+                    </ThemedText>
+                  </Pressable>
+                  <Stepper value={entry.servings} onChange={(v) => updatePlanEntry(entry.id, v)} format={(v) => `${v}×`} />
+                  <Pressable hitSlop={8} onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
+                    <IconSymbol name="xmark" size={18} color={theme.icon} />
+                  </Pressable>
+                </View>
+              );
+            })}
+          </Card>
+        );
+      })}
+
+      {shown.length > 0 && (
+        <View style={styles.generate}>
+          <ThemedText type="label">{t('plan_pick_title')}</ThemedText>
+          <View style={styles.chips}>
+            <Chip label={t('plan_pick_day')} onPress={() => select(idsFor((d) => d === selectedDate))} />
+            <Chip label={t('plan_pick_week')} onPress={() => select(idsFor((d) => d >= days[0] && d <= days[6]))} />
+            <Chip label={t('plan_pick_from_today')} onPress={() => select(idsFor((d) => d >= today()))} />
+            <Chip label={t('plan_pick_none')} onPress={() => select([])} />
+          </View>
+          <Button
+            label={pickedShown.length > 0 ? t('plan_generate_count', { count: pickedShown.length }) : t('plan_generate')}
+            onPress={generate}
+            disabled={pickedShown.length === 0}
+          />
+        </View>
+      )}
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  days: { flexDirection: 'row', gap: 6 },
+  day: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 12, borderWidth: 1, gap: 2 },
+  dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
+  dot: { width: 5, height: 5, borderRadius: 3 },
+  slot: { gap: Spacing.two },
+  slotHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  addLink: { fontSize: 14, fontWeight: '700' },
+  entry: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 2 },
+  entryTitle: { flex: 1 },
+  entryName: { fontWeight: '600' },
+  checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  generate: { gap: Spacing.two, marginTop: Spacing.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+});
