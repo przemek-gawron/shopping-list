@@ -7,15 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "shoppinglist",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.przemekgawron.shoppinglist",
-      "splash": {
-        "image": "./assets/images/splash.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#1B4332"
-      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby zaimportować przepis ze zdjęcia.",
@@ -27,7 +21,6 @@
         "backgroundColor": "#1B4332",
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.przemekgawron.shoppinglist",
       "permissions": [

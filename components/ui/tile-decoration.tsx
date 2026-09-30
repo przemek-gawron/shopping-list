@@ -85,12 +85,12 @@ export function TileDecoration({ variant = 'recipe' }: TileDecorationProps) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: CARD_RADIUS,
     overflow: 'hidden',
   },
   baseTint: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: CARD_RADIUS,
   },
   wash: {
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   lineField: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     left: -40,
     right: -40,
     top: -16,

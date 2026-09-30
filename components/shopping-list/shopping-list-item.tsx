@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   completionOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   editInput: {
     flex: 1,
