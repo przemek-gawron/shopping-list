@@ -109,7 +109,10 @@ export default function PlanScreen() {
       </ThemedText>
 
       {slots.map((slot, index) => {
-        const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
+        const entry = dayEntries(selectedDate).find((e) => e.slotId === slot.id);
+        const recipe = entry && recipes.find((r) => r.id === entry.recipeId);
+        const isPicked = !!entry && picked.includes(entry.id);
+        const action = entry ? t('change') : `+ ${t('plan_add_meal')}`;
         return (
           <Card key={slot.id} style={styles.slot}>
             <View style={styles.slotHeader}>
@@ -118,39 +121,39 @@ export default function PlanScreen() {
                 hitSlop={8}
                 accessibilityRole="button"
                 onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
-                accessibilityLabel={`${t('plan_add_meal')} – ${slotName(slot, index)}`}>
+                accessibilityLabel={`${entry ? t('change') : t('plan_add_meal')} – ${slotName(slot, index)}`}>
                 <ThemedText color="tint" style={styles.addLink}>
-                  + {t('plan_add_meal')}
+                  {action}
                 </ThemedText>
               </Pressable>
             </View>
-            {entries.length === 0 && <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>}
-            {entries.map((entry) => {
-              const recipe = recipes.find((r) => r.id === entry.recipeId);
-              const isPicked = picked.includes(entry.id);
-              return (
-                <View key={entry.id} style={styles.entry}>
-                  <Pressable
-                    onPress={() => toggle(entry.id)}
-                    hitSlop={8}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isPicked }}
-                    accessibilityLabel={t('plan_pick_for_list')}
-                    style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
-                    {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-                  </Pressable>
-                  <Pressable style={styles.entryTitle} onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
-                    <ThemedText style={styles.entryName} numberOfLines={2}>
-                      {recipe?.title ?? '?'}
-                    </ThemedText>
-                  </Pressable>
-                  <Stepper value={entry.servings} onChange={(v) => updatePlanEntry(entry.id, v)} format={(v) => `${v}×`} />
-                  <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
-                    <IconSymbol name="xmark" size={18} color={theme.icon} />
-                  </Pressable>
-                </View>
-              );
-            })}
+            {entry ? (
+              <View style={styles.entry}>
+                <Pressable
+                  onPress={() => toggle(entry.id)}
+                  hitSlop={8}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: isPicked }}
+                  accessibilityLabel={t('plan_pick_for_list')}
+                  style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
+                  {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
+                </Pressable>
+                <Pressable
+                  style={styles.entryTitle}
+                  accessibilityRole="button"
+                  onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
+                  <ThemedText style={styles.entryName} numberOfLines={2}>
+                    {recipe?.title ?? '?'}
+                  </ThemedText>
+                </Pressable>
+                <Stepper value={entry.servings} onChange={(v) => updatePlanEntry(entry.id, v)} format={(v) => `${v}×`} />
+                <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
+                  <IconSymbol name="xmark" size={18} color={theme.icon} />
+                </Pressable>
+              </View>
+            ) : (
+              <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>
+            )}
           </Card>
         );
       })}

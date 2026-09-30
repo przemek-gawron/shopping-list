@@ -63,12 +63,15 @@ interface Actions {
   updateRecipe: (recipe: Recipe) => void;
   removeRecipe: (id: string) => void;
 
-  addPlanEntry: (entry: Omit<PlanEntry, 'id'>) => void;
+  /** Puts a recipe in a day's meal slot; a slot holds one recipe, so it replaces what was there. */
+  setPlanEntry: (entry: Omit<PlanEntry, 'id'>) => void;
   updatePlanEntry: (id: string, servings: number) => void;
   removePlanEntry: (id: string) => void;
 
   setMealCount: (count: number) => void;
   renameSlot: (id: string, name: string) => void;
+  /** Reorders the visible meals; plan entries follow their slot. */
+  moveSlot: (id: string, direction: -1 | 1) => void;
 
   /** Replaces the shopping list with the ingredients of the given plan entries. */
   generateList: (entryIds: string[]) => void;
@@ -149,8 +152,13 @@ export const useStore = create<Store>()(
         }));
       },
 
-      addPlanEntry: (entry) =>
-        set((s) => ({ plan: [...s.plan, { ...entry, id: generateId() }] })),
+      setPlanEntry: (entry) =>
+        set((s) => ({
+          plan: [
+            ...s.plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
+            { ...entry, id: generateId() },
+          ],
+        })),
       updatePlanEntry: (id, servings) =>
         set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
       removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
@@ -161,6 +169,15 @@ export const useStore = create<Store>()(
           const slots = [...s.slots];
           while (slots.length < mealCount) slots.push({ id: generateId() });
           return { mealCount, slots };
+        }),
+      moveSlot: (id, direction) =>
+        set((s) => {
+          const index = s.slots.findIndex((slot) => slot.id === id);
+          const target = index + direction;
+          if (index < 0 || target < 0 || target >= s.mealCount) return s;
+          const slots = [...s.slots];
+          [slots[index], slots[target]] = [slots[target], slots[index]];
+          return { slots };
         }),
       renameSlot: (id, name) =>
         set((s) => ({
@@ -208,7 +225,16 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'shopping-list:v2',
-      version: 1,
+      version: 2,
+      // v1 allowed several recipes in one meal slot; keep the most recently added one
+      migrate: (persisted, version) => {
+        const data = persisted as Data;
+        if (version < 2 && Array.isArray(data?.plan)) {
+          const bySlot = new Map(data.plan.map((e) => [`${e.date}:${e.slotId}`, e]));
+          data.plan = [...bySlot.values()];
+        }
+        return data;
+      },
       storage: createJSONStorage(() => AsyncStorage),
       // functions are not serialisable; persist the data only
       partialize: (s): Data => ({

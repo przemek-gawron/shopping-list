@@ -26,7 +26,8 @@ export default function PlanAddScreen() {
   const recipes = useStore((s) => s.recipes);
   const allSlots = useStore((s) => s.slots);
   const mealCount = useStore((s) => s.mealCount);
-  const addPlanEntry = useStore((s) => s.addPlanEntry);
+  const setPlanEntry = useStore((s) => s.setPlanEntry);
+  const plan = useStore((s) => s.plan);
 
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
   const [recipeId, setRecipeId] = useState<string | null>(params.recipeId ?? null);
@@ -44,10 +45,13 @@ export default function PlanAddScreen() {
   }, [recipes, query]);
 
   const chosen = recipes.find((r) => r.id === recipeId);
+  // a slot holds one recipe, so saving onto a taken slot replaces it
+  const occupied = plan.find((e) => e.date === date && e.slotId === slotId);
+  const replaced = occupied && recipes.find((r) => r.id === occupied.recipeId);
 
   const save = () => {
     if (!chosen) return;
-    addPlanEntry({ date, slotId, recipeId: chosen.id, servings });
+    setPlanEntry({ date, slotId, recipeId: chosen.id, servings });
     router.back();
   };
 
@@ -112,6 +116,7 @@ export default function PlanAddScreen() {
             <ThemedText type="label">{t('servings')}</ThemedText>
             <Stepper value={servings} onChange={setServings} format={(v) => `${v}×`} />
           </View>
+          {replaced && <ThemedText type="small">{t('plan_replaces', { name: replaced.title })}</ThemedText>}
           <Button label={t('plan_add_confirm')} onPress={save} />
         </>
       )}
