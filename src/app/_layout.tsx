@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
-import { View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { Colors } from '@/constants/theme';
@@ -52,7 +52,21 @@ export default function RootLayout() {
 
   if (!hydrated) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
 
-  const modal = { presentation: 'modal' } as const;
+  // iOS modals have no back arrow; without this the only way out is the swipe-down gesture
+  const modal = {
+    presentation: 'modal',
+    headerLeft:
+      Platform.OS === 'ios'
+        ? () => (
+            <Text
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              style={{ color: colors.tint, fontSize: 16, fontWeight: '600', paddingHorizontal: 6 }}>
+              {t('cancel')}
+            </Text>
+          )
+        : undefined,
+  } as const;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
