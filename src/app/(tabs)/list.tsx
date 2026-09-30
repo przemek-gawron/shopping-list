@@ -58,12 +58,19 @@ export default function ListScreen() {
         style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: item.checked ? theme.tint : 'transparent' }]}>
         {item.checked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
       </Pressable>
-      <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
-        {item.name}
-      </ThemedText>
-      <ThemedText type="small" style={item.checked && styles.doneText}>
-        {formatQuantity(item.quantity)} {t(`unit_${item.unit}`)}
-      </ThemedText>
+      {/* tapping the name or amount opens the item for editing */}
+      <Pressable
+        style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('list_edit')} – ${item.name}`}
+        onPress={() => router.push({ pathname: '/list/add', params: { id: item.id } })}>
+        <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
+          {item.name}
+        </ThemedText>
+        <ThemedText type="small" style={item.checked && styles.doneText}>
+          {formatQuantity(item.quantity)} {t(`unit_${item.unit}`)}
+        </ThemedText>
+      </Pressable>
       <Pressable hitSlop={8} accessibilityRole="button" onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
         <IconSymbol name="xmark" size={18} color={theme.icon} />
       </Pressable>
@@ -127,6 +134,8 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   section: { gap: Spacing.two },
   item: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 4 },
+  itemBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  pressed: { opacity: 0.6 },
   itemName: { flex: 1, fontWeight: '600' },
   doneText: { textDecorationLine: 'line-through' },
   checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
