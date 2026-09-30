@@ -5,6 +5,7 @@ import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { UpdateToast } from '@/components/update-toast';
 import { Colors } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -93,6 +94,8 @@ export default function RootLayout() {
           <Stack.Screen name="meals" options={{ title: t('meals_title') }} />
           <Stack.Screen name="about" options={{ title: t('about_title') }} />
         </Stack>
+        {/* expo-updates has nothing to report on web */}
+        {Platform.OS !== 'web' && <UpdateToast />}
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>
