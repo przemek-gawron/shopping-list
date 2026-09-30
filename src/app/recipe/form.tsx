@@ -92,13 +92,19 @@ export default function RecipeFormScreen() {
     const trimmed = title.trim();
     if (!trimmed) return Alert.alert(t('recipe_title_required'));
 
+    // products created by earlier rows of this save, so the same new name is not added twice
+    const created = new Map<string, string>();
     const ingredients = rows
       .filter((r) => r.name.trim())
       .map((r) => {
         const name = r.name.trim();
-        const existing = products.find((p) => p.name.toLowerCase() === name.toLowerCase());
-        const productId =
-          existing?.id ?? addProduct({ name, defaultUnit: r.unit, departmentId: 'other' });
+        const key = name.toLowerCase();
+        const existing = products.find((p) => p.name.toLowerCase() === key);
+        let productId = existing?.id ?? created.get(key);
+        if (!productId) {
+          productId = addProduct({ name, defaultUnit: r.unit, departmentId: 'other' });
+          created.set(key, productId);
+        }
         const quantity = parseFloat(r.quantity.replace(',', '.'));
         return {
           id: generateId(),
