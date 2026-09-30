@@ -158,6 +158,11 @@ const en: Record<keyof typeof pl, string> = {
   about_offline_title: 'No account',
   about_offline_text: 'The app needs no sign-in and no internet. Data is stored only on your device.',
 
+  update_ready: 'A new version is ready',
+  update_installed: 'The app was updated',
+  update_version: 'Version from {{when}}',
+  update_restart: 'Restart',
+
   slot_breakfast: 'Breakfast',
   slot_second_breakfast: 'Second breakfast',
   slot_lunch: 'Lunch',

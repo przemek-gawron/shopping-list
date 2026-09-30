@@ -6,7 +6,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { Screen } from '@/components/screen';
-import { Stepper } from '@/components/stepper';
+import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing } from '@/constants/theme';
@@ -33,6 +33,8 @@ export default function PlanScreen() {
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
   const [selectedDate, setSelectedDate] = useState(today());
   const [picked, setPicked] = useState<string[]>([]);
+  /** Plan entry whose multiplier choices are open. */
+  const [editing, setEditing] = useState<string | null>(null);
 
   const weekStart = startOfWeek(selectedDate);
   const days = weekDays(weekStart);
@@ -128,29 +130,44 @@ export default function PlanScreen() {
               </Pressable>
             </View>
             {entry ? (
-              <View style={styles.entry}>
-                <Pressable
-                  onPress={() => toggle(entry.id)}
-                  hitSlop={8}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: isPicked }}
-                  accessibilityLabel={t('plan_pick_for_list')}
-                  style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
-                  {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-                </Pressable>
-                <Pressable
-                  style={styles.entryTitle}
-                  accessibilityRole="button"
-                  onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
-                  <ThemedText style={styles.entryName} numberOfLines={2}>
-                    {recipe?.title ?? '?'}
-                  </ThemedText>
-                </Pressable>
-                <Stepper value={entry.servings} onChange={(v) => updatePlanEntry(entry.id, v)} format={(v) => `${v}×`} />
-                <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
-                  <IconSymbol name="xmark" size={18} color={theme.icon} />
-                </Pressable>
-              </View>
+              <>
+                <View style={styles.entry}>
+                  <Pressable
+                    onPress={() => toggle(entry.id)}
+                    hitSlop={8}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isPicked }}
+                    accessibilityLabel={t('plan_pick_for_list')}
+                    style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
+                    {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
+                  </Pressable>
+                  <Pressable
+                    style={styles.entryTitle}
+                    accessibilityRole="button"
+                    onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
+                    <ThemedText style={styles.entryName} numberOfLines={2}>
+                      {recipe?.title ?? '?'}
+                    </ThemedText>
+                  </Pressable>
+                  <ServingsStepper
+                    value={entry.servings}
+                    onChange={(v) => updatePlanEntry(entry.id, v)}
+                    onValuePress={() => setEditing(editing === entry.id ? null : entry.id)}
+                  />
+                  <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
+                    <IconSymbol name="xmark" size={18} color={theme.icon} />
+                  </Pressable>
+                </View>
+                {editing === entry.id && (
+                  <ServingsChips
+                    value={entry.servings}
+                    onChange={(v) => {
+                      updatePlanEntry(entry.id, v);
+                      setEditing(null);
+                    }}
+                  />
+                )}
+              </>
             ) : (
               <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>
             )}

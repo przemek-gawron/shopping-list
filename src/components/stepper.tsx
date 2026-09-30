@@ -11,10 +11,12 @@ type Props = {
   max?: number;
   step?: number;
   format?: (value: number) => string;
+  /** Makes the number tappable, e.g. to offer more values than the buttons reach. */
+  onValuePress?: () => void;
 };
 
 /** − value + control. */
-export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format }: Props) {
+export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, onValuePress }: Props) {
   const theme = useTheme();
   const button = (icon: 'minus' | 'plus', next: number, disabled: boolean, label: string) => (
     <Pressable
@@ -35,7 +37,12 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format }
   return (
     <View style={styles.root}>
       {button('minus', Math.max(min, value - step), value <= min, '−')}
-      <ThemedText type="default" style={styles.value}>
+      <ThemedText
+        type="default"
+        color={onValuePress ? 'tint' : 'text'}
+        style={styles.value}
+        onPress={onValuePress}
+        accessibilityRole={onValuePress ? 'button' : undefined}>
         {format ? format(value) : String(value)}
       </ThemedText>
       {button('plus', Math.min(max, value + step), value >= max, '+')}
@@ -46,5 +53,5 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format }
 const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   button: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  value: { minWidth: 34, textAlign: 'center', fontWeight: '700' },
+  value: { minWidth: 40, textAlign: 'center', fontWeight: '700' },
 });

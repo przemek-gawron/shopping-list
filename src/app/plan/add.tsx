@@ -7,10 +7,10 @@ import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
 import { Page } from '@/components/screen';
-import { Stepper } from '@/components/stepper';
+import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { useSlotName } from '@/data/labels';
+import { groupForSlot, useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
@@ -24,6 +24,7 @@ export default function PlanAddScreen() {
   const locale = useLocale();
   const slotName = useSlotName();
   const recipes = useStore((s) => s.recipes);
+  const groups = useStore((s) => s.groups);
   const allSlots = useStore((s) => s.slots);
   const mealCount = useStore((s) => s.mealCount);
   const setPlanEntry = useStore((s) => s.setPlanEntry);
@@ -35,14 +36,22 @@ export default function PlanAddScreen() {
   const [slotId, setSlotId] = useState(params.slotId ?? slots[0]?.id ?? '');
   const [servings, setServings] = useState(1);
   const [query, setQuery] = useState('');
+  const [showMultipliers, setShowMultipliers] = useState(false);
+  // opened from a meal of the plan: start with the recipes of the matching group ("Obiad" -> "Obiady")
+  const [groupFilter, setGroupFilter] = useState<string | null>(() => {
+    const index = slots.findIndex((s) => s.id === params.slotId);
+    return index < 0 ? null : (groupForSlot(slots[index], slotName(slots[index], index), groups)?.id ?? null);
+  });
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(today(), i));
   if (!days.includes(date)) days.unshift(date);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return recipes.filter((r) => !q || r.title.toLowerCase().includes(q)).sort((a, b) => a.title.localeCompare(b.title));
-  }, [recipes, query]);
+    return recipes
+      .filter((r) => (!groupFilter || r.groupId === groupFilter) && (!q || r.title.toLowerCase().includes(q)))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [recipes, query, groupFilter]);
 
   const chosen = recipes.find((r) => r.id === recipeId);
   // a slot holds one recipe, so saving onto a taken slot replaces it
@@ -79,6 +88,15 @@ export default function PlanAddScreen() {
               placeholderTextColor={theme.icon}
               style={[styles.search, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
             />
+            {groups.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+                <Chip label={t('all')} selected={groupFilter === null} onPress={() => setGroupFilter(null)} />
+                {groups.map((g) => (
+                  <Chip key={g.id} label={`${g.emoji} ${g.name}`} selected={groupFilter === g.id} onPress={() => setGroupFilter(g.id)} />
+                ))}
+              </ScrollView>
+            )}
+            {recipes.length > 0 && matches.length === 0 && <EmptyState emoji="🔎" title={t('recipes_none_found')} />}
             {recipes.length === 0 && <EmptyState emoji="🍽️" title={t('recipes_empty_title')} subtitle={t('plan_no_recipes')} />}
             {matches.map((r) => (
               <Card key={r.id} onPress={() => setRecipeId(r.id)}>
@@ -114,8 +132,17 @@ export default function PlanAddScreen() {
           </View>
           <View style={[styles.section, styles.servings]}>
             <ThemedText type="label">{t('servings')}</ThemedText>
-            <Stepper value={servings} onChange={setServings} format={(v) => `${v}×`} />
+            <ServingsStepper value={servings} onChange={setServings} onValuePress={() => setShowMultipliers(!showMultipliers)} />
           </View>
+          {showMultipliers && (
+            <ServingsChips
+              value={servings}
+              onChange={(v) => {
+                setServings(v);
+                setShowMultipliers(false);
+              }}
+            />
+          )}
           {replaced && <ThemedText type="small">{t('plan_replaces', { name: replaced.title })}</ThemedText>}
           <Button label={t('plan_add_confirm')} onPress={save} />
         </>

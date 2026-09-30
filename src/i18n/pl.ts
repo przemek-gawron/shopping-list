@@ -156,6 +156,11 @@ export default {
   about_offline_title: 'Bez konta',
   about_offline_text: 'Aplikacja nie wymaga logowania ani internetu. Dane są zapisane tylko na Twoim urządzeniu.',
 
+  update_ready: 'Nowa wersja jest gotowa',
+  update_installed: 'Aplikacja została zaktualizowana',
+  update_version: 'Wersja z {{when}}',
+  update_restart: 'Uruchom ponownie',
+
   slot_breakfast: 'Śniadanie',
   slot_second_breakfast: 'II śniadanie',
   slot_lunch: 'Obiad',
