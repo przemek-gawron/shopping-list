@@ -66,13 +66,13 @@ export default function PlanScreen() {
   return (
     <Screen title={t('plan_title')}>
       <View style={styles.weekNav}>
-        <Pressable hitSlop={10} onPress={() => setSelectedDate(addDays(selectedDate, -7))} accessibilityLabel={t('plan_prev_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(selectedDate, -7))} accessibilityLabel={t('plan_prev_week')}>
           <IconSymbol name="chevron.left" size={22} color={theme.tint} />
         </Pressable>
-        <Pressable onPress={() => setSelectedDate(today())} accessibilityLabel={t('plan_today')}>
+        <Pressable accessibilityRole="button" onPress={() => setSelectedDate(today())} accessibilityLabel={t('plan_today')}>
           <ThemedText type="heading">{weekLabel}</ThemedText>
         </Pressable>
-        <Pressable hitSlop={10} onPress={() => setSelectedDate(addDays(selectedDate, 7))} accessibilityLabel={t('plan_next_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(selectedDate, 7))} accessibilityLabel={t('plan_next_week')}>
           <IconSymbol name="chevron.right" size={22} color={theme.tint} />
         </Pressable>
       </View>
@@ -116,6 +116,7 @@ export default function PlanScreen() {
               <ThemedText type="label">{slotName(slot, index)}</ThemedText>
               <Pressable
                 hitSlop={8}
+                accessibilityRole="button"
                 onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
                 accessibilityLabel={`${t('plan_add_meal')} – ${slotName(slot, index)}`}>
                 <ThemedText color="tint" style={styles.addLink}>
@@ -144,7 +145,7 @@ export default function PlanScreen() {
                     </ThemedText>
                   </Pressable>
                   <Stepper value={entry.servings} onChange={(v) => updatePlanEntry(entry.id, v)} format={(v) => `${v}×`} />
-                  <Pressable hitSlop={8} onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
+                  <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
                     <IconSymbol name="xmark" size={18} color={theme.icon} />
                   </Pressable>
                 </View>

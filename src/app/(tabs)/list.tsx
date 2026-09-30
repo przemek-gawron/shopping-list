@@ -64,7 +64,7 @@ export default function ListScreen() {
       <ThemedText type="small" style={item.checked && styles.doneText}>
         {formatQuantity(item.quantity)} {t(`unit_${item.unit}`)}
       </ThemedText>
-      <Pressable hitSlop={8} onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
+      <Pressable hitSlop={8} accessibilityRole="button" onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
         <IconSymbol name="xmark" size={18} color={theme.icon} />
       </Pressable>
     </View>

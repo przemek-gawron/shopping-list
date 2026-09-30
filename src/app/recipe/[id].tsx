@@ -30,6 +30,7 @@ export default function RecipeScreen() {
           headerRight: () => (
             <ThemedText
               color="tint"
+              accessibilityRole="button"
               style={styles.edit}
               onPress={() => router.push({ pathname: '/recipe/form', params: { id: recipe.id } })}>
               {t('edit')}
