@@ -6,6 +6,7 @@ import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
+import { MenuSections } from '@/components/menu-sections';
 import { RecipePhoto } from '@/components/recipe-photo';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
@@ -80,11 +81,13 @@ export default function RecipesScreen() {
       ) : visible.length === 0 ? (
         <EmptyState emoji="🔎" title={t('recipes_none_found')} />
       ) : (
-        <View style={styles.list}>
-          {visible.map((r) => {
+        <MenuSections
+          recipes={visible}
+          flat={!!query.trim()}
+          renderRecipe={(r) => {
             const group = groupOf(r.groupId);
             return (
-              <Card key={r.id} onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: r.id } })} style={styles.row}>
+              <Card onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: r.id } })} style={styles.row}>
                 <RecipePhoto photo={r.photo} emoji={group?.emoji ?? '🍽️'} size={64} />
                 <View style={styles.rowText}>
                   <ThemedText type="default" style={styles.rowTitle} numberOfLines={2}>
@@ -96,8 +99,8 @@ export default function RecipesScreen() {
                 </View>
               </Card>
             );
-          })}
-        </View>
+          }}
+        />
       )}
     </Screen>
   );
@@ -106,7 +109,6 @@ export default function RecipesScreen() {
 const styles = StyleSheet.create({
   search: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
   chips: { gap: Spacing.two, paddingVertical: 2 },
-  list: { gap: Spacing.two },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: 10 },
   rowText: { flex: 1, gap: 2 },
   rowTitle: { fontWeight: '700' },

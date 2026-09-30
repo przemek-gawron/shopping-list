@@ -92,6 +92,7 @@ export default function RootLayout() {
           <Stack.Screen name="plan/add" options={modal} />
           <Stack.Screen name="list/add" options={modal} />
           <Stack.Screen name="meals" options={{ title: t('meals_title') }} />
+          <Stack.Screen name="menus" options={{ title: t('menus_title') }} />
           <Stack.Screen name="about" options={{ title: t('about_title') }} />
         </Stack>
         {/* expo-updates has nothing to report on web */}

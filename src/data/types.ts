@@ -32,6 +32,12 @@ export interface Group {
   emoji: string;
 }
 
+/** A dietitian meal plan (one imported .doc) that recipes came from. */
+export interface Menu {
+  id: string;
+  name: string;
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -39,6 +45,8 @@ export interface Recipe {
   ingredients: Ingredient[];
   /** null = not in any group */
   groupId: string | null;
+  /** Meal plans this recipe appeared in; none for recipes added by hand. */
+  menuIds?: string[];
   /** File name of the photo inside the app's document directory */
   photo?: string;
 }

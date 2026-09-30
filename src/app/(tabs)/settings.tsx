@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Card } from '@/components/card';
 import { Screen } from '@/components/screen';
@@ -27,6 +27,8 @@ export default function SettingsScreen() {
   const loadSamples = useStore((s) => s.loadSamples);
   const clearAll = useStore((s) => s.clearAll);
   const importRecipes = useStore((s) => s.importRecipes);
+  const groupByMenu = useStore((s) => s.groupByMenu);
+  const setGroupByMenu = useStore((s) => s.setGroupByMenu);
 
   const link = (label: string, onPress: () => void, destructive = false) => (
     <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.link, pressed && { opacity: 0.6 }]}>
@@ -53,7 +55,7 @@ export default function SettingsScreen() {
     try {
       const source = new File(picked.assets[0].uri);
       // a Word meal plan is parsed on the device; anything else must be a recipe JSON file
-      const doc = parseMealPlanDoc(new Uint8Array(await source.arrayBuffer()));
+      const doc = parseMealPlanDoc(new Uint8Array(await source.arrayBuffer()), picked.assets[0].name);
       file = doc ? doc.file : parseRecipeFile(await source.text());
       unknown = doc?.unknown ?? 0;
     } catch {
@@ -73,6 +75,20 @@ export default function SettingsScreen() {
           <Stepper value={mealCount} onChange={setMealCount} min={1} max={MAX_MEALS} />
         </View>
         {link(t('meals_names'), () => router.push('/meals'))}
+      </Card>
+
+      <ThemedText type="label">{t('settings_recipes')}</ThemedText>
+      <Card style={styles.card}>
+        <View style={styles.rowBetween}>
+          <ThemedText style={[styles.linkLabel, styles.flex]}>{t('settings_group_by_menu')}</ThemedText>
+          <Switch
+            value={groupByMenu}
+            onValueChange={setGroupByMenu}
+            trackColor={{ true: theme.tint }}
+            accessibilityLabel={t('settings_group_by_menu')}
+          />
+        </View>
+        {link(t('settings_menus'), () => router.push('/menus'))}
       </Card>
 
       <ThemedText type="label">{t('settings_data')}</ThemedText>
@@ -113,7 +129,8 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   card: { gap: Spacing.one },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, paddingVertical: 4 },
   link: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
   linkLabel: { fontWeight: '600' },
+  flex: { flex: 1 },
 });

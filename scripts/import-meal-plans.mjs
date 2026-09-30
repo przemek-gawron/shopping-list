@@ -13,6 +13,7 @@
  * src/data/meal-plan-products.ts.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import { basename } from 'node:path';
 
 import { extractDocText } from '../src/data/doc-text.ts';
 import { MEAL_PLAN_PRODUCTS } from '../src/data/meal-plan-products.ts';
@@ -31,15 +32,21 @@ if (files.length === 0 || (!out && !rawNames)) {
 const byTitle = new Map();
 const groups = new Map();
 const unknown = new Set();
+/** Meal plan names (from the file names), oldest first. */
+const menus = [];
 let overwritten = 0;
 for (const file of files) {
   const plan = parseMealPlan(extractDocText(new Uint8Array(readFileSync(file))), MEAL_PLAN_PRODUCTS);
+  const menu = basename(file).replace(/\.[^.]+$/, '').replace(/\s+/g, ' ').trim();
+  if (!menus.includes(menu)) menus.push(menu);
   plan.groups.forEach((g) => groups.set(g.name, g));
   plan.unknown.forEach((name) => unknown.add(name));
   for (const recipe of plan.recipes) {
     const key = recipe.title.toLowerCase();
-    if (byTitle.has(key)) overwritten++;
-    byTitle.set(key, recipe);
+    const earlier = byTitle.get(key);
+    if (earlier) overwritten++;
+    // a repeated recipe takes the newer content but stays listed under every plan it was in
+    byTitle.set(key, { ...recipe, menus: [...new Set([...(earlier?.menus ?? []), menu])] });
   }
 }
 
@@ -49,7 +56,7 @@ if (rawNames) {
 }
 
 const recipes = [...byTitle.values()];
-writeFileSync(out, JSON.stringify({ format: 'shopping-list-recipes', version: 1, groups: [...groups.values()], recipes }, null, 2));
+writeFileSync(out, JSON.stringify({ format: 'shopping-list-recipes', version: 1, menus, groups: [...groups.values()], recipes }, null, 2));
 
 console.log(`${recipes.length} recipes written to ${out} (${overwritten} repeated recipes overwritten)`);
 for (const g of groups.values()) console.log(`  ${g.name}: ${recipes.filter((r) => r.group === g.name).length}`);

@@ -9,6 +9,7 @@ import type {
   Group,
   Language,
   ListItem,
+  Menu,
   MealSlot,
   PlanEntry,
   Product,
@@ -31,6 +32,10 @@ interface Data {
   groups: Group[];
   products: Product[];
   recipes: Recipe[];
+  /** Imported meal plans, newest first. */
+  menus: Menu[];
+  /** Show recipe lists split into collapsible sections per meal plan. */
+  groupByMenu: boolean;
   plan: PlanEntry[];
   list: ListItem[];
   slots: MealSlot[];
@@ -43,6 +48,8 @@ const initialData = (): Data => ({
   groups: [],
   products: [],
   recipes: [],
+  menus: [],
+  groupByMenu: false,
   plan: [],
   list: [],
   slots: DEFAULT_SLOTS,
@@ -77,12 +84,18 @@ interface Actions {
   /** Replaces the shopping list with the ingredients of the given plan entries. */
   generateList: (entryIds: string[]) => void;
   addListItem: (item: Omit<ListItem, 'id' | 'checked'>) => void;
+  updateListItem: (item: ListItem) => void;
   toggleListItem: (id: string) => void;
   removeListItem: (id: string) => void;
   clearChecked: () => void;
   clearList: () => void;
 
   setLanguage: (language: Language) => void;
+  setGroupByMenu: (value: boolean) => void;
+  renameMenu: (id: string, name: string) => void;
+  moveMenu: (id: string, direction: -1 | 1) => void;
+  /** Removes the meal plan label only; its recipes stay. */
+  removeMenu: (id: string) => void;
   /** Adds the built-in example recipes; returns how many recipes were new. */
   loadSamples: (language: 'pl' | 'en') => number;
   /** Adds recipes from a file; a recipe with the same title is overwritten (its photo is kept). */
@@ -199,6 +212,7 @@ export const useStore = create<Store>()(
       },
       addListItem: (item) =>
         set((s) => ({ list: [...s.list, { ...item, id: generateId(), checked: false }] })),
+      updateListItem: (item) => set((s) => ({ list: s.list.map((i) => (i.id === item.id ? item : i)) })),
       toggleListItem: (id) =>
         set((s) => ({ list: s.list.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)) })),
       removeListItem: (id) => set((s) => ({ list: s.list.filter((i) => i.id !== id) })),
@@ -206,6 +220,23 @@ export const useStore = create<Store>()(
       clearList: () => set({ list: [] }),
 
       setLanguage: (language) => set({ language }),
+      setGroupByMenu: (groupByMenu) => set({ groupByMenu }),
+      renameMenu: (id, name) =>
+        set((s) => ({ menus: s.menus.map((m) => (m.id === id && name.trim() ? { ...m, name: name.trim() } : m)) })),
+      moveMenu: (id, direction) =>
+        set((s) => {
+          const index = s.menus.findIndex((m) => m.id === id);
+          const target = index + direction;
+          if (index < 0 || target < 0 || target >= s.menus.length) return s;
+          const menus = [...s.menus];
+          [menus[index], menus[target]] = [menus[target], menus[index]];
+          return { menus };
+        }),
+      removeMenu: (id) =>
+        set((s) => ({
+          menus: s.menus.filter((m) => m.id !== id),
+          recipes: s.recipes.map((r) => (r.menuIds?.includes(id) ? { ...r, menuIds: r.menuIds.filter((m) => m !== id) } : r)),
+        })),
 
       loadSamples: (language) => {
         const samples = buildSamples(language);
@@ -226,6 +257,17 @@ export const useStore = create<Store>()(
         const groups = [...get().groups];
         const products = [...get().products];
         const recipes = [...get().recipes];
+        let menus = [...get().menus];
+        // newest first; a plan imported again keeps its place
+        const menuId = (name: string) => {
+          let menu = menus.find((m) => same(m.name, name));
+          if (!menu) {
+            menu = { id: generateId(), name };
+            menus = [menu, ...menus];
+          }
+          return menu.id;
+        };
+        file.menus.forEach(menuId);
         let added = 0;
         let updated = 0;
 
@@ -256,15 +298,16 @@ export const useStore = create<Store>()(
             ingredients,
           };
           const index = recipes.findIndex((r) => same(r.title, incoming.title));
+          const menuIds = [...new Set([...((index >= 0 && recipes[index].menuIds) || []), ...incoming.menus.map(menuId)])];
           if (index >= 0) {
-            recipes[index] = { ...recipes[index], ...data };
+            recipes[index] = { ...recipes[index], ...data, menuIds };
             updated++;
           } else {
-            recipes.push({ ...data, id: generateId() });
+            recipes.push({ ...data, menuIds, id: generateId() });
             added++;
           }
         }
-        set({ groups, products, recipes });
+        set({ groups, products, recipes, menus });
         return { added, updated };
       },
 
@@ -291,6 +334,8 @@ export const useStore = create<Store>()(
         groups: s.groups,
         products: s.products,
         recipes: s.recipes,
+        menus: s.menus,
+        groupByMenu: s.groupByMenu,
         plan: s.plan,
         list: s.list,
         slots: s.slots,

@@ -7,11 +7,15 @@ import type { DepartmentId, Unit } from '@/data/types';
 
 /** Recipes to import: a JSON file produced by `scripts/import-meal-plans.mjs`, or a parsed .doc meal plan. */
 export interface RecipeFile {
+  /** Meal plan names, oldest first. */
+  menus: string[];
   groups: { name: string; emoji: string }[];
   recipes: {
     title: string;
     group: string | null;
     description?: string;
+    /** Names of the meal plans the recipe belongs to. */
+    menus: string[];
     ingredients: { name: string; quantity: number; unit: Unit; department: DepartmentId }[];
   }[];
 }
@@ -19,10 +23,13 @@ export interface RecipeFile {
 const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
 
 /** Recipes of a dietitian meal plan in Word format; `unknown` counts ingredient names the dictionary lacks. */
-export function parseMealPlanDoc(bytes: Uint8Array): { file: RecipeFile; unknown: number } | null {
+export function parseMealPlanDoc(bytes: Uint8Array, fileName: string): { file: RecipeFile; unknown: number } | null {
   if (!isDocFile(bytes)) return null;
   const plan = parseMealPlan(extractDocText(bytes), MEAL_PLAN_PRODUCTS);
-  const file = toRecipeFile(plan);
+  // the meal plan is named after its file
+  const menu = fileName.replace(/\.[^.]+$/, '').replace(/\s+/g, ' ').trim();
+  const menus = menu ? [menu] : [];
+  const file = toRecipeFile({ ...plan, menus, recipes: plan.recipes.map((r) => ({ ...r, menus })) });
   return file && { file, unknown: plan.unknown.length };
 }
 
@@ -40,7 +47,8 @@ export function parseRecipeFile(json: string): RecipeFile | null {
 
 /** Keeps only well-formed groups, recipes and ingredients. */
 function toRecipeFile(data: unknown): RecipeFile | null {
-  const file = data as { groups?: unknown; recipes?: unknown };
+  const file = data as { menus?: unknown; groups?: unknown; recipes?: unknown };
+  const names = (value: unknown) => (Array.isArray(value) ? value.map(text).filter(Boolean) : []);
   if (!Array.isArray(file?.recipes)) return null;
 
   const groups = (Array.isArray(file.groups) ? file.groups : [])
@@ -52,6 +60,7 @@ function toRecipeFile(data: unknown): RecipeFile | null {
       title: text(r?.title),
       group: text(r?.group) || null,
       description: text(r?.description) || undefined,
+      menus: names(r?.menus),
       ingredients: (Array.isArray(r?.ingredients) ? r.ingredients : [])
         .map((i: Record<string, unknown>) => ({
           name: text(i?.name),
@@ -63,5 +72,5 @@ function toRecipeFile(data: unknown): RecipeFile | null {
     }))
     .filter((r) => r.title);
 
-  return { groups, recipes };
+  return { menus: names(file.menus), groups, recipes };
 }

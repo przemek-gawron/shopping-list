@@ -6,6 +6,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
+import { MenuSections } from '@/components/menu-sections';
 import { Page } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
@@ -98,11 +99,15 @@ export default function PlanAddScreen() {
             )}
             {recipes.length > 0 && matches.length === 0 && <EmptyState emoji="🔎" title={t('recipes_none_found')} />}
             {recipes.length === 0 && <EmptyState emoji="🍽️" title={t('recipes_empty_title')} subtitle={t('plan_no_recipes')} />}
-            {matches.map((r) => (
-              <Card key={r.id} onPress={() => setRecipeId(r.id)}>
-                <ThemedText style={styles.chosenName}>{r.title}</ThemedText>
-              </Card>
-            ))}
+            <MenuSections
+              recipes={matches}
+              flat={!!query.trim()}
+              renderRecipe={(r) => (
+                <Card onPress={() => setRecipeId(r.id)}>
+                  <ThemedText style={styles.chosenName}>{r.title}</ThemedText>
+                </Card>
+              )}
+            />
           </>
         )}
       </View>
