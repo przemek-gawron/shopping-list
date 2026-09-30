@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type { RecipeFile } from '@/data/import';
 import { buildSamples } from '@/data/sample-data';
 import { buildShoppingList } from '@/data/shopping';
 import type {
@@ -84,6 +85,8 @@ interface Actions {
   setLanguage: (language: Language) => void;
   /** Adds the built-in example recipes; returns how many recipes were new. */
   loadSamples: (language: 'pl' | 'en') => number;
+  /** Adds recipes from a file; a recipe with the same title is overwritten (its photo is kept). */
+  importRecipes: (file: RecipeFile) => { added: number; updated: number };
   /** Wipes everything except the language setting. */
   clearAll: () => void;
 }
@@ -216,6 +219,53 @@ export const useStore = create<Store>()(
           recipes: [...recipes, ...newRecipes],
         });
         return newRecipes.length;
+      },
+
+      importRecipes: (file) => {
+        const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+        const groups = [...get().groups];
+        const products = [...get().products];
+        const recipes = [...get().recipes];
+        let added = 0;
+        let updated = 0;
+
+        const groupId = (name: string | null) => {
+          if (!name) return null;
+          let group = groups.find((g) => same(g.name, name));
+          if (!group) {
+            const emoji = file.groups.find((g) => same(g.name, name))?.emoji ?? '🍽️';
+            group = { id: generateId(), name, emoji };
+            groups.push(group);
+          }
+          return group.id;
+        };
+
+        for (const incoming of file.recipes) {
+          const ingredients = incoming.ingredients.map((ing) => {
+            let product = products.find((p) => same(p.name, ing.name));
+            if (!product) {
+              product = { id: generateId(), name: ing.name, defaultUnit: ing.unit, departmentId: ing.department };
+              products.push(product);
+            }
+            return { id: generateId(), productId: product.id, quantity: ing.quantity, unit: ing.unit };
+          });
+          const data = {
+            title: incoming.title,
+            description: incoming.description,
+            groupId: groupId(incoming.group),
+            ingredients,
+          };
+          const index = recipes.findIndex((r) => same(r.title, incoming.title));
+          if (index >= 0) {
+            recipes[index] = { ...recipes[index], ...data };
+            updated++;
+          } else {
+            recipes.push({ ...data, id: generateId() });
+            added++;
+          }
+        }
+        set({ groups, products, recipes });
+        return { added, updated };
       },
 
       clearAll: () => {

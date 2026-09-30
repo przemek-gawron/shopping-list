@@ -20,6 +20,14 @@ const here = dirname(fileURLToPath(import.meta.url));
 /** raw ingredient name (lower case) -> [product name, store department] or null to skip it */
 const DICTIONARY = JSON.parse(readFileSync(join(here, 'meal-plan-products.json'), 'utf8'));
 
+/** Spices are bought by the packet, so they go on the list as one piece whatever the recipe's amount. */
+const SPICES = new Set([
+  'Sól', 'Sól i pieprz', 'Pieprz czarny', 'Pieprz biały', 'Przyprawy', 'Oregano', 'Bazylia suszona', 'Tymianek',
+  'Rozmaryn', 'Majeranek', 'Zioła prowansalskie', 'Curry', 'Kurkuma', 'Cynamon', 'Papryka słodka mielona',
+  'Papryka wędzona', 'Chili w proszku', 'Czosnek granulowany', 'Imbir mielony', 'Kmin rzymski', 'Garam masala',
+  'Kardamon', 'Czarnuszka',
+]);
+
 const SECTIONS = [
   { pattern: /^PRZYKŁADOWE ŚNIADANIA/, group: 'Śniadania', emoji: '🍳' },
   { pattern: /^PRZYKŁADOWE DRUGIE ŚNIADANIA/, group: 'Drugie śniadania', emoji: '🥪' },
@@ -185,6 +193,10 @@ const recipes = [...byTitle.values()].map((recipe) => {
     if (entry === null) continue;
     if (entry === undefined) unknown.set(key, (unknown.get(key) ?? 0) + 1);
     const [name, department] = entry ?? [ing.raw.trim(), 'other'];
+    if (SPICES.has(name)) {
+      merged.set(name, { name, quantity: 1, unit: 'szt', department });
+      continue;
+    }
     const id = `${name}|${ing.unit}`;
     const existing = merged.get(id);
     if (existing) existing.quantity += ing.quantity;

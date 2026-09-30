@@ -1,3 +1,5 @@
+import * as DocumentPicker from 'expo-document-picker';
+import { File } from 'expo-file-system';
 import { router } from 'expo-router';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
@@ -8,6 +10,7 @@ import { Stepper } from '@/components/stepper';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing } from '@/constants/theme';
+import { parseRecipeFile } from '@/data/import';
 import { MAX_MEALS, useStore } from '@/data/store';
 import type { Language } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -23,6 +26,7 @@ export default function SettingsScreen() {
   const setLanguage = useStore((s) => s.setLanguage);
   const loadSamples = useStore((s) => s.loadSamples);
   const clearAll = useStore((s) => s.clearAll);
+  const importRecipes = useStore((s) => s.importRecipes);
 
   const link = (label: string, onPress: () => void, destructive = false) => (
     <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.link, pressed && { opacity: 0.6 }]}>
@@ -36,6 +40,20 @@ export default function SettingsScreen() {
   const onLoadSamples = () => {
     const added = loadSamples(resolveLocale(language));
     Alert.alert(added > 0 ? t('samples_loaded', { count: added }) : t('samples_already'));
+  };
+
+  const onImport = async () => {
+    const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain'], copyToCacheDirectory: true });
+    if (picked.canceled || !picked.assets[0]) return;
+    let file = null;
+    try {
+      file = parseRecipeFile(await new File(picked.assets[0].uri).text());
+    } catch {
+      // unreadable file: reported below
+    }
+    if (!file || file.recipes.length === 0) return Alert.alert(t('import_invalid'));
+    const { added, updated } = importRecipes(file);
+    Alert.alert(t('import_done', { added, updated }));
   };
 
   return (
@@ -53,6 +71,7 @@ export default function SettingsScreen() {
       <Card style={styles.card}>
         {link(t('settings_groups'), () => router.push('/groups'))}
         {link(t('settings_products'), () => router.push('/products'))}
+        {link(t('settings_import'), () => void onImport())}
         {link(t('settings_load_samples'), () =>
           confirm(t('settings_load_samples'), t('settings_load_samples_message'), t('add'), t('cancel'), onLoadSamples),
         )}

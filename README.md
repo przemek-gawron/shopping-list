@@ -9,6 +9,16 @@ Aplikacja mobilna (Expo SDK 57 + React Native) do zapisywania przepisów, planow
 - **Lista zakupów** – tworzona z zaznaczonych posiłków planu, ze zsumowanymi składnikami, pogrupowana według działów sklepu.
 - **Ustawienia** – liczba posiłków, przykładowe przepisy (PL/EN), wyczyszczenie wszystkich danych, język, opis aplikacji.
 
+## Import przepisów z planów żywieniowych (.doc)
+
+Skrypt (macOS) zamienia plany dietetyka w plik JSON, który wczytasz w aplikacji przez Ustawienia → „Importuj przepisy z pliku":
+
+```bash
+node scripts/import-meal-plans.mjs --out ~/przepisy.json "plan I.doc" "plan II.doc"
+```
+
+Pliki są czytane w podanej kolejności, a przepis o tej samej nazwie nadpisuje wcześniejszy. Nazwy produktów i działy sklepu ujednolica słownik `scripts/meal-plan-products.json`; opcja `--raw-names` wypisuje nazwy, których w nim brakuje. Wynikowego pliku nie dodawaj do repo.
+
 ## Uruchomienie
 
 ```bash
