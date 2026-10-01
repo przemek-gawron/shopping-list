@@ -84,6 +84,8 @@ interface Actions {
   setPlanEntries: (entries: Omit<PlanEntry, 'id'>[]) => void;
   updatePlanEntry: (id: string, servings: number) => void;
   removePlanEntry: (id: string) => void;
+  /** Removes every planned meal from `from` to `to` (YYYY-MM-DD, inclusive), hidden meal slots included. */
+  clearPlan: (from: string, to: string) => void;
   /** Replaces one ingredient of a planned meal; creates the substitute product when it is new. */
   setSwap: (entryId: string, fromProductId: string, substitute: { product: string; quantity: number; unit: Unit }) => void;
   clearSwap: (entryId: string, fromProductId: string) => void;
@@ -200,6 +202,7 @@ export const useStore = create<Store>()(
       updatePlanEntry: (id, servings) =>
         set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
       removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
+      clearPlan: (from, to) => set((s) => ({ plan: s.plan.filter((e) => e.date < from || e.date > to) })),
       setSwap: (entryId, fromProductId, substitute) => {
         const { products } = get();
         let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());

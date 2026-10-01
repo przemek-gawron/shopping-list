@@ -14,6 +14,7 @@ import { useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
+import { confirm } from '@/utils/confirm';
 import { addDays, formatDate, startOfWeek, today, weekDays } from '@/utils/dates';
 
 export default function PlanScreen() {
@@ -29,6 +30,7 @@ export default function PlanScreen() {
   const updatePlanEntry = useStore((s) => s.updatePlanEntry);
   const removePlanEntry = useStore((s) => s.removePlanEntry);
   const generateList = useStore((s) => s.generateList);
+  const clearPlan = useStore((s) => s.clearPlan);
 
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
   const [selectedDate, setSelectedDate] = useState(today());
@@ -45,6 +47,7 @@ export default function PlanScreen() {
 
   const weekLabel = `${formatDate(days[0], locale, { day: 'numeric', month: 'short' })} – ${formatDate(days[6], locale, { day: 'numeric', month: 'short' })}`;
   const dayEntries = (date: string) => shown.filter((e) => e.date === date);
+  const weekEntries = shown.filter((e) => e.date >= days[0] && e.date <= days[6]);
 
   const select = (ids: string[]) => setPicked(ids);
   const idsFor = (predicate: (date: string) => boolean) => shown.filter((e) => predicate(e.date)).map((e) => e.id);
@@ -205,6 +208,36 @@ export default function PlanScreen() {
             onPress={generate}
             disabled={pickedShown.length === 0}
           />
+        </View>
+      )}
+
+      {weekEntries.length > 0 && (
+        <View style={styles.generate}>
+          <ThemedText type="label">{t('plan_clear_title')}</ThemedText>
+          <View style={styles.chips}>
+            {dayEntries(selectedDate).length > 0 && (
+              <Chip
+                label={t('plan_clear_day')}
+                onPress={() =>
+                  confirm(
+                    t('plan_clear_title'),
+                    t('plan_clear_day_message', { date: formatDate(selectedDate, locale, { weekday: 'long', day: 'numeric', month: 'long' }) }),
+                    t('plan_clear_confirm'),
+                    t('cancel'),
+                    () => clearPlan(selectedDate, selectedDate),
+                  )
+                }
+              />
+            )}
+            <Chip
+              label={t('plan_clear_week')}
+              onPress={() =>
+                confirm(t('plan_clear_title'), t('plan_clear_week_message', { range: weekLabel }), t('plan_clear_confirm'), t('cancel'), () =>
+                  clearPlan(days[0], days[6]),
+                )
+              }
+            />
+          </View>
         </View>
       )}
     </Screen>
