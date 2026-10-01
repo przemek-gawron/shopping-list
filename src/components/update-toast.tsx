@@ -33,7 +33,8 @@ export function UpdateToast() {
   const dismiss = () => (toast?.kind === 'ready' ? setReadyDismissed(true) : setInstalled(null));
 
   useEffect(() => {
-    if (!Updates.isEnabled) return;
+    // Expo Go loads every dev reload as a new "update"
+    if (!Updates.isEnabled || __DEV__) return;
     const current = Updates.isEmbeddedLaunch ? 'embedded' : (Updates.updateId ?? 'embedded');
     AsyncStorage.getItem(LAST_UPDATE_KEY)
       .then((last) => {
@@ -45,7 +46,7 @@ export function UpdateToast() {
 
   // the native side only checks at cold start; also look when the app returns to the foreground
   useEffect(() => {
-    if (!Updates.isEnabled) return;
+    if (!Updates.isEnabled || __DEV__) return;
     const subscription = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       Updates.checkForUpdateAsync()
