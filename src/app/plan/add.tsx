@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   chips: { gap: Spacing.two },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   search: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
-  chosen: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
+  chosen: { flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
   chosenName: { flex: 1, fontWeight: '700' },
   change: { fontWeight: '700' },
 });

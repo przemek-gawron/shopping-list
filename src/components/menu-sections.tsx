@@ -1,6 +1,7 @@
 import { Fragment, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Grid } from '@/components/columns';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing } from '@/constants/theme';
@@ -31,7 +32,7 @@ export function MenuSections<T extends { id: string; menuIds?: string[] }>({ rec
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
 
   if (flat || !groupByMenu || menus.length === 0) {
-    return <View style={styles.list}>{recipes.map((r) => <Fragment key={r.id}>{renderRecipe(r)}</Fragment>)}</View>;
+    return <Grid>{recipes.map((r) => <Fragment key={r.id}>{renderRecipe(r)}</Fragment>)}</Grid>;
   }
 
   const known = new Set(menus.map((m) => m.id));
@@ -57,7 +58,7 @@ export function MenuSections<T extends { id: string; menuIds?: string[] }>({ rec
               </ThemedText>
               <ThemedText type="small">{section.recipes.length}</ThemedText>
             </Pressable>
-            {open && section.recipes.map((r) => <Fragment key={r.id}>{renderRecipe(r)}</Fragment>)}
+            {open && <Grid>{section.recipes.map((r) => <Fragment key={r.id}>{renderRecipe(r)}</Fragment>)}</Grid>}
           </View>
         );
       })}

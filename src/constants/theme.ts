@@ -123,5 +123,7 @@ export const Spacing = {
 } as const;
 
 export const MaxContentWidth = 640;
+/** For screens that lay content out in columns on tablets (recipes, shopping list). */
+export const WideContentWidth = 1200;
 
 export type ThemeColors = (typeof Colors)['light'];

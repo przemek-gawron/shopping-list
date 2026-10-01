@@ -6,6 +6,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
+import { Columns } from '@/components/columns';
 import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
@@ -78,7 +79,7 @@ export default function ListScreen() {
   );
 
   return (
-    <Screen title={t('list_title')} action={<AddButton onPress={() => router.push('/list/add')} accessibilityLabel={t('list_add')} />}>
+    <Screen wide title={t('list_title')} action={<AddButton onPress={() => router.push('/list/add')} accessibilityLabel={t('list_add')} />}>
       {list.length === 0 ? (
         <EmptyState emoji="🛒" title={t('list_empty_title')} subtitle={t('list_empty_subtitle')} />
       ) : (
@@ -104,21 +105,37 @@ export default function ListScreen() {
             />
           </View>
 
-          {sections.map((section) => (
-            <Card key={section.id} style={styles.section}>
-              <ThemedText type="label">
-                {section.emoji} {t(`dept_${section.id}`)}
-              </ThemedText>
-              {section.items.map(row)}
-            </Card>
-          ))}
-
-          {checked.length > 0 && (
-            <Card style={styles.section}>
-              <ThemedText type="label">✅ {t('list_checked')}</ThemedText>
-              {checked.map(row)}
-            </Card>
-          )}
+          {/* departments side by side on tablets; the label row counts as one item */}
+          <Columns
+            blocks={[
+              ...sections.map((section) => ({
+                key: section.id,
+                weight: section.items.length + 1,
+                node: (
+                  <Card style={styles.section}>
+                    <ThemedText type="label">
+                      {section.emoji} {t(`dept_${section.id}`)}
+                    </ThemedText>
+                    {section.items.map(row)}
+                  </Card>
+                ),
+              })),
+              ...(checked.length > 0
+                ? [
+                    {
+                      key: 'checked',
+                      weight: checked.length + 1,
+                      node: (
+                        <Card style={styles.section}>
+                          <ThemedText type="label">✅ {t('list_checked')}</ThemedText>
+                          {checked.map(row)}
+                        </Card>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </>
       )}
     </Screen>

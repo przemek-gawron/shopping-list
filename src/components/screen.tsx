@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing, WideContentWidth } from '@/constants/theme';
 import { useTabBarInset } from '@/hooks/use-tab-bar-inset';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -14,10 +14,13 @@ type Props = {
   children?: ReactNode;
   /** false for screens that manage their own scrolling (long lists). */
   scroll?: boolean;
+  /** Lets the content grow past MaxContentWidth, for screens that use columns on tablets. */
+  wide?: boolean;
 };
 
-/** Tab screen shell: safe area, large title, content capped at MaxContentWidth for web. */
-export function Screen({ title, action, children, scroll = true }: Props) {
+/** Tab screen shell: safe area, large title, content capped at MaxContentWidth (tablets, web). */
+export function Screen({ title, action, children, scroll = true, wide = false }: Props) {
+  const maxWidth = { maxWidth: wide ? WideContentWidth : MaxContentWidth };
   const theme = useTheme();
   const bottom = useTabBarInset() + Spacing.four;
 
@@ -35,7 +38,7 @@ export function Screen({ title, action, children, scroll = true }: Props) {
       <SafeAreaView edges={['top']} style={styles.root}>
         {scroll ? (
           <ScrollView
-            contentContainerStyle={[styles.content, { paddingBottom: bottom }]}
+            contentContainerStyle={[styles.content, maxWidth, { paddingBottom: bottom }]}
             automaticallyAdjustKeyboardInsets
             keyboardDismissMode="interactive"
             keyboardShouldPersistTaps="handled">
@@ -43,7 +46,7 @@ export function Screen({ title, action, children, scroll = true }: Props) {
             {children}
           </ScrollView>
         ) : (
-          <View style={[styles.root, styles.wide]}>
+          <View style={[styles.root, styles.wide, maxWidth]}>
             <View style={styles.headerPad}>{header}</View>
             {children}
           </View>
