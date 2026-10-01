@@ -79,14 +79,16 @@ interface Actions {
 
   /** Puts a recipe in a day's meal slot; a slot holds one recipe, so it replaces what was there. */
   setPlanEntry: (entry: Omit<PlanEntry, 'id'>) => void;
+  /** Several meals at once (random plan); each replaces what its day and meal had. */
+  setPlanEntries: (entries: Omit<PlanEntry, 'id'>[]) => void;
   updatePlanEntry: (id: string, servings: number) => void;
   removePlanEntry: (id: string) => void;
-
-  setMealCount: (count: number) => void;
   /** Replaces one ingredient of a planned meal; creates the substitute product when it is new. */
   setSwap: (entryId: string, fromProductId: string, substitute: { product: string; quantity: number; unit: Unit }) => void;
   clearSwap: (entryId: string, fromProductId: string) => void;
   setSubstitutes: (groups: SubstituteGroup[]) => void;
+
+  setMealCount: (count: number) => void;
   renameSlot: (id: string, name: string) => void;
   /** Reorders the visible meals; plan entries follow their slot. */
   moveSlot: (id: string, direction: -1 | 1) => void;
@@ -185,18 +187,16 @@ export const useStore = create<Store>()(
             { ...entry, id: generateId() },
           ],
         })),
+      setPlanEntries: (entries) =>
+        set((s) => ({
+          plan: [
+            ...s.plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),
+            ...entries.map((e) => ({ ...e, id: generateId() })),
+          ],
+        })),
       updatePlanEntry: (id, servings) =>
         set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
       removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
-
-      setMealCount: (count) =>
-        set((s) => {
-          const mealCount = Math.min(MAX_MEALS, Math.max(1, count));
-          const slots = [...s.slots];
-          while (slots.length < mealCount) slots.push({ id: generateId() });
-          return { mealCount, slots };
-        }),
-      moveSlot: (id, direction) =>
       setSwap: (entryId, fromProductId, substitute) => {
         const { products } = get();
         let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());
@@ -218,6 +218,15 @@ export const useStore = create<Store>()(
           plan: s.plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
         })),
       setSubstitutes: (substitutes) => set({ substitutes }),
+
+      setMealCount: (count) =>
+        set((s) => {
+          const mealCount = Math.min(MAX_MEALS, Math.max(1, count));
+          const slots = [...s.slots];
+          while (slots.length < mealCount) slots.push({ id: generateId() });
+          return { mealCount, slots };
+        }),
+      moveSlot: (id, direction) =>
         set((s) => {
           const index = s.slots.findIndex((slot) => slot.id === id);
           const target = index + direction;
@@ -370,10 +379,10 @@ export const useStore = create<Store>()(
         plan: s.plan,
         list: s.list,
         slots: s.slots,
+        substitutes: s.substitutes,
         mealCount: s.mealCount,
         language: s.language,
       }),
     },
   ),
 );
-        substitutes: s.substitutes,

@@ -66,7 +66,18 @@ export default function PlanScreen() {
   };
 
   return (
-    <Screen title={t('plan_title')}>
+    <Screen
+      title={t('plan_title')}
+      action={
+        <Pressable
+          onPress={() => router.push({ pathname: '/plan/random', params: { date: selectedDate } })}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.random, { backgroundColor: theme.tint }, pressed && { opacity: 0.7 }]}>
+          <ThemedText color="onPrimary" style={styles.randomLabel}>
+            🎲 {t('random_title')}
+          </ThemedText>
+        </Pressable>
+      }>
       <View style={styles.weekNav}>
         <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(selectedDate, -7))} accessibilityLabel={t('plan_prev_week')}>
           <IconSymbol name="chevron.left" size={22} color={theme.tint} />
@@ -148,6 +159,11 @@ export default function PlanScreen() {
                     <ThemedText style={styles.entryName} numberOfLines={2}>
                       {recipe?.title ?? '?'}
                     </ThemedText>
+                    {!!entry.swaps?.length && (
+                      <ThemedText type="caption" color="tint">
+                        {t('swap_count', { count: entry.swaps.length })}
+                      </ThemedText>
+                    )}
                   </Pressable>
                   <ServingsStepper
                     value={entry.servings}
@@ -159,11 +175,6 @@ export default function PlanScreen() {
                   </Pressable>
                 </View>
                 {editing === entry.id && (
-                    {!!entry.swaps?.length && (
-                      <ThemedText type="caption" color="tint">
-                        {t('swap_count', { count: entry.swaps.length })}
-                      </ThemedText>
-                    )}
                   <ServingsChips
                     value={entry.servings}
                     onChange={(v) => {
@@ -201,6 +212,8 @@ export default function PlanScreen() {
 }
 
 const styles = StyleSheet.create({
+  random: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  randomLabel: { fontWeight: '700', fontSize: 14 },
   weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   days: { flexDirection: 'row', gap: 6 },
   day: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 12, borderWidth: 1, gap: 2 },
