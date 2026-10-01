@@ -1,0 +1,51 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 Przemysław Gawron",
+    "categories": [
+      "FOOD_AND_DRINK",
+      "LIFESTYLE"
+    ],
+    "info": {
+      "pl": {
+        "title": "Dishdeck",
+        "subtitle": "Plan posiłków i lista zakupów",
+        "promoText": "Zaimportuj jadłospis od dietetyka, rozplanuj tydzień i wygeneruj listę zakupów jednym dotknięciem. Bez konta, bez reklam, w całości offline.",
+        "description": "Dishdeck to Twoja talia przepisów: zapisujesz ulubione dania, układasz z nich plan na tydzień, a lista zakupów tworzy się sama.\n\nPRZEPISY\n• Przepisy w grupach: śniadania, obiady, kolacje albo dowolne własne\n• Zdjęcie do każdego przepisu, żeby od razu było wiadomo, co to za danie\n• Oceny w gwiazdkach – wiesz, co smakowało najbardziej\n• Wyszukiwanie i filtrowanie po grupach\n\nJADŁOSPIS OD DIETETYKA\n• Zaimportuj jadłospis z pliku Word (.doc) – przepisy, składniki i gramatury trafią do aplikacji\n• Przepisy można grupować według jadłospisu, żeby wybierać głównie z najnowszego\n• Wbudowane zamienniki (np. kasza zamiast ryżu, indyk zamiast kurczaka) z przeliczonymi ilościami – zamieniasz składnik tylko w danym posiłku, przepis zostaje bez zmian\n\nPLAN TYGODNIA\n• Własne posiłki dnia: od 1 do 8, z własnymi nazwami i kolejnością\n• Porcje z mnożnikiem, także połówkowym (1,5×, 2,5×)\n• Losowanie posiłków na dzień lub tydzień – bez powtarzania tego samego dania dzień po dniu\n\nLISTA ZAKUPÓW\n• Generowana z zaznaczonych posiłków planu\n• Składniki zsumowane i pogrupowane według działów sklepu\n• Ilości możesz poprawić ręcznie, a kupione produkty odhaczasz\n\nPRYWATNOŚĆ\nDishdeck działa w całości offline. Nie wymaga konta, nie ma reklam i nie wysyła żadnych danych – wszystko zostaje na Twoim telefonie.\n\nAplikacja dostępna po polsku i angielsku.",
+        "keywords": [
+          "jadłospis",
+          "dieta",
+          "przepisy",
+          "lista zakupów",
+          "plan posiłków",
+          "dietetyk",
+          "zakupy",
+          "gotowanie",
+          "menu",
+          "obiad"
+        ],
+        "privacyPolicyUrl": "https://przemek-gawron.github.io/shopping-list/privacy.html",
+        "supportUrl": "https://przemek-gawron.github.io/shopping-list/"
+      },
+      "en-US": {
+        "title": "Dishdeck",
+        "subtitle": "Meal Plan & Grocery List",
+        "promoText": "Import your dietitian's meal plan, plan the week and turn it into a shopping list in one tap. No account, no ads, fully offline.",
+        "description": "Dishdeck is your deck of recipes: save the dishes you love, lay them out into a weekly plan, and let the shopping list write itself.\n\nRECIPES\n• Recipes in groups: breakfasts, lunches, dinners or your own\n• A photo for every recipe, so you know the dish at a glance\n• Star ratings – remember what you liked most\n• Search and filter by group\n\nYOUR DIETITIAN'S MEAL PLAN\n• Import a meal plan from a Word file (.doc) – recipes, ingredients and amounts come straight in\n• Group recipes by meal plan to pick mostly from the newest one\n• Built-in substitutes (e.g. groats instead of rice, turkey instead of chicken) with recalculated amounts – swap an ingredient in one planned meal while the recipe stays unchanged\n\nWEEKLY PLAN\n• Your own meals of the day: 1 to 8, with your names and order\n• Servings with multipliers, including halves (1.5×, 2.5×)\n• Draw random meals for a day or a week – never the same dish two days in a row\n\nSHOPPING LIST\n• Generated from the meals you pick in the plan\n• Ingredients added up and grouped by store aisle\n• Adjust amounts by hand and tick items off as you shop\n\nPRIVACY\nDishdeck works fully offline. No account, no ads and no data sent anywhere – everything stays on your phone.\n\nAvailable in English and Polish.",
+        "keywords": [
+          "meal planner",
+          "recipes",
+          "grocery list",
+          "shopping list",
+          "meal prep",
+          "diet",
+          "dietitian",
+          "weekly menu",
+          "cooking"
+        ],
+        "privacyPolicyUrl": "https://przemek-gawron.github.io/shopping-list/privacy.html",
+        "supportUrl": "https://przemek-gawron.github.io/shopping-list/"
+      }
+    }
+  }
+}
