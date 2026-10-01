@@ -89,6 +89,7 @@ export default function SettingsScreen() {
           />
         </View>
         {link(t('settings_menus'), () => router.push('/menus'))}
+        {link(t('substitutes_title'), () => router.push('/substitutes'))}
       </Card>
 
       <ThemedText type="label">{t('settings_data')}</ThemedText>

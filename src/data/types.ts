@@ -65,6 +65,24 @@ export interface PlanEntry {
   slotId: string;
   recipeId: string;
   servings: number;
+  /** Ingredients replaced for this meal only; the recipe itself is unchanged. */
+  swaps?: Swap[];
+}
+
+/** One ingredient of a planned meal replaced by a substitute (amounts are per serving). */
+export interface Swap {
+  /** Product of the recipe's ingredient being replaced. */
+  fromProductId: string;
+  productId: string;
+  quantity: number;
+  unit: Unit;
+}
+
+/** Interchangeable products with equivalent amounts, e.g. bread 30 g = groats 20 g = potatoes 80 g. */
+export interface SubstituteGroup {
+  id: string;
+  name: string;
+  items: { product: string; quantity: number; unit: Unit }[];
 }
 
 export interface ListItem {

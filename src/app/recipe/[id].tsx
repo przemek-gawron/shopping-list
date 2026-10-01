@@ -1,20 +1,33 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import { Chip } from '@/components/chip';
 import { RecipePhoto } from '@/components/recipe-photo';
 import { Page } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { formatQuantity } from '@/constants/units';
 import { useStore } from '@/data/store';
+import { substituteOptions } from '@/data/substitutes';
 import { useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
 
+/**
+ * A recipe. Opened from the plan (`entryId`), it also lets you swap ingredients for substitutes
+ * for that one meal; the recipe itself stays as it is.
+ */
 export default function RecipeScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, entryId } = useLocalSearchParams<{ id: string; entryId?: string }>();
   const t = useT();
+  const entry = useStore((s) => (entryId ? s.plan.find((e) => e.id === entryId) : undefined));
+  const substitutes = useStore((s) => s.substitutes);
+  const setSwap = useStore((s) => s.setSwap);
+  const clearSwap = useStore((s) => s.clearSwap);
+  // ingredient whose substitutes are listed
+  const [choosing, setChoosing] = useState<string | null>(null);
   const recipe = useStore((s) => s.recipes.find((r) => r.id === id));
   const group = useStore((s) => s.groups.find((g) => g.id === recipe?.groupId));
   const products = useStore((s) => s.products);
@@ -46,16 +59,53 @@ export default function RecipeScreen() {
       {recipe.description ? <ThemedText>{recipe.description}</ThemedText> : null}
 
       <ThemedText type="label">{t('ingredients')}</ThemedText>
+      {entry && <ThemedText type="small">{t('swap_hint')}</ThemedText>}
       <Card style={styles.ingredients}>
         {recipe.ingredients.length === 0 && <ThemedText type="small">{t('no_ingredients')}</ThemedText>}
         {recipe.ingredients.map((ing) => {
           const product = products.find((p) => p.id === ing.productId);
+          const swap = entry?.swaps?.find((w) => w.fromProductId === ing.productId);
+          const shown = swap ? { name: products.find((p) => p.id === swap.productId)?.name ?? '?', ...swap } : { name: product?.name ?? '?', ...ing };
+          const options = entry && product && !swap ? substituteOptions(product.name, ing.quantity, ing.unit, substitutes) : [];
           return (
-            <View key={ing.id} style={styles.ingredient}>
-              <ThemedText style={styles.ingredientName}>{product?.name ?? '?'}</ThemedText>
-              <ThemedText type="small">
-                {formatQuantity(ing.quantity)} {t(`unit_${ing.unit}`)}
-              </ThemedText>
+            <View key={ing.id} style={styles.ingredientBlock}>
+              <View style={styles.ingredient}>
+                <View style={styles.ingredientName}>
+                  <ThemedText color={swap ? 'tint' : 'text'}>{shown.name}</ThemedText>
+                  {swap && <ThemedText type="caption">{t('swap_instead_of', { name: product?.name ?? '?' })}</ThemedText>}
+                </View>
+                <ThemedText type="small">
+                  {formatQuantity(shown.quantity)} {t(`unit_${shown.unit}`)}
+                </ThemedText>
+                {swap && entry && (
+                  <ThemedText color="tint" style={styles.action} accessibilityRole="button" onPress={() => clearSwap(entry.id, ing.productId)}>
+                    {t('swap_restore')}
+                  </ThemedText>
+                )}
+                {options.length > 0 && entry && (
+                  <ThemedText
+                    color="tint"
+                    style={styles.action}
+                    accessibilityRole="button"
+                    onPress={() => setChoosing(choosing === ing.id ? null : ing.id)}>
+                    {t('swap')}
+                  </ThemedText>
+                )}
+              </View>
+              {choosing === ing.id && entry && (
+                <View style={styles.options}>
+                  {options.map((o) => (
+                    <Chip
+                      key={o.product}
+                      label={`${o.product} · ${formatQuantity(o.quantity)} ${t(`unit_${o.unit}`)}`}
+                      onPress={() => {
+                        setSwap(entry.id, ing.productId, o);
+                        setChoosing(null);
+                      }}
+                    />
+                  ))}
+                </View>
+              )}
             </View>
           );
         })}
@@ -83,6 +133,9 @@ const styles = StyleSheet.create({
   edit: { fontWeight: '700', fontSize: 16 },
   titleBlock: { gap: Spacing.one },
   ingredients: { gap: Spacing.two },
-  ingredient: { flexDirection: 'row', justifyContent: 'space-between', gap: Spacing.three },
+  ingredientBlock: { gap: Spacing.two },
+  ingredient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
+  action: { fontWeight: '700', fontSize: 14 },
+  options: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   ingredientName: { flex: 1 },
 });

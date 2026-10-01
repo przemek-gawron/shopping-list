@@ -18,9 +18,12 @@ export function buildShoppingList(
     const recipe = recipeById.get(entry.recipeId);
     if (!recipe) continue;
     for (const ingredient of recipe.ingredients) {
-      const product = productById.get(ingredient.productId);
+      // a substitute chosen for this meal replaces the recipe's ingredient
+      const swap = entry.swaps?.find((s) => s.fromProductId === ingredient.productId);
+      const used = swap ?? ingredient;
+      const product = productById.get(used.productId);
       if (!product) continue;
-      const { value, baseUnit } = convertToBase(ingredient.quantity * entry.servings, ingredient.unit);
+      const { value, baseUnit } = convertToBase(used.quantity * entry.servings, used.unit);
       const key = `${product.id}:${baseUnit}`;
       const current = totals.get(key);
       if (current) current.value += value;

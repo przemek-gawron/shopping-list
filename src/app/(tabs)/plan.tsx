@@ -144,7 +144,7 @@ export default function PlanScreen() {
                   <Pressable
                     style={styles.entryTitle}
                     accessibilityRole="button"
-                    onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}>
+                    onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id, entryId: entry.id } })}>
                     <ThemedText style={styles.entryName} numberOfLines={2}>
                       {recipe?.title ?? '?'}
                     </ThemedText>
@@ -159,6 +159,11 @@ export default function PlanScreen() {
                   </Pressable>
                 </View>
                 {editing === entry.id && (
+                    {!!entry.swaps?.length && (
+                      <ThemedText type="caption" color="tint">
+                        {t('swap_count', { count: entry.swaps.length })}
+                      </ThemedText>
+                    )}
                   <ServingsChips
                     value={entry.servings}
                     onChange={(v) => {

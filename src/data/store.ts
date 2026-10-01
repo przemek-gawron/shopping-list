@@ -4,6 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { RecipeFile } from '@/data/import';
 import { buildSamples } from '@/data/sample-data';
+import { DEFAULT_SUBSTITUTES } from '@/constants/substitutes';
 import { buildShoppingList } from '@/data/shopping';
 import type {
   Group,
@@ -14,6 +15,9 @@ import type {
   PlanEntry,
   Product,
   Recipe,
+  SubstituteGroup,
+  Swap,
+  Unit,
 } from '@/data/types';
 import { generateId } from '@/utils/id-generator';
 import { deletePhoto } from '@/utils/photos';
@@ -39,6 +43,7 @@ interface Data {
   plan: PlanEntry[];
   list: ListItem[];
   slots: MealSlot[];
+  substitutes: SubstituteGroup[];
   /** How many of `slots` (from the top) are shown each day. */
   mealCount: number;
   language: Language;
@@ -53,6 +58,7 @@ const initialData = (): Data => ({
   plan: [],
   list: [],
   slots: DEFAULT_SLOTS,
+  substitutes: DEFAULT_SUBSTITUTES,
   mealCount: DEFAULT_SLOTS.length,
   language: 'system',
 });
@@ -77,6 +83,10 @@ interface Actions {
   removePlanEntry: (id: string) => void;
 
   setMealCount: (count: number) => void;
+  /** Replaces one ingredient of a planned meal; creates the substitute product when it is new. */
+  setSwap: (entryId: string, fromProductId: string, substitute: { product: string; quantity: number; unit: Unit }) => void;
+  clearSwap: (entryId: string, fromProductId: string) => void;
+  setSubstitutes: (groups: SubstituteGroup[]) => void;
   renameSlot: (id: string, name: string) => void;
   /** Reorders the visible meals; plan entries follow their slot. */
   moveSlot: (id: string, direction: -1 | 1) => void;
@@ -187,6 +197,27 @@ export const useStore = create<Store>()(
           return { mealCount, slots };
         }),
       moveSlot: (id, direction) =>
+      setSwap: (entryId, fromProductId, substitute) => {
+        const { products } = get();
+        let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());
+        if (!product) {
+          // a new substitute goes to the same store department as what it replaces
+          const departmentId = products.find((p) => p.id === fromProductId)?.departmentId ?? 'other';
+          product = { id: generateId(), name: substitute.product, defaultUnit: substitute.unit, departmentId };
+          set({ products: [...products, product] });
+        }
+        const swap: Swap = { fromProductId, productId: product.id, quantity: substitute.quantity, unit: substitute.unit };
+        set((s) => ({
+          plan: s.plan.map((e) =>
+            e.id === entryId ? { ...e, swaps: [...(e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId), swap] } : e,
+          ),
+        }));
+      },
+      clearSwap: (entryId, fromProductId) =>
+        set((s) => ({
+          plan: s.plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
+        })),
+      setSubstitutes: (substitutes) => set({ substitutes }),
         set((s) => {
           const index = s.slots.findIndex((slot) => slot.id === id);
           const target = index + direction;
@@ -345,3 +376,4 @@ export const useStore = create<Store>()(
     },
   ),
 );
+        substitutes: s.substitutes,
