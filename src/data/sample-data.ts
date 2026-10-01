@@ -69,13 +69,17 @@ const PRODUCTS: Record<string, ProductDef> = {
   lentils: ['Soczewica', 'Lentils', 'g', 'dry'],
   coconut_milk: ['Mleczko kokosowe', 'Coconut milk', 'ml', 'dry'],
   curry: ['Curry', 'Curry powder', 'lyzeczka', 'dry'],
+  radish: ['Rzodkiewka', 'Radishes', 'szt', 'produce'],
+  chives: ['Szczypiorek', 'Chives', 'szt', 'produce'],
 };
 
-const GROUPS: { key: string; emoji: string; pl: string; en: string }[] = [
-  { key: 'breakfast', emoji: '🍳', pl: 'Śniadania', en: 'Breakfasts' },
-  { key: 'lunch', emoji: '🍲', pl: 'Obiady', en: 'Lunches' },
-  { key: 'dinner', emoji: '🥗', pl: 'Kolacje', en: 'Dinners' },
-  { key: 'dessert', emoji: '🍰', pl: 'Desery', en: 'Desserts' },
+/** The five meals of the dietitian's plans. `id` keeps the ids of the first sample set (snacks were "dessert"). */
+const GROUPS: { key: string; id: string; emoji: string; pl: string; en: string }[] = [
+  { key: 'breakfast', id: 'breakfast', emoji: '🍳', pl: 'Śniadania', en: 'Breakfasts' },
+  { key: 'second_breakfast', id: 'second_breakfast', emoji: '🥪', pl: 'Drugie śniadania', en: 'Second breakfasts' },
+  { key: 'lunch', id: 'lunch', emoji: '🍲', pl: 'Obiady', en: 'Lunches' },
+  { key: 'snack', id: 'dessert', emoji: '🍰', pl: 'Podwieczorki', en: 'Snacks' },
+  { key: 'dinner', id: 'dinner', emoji: '🥗', pl: 'Kolacje', en: 'Dinners' },
 ];
 
 type Ing = [product: string, quantity: number, unit: Unit];
@@ -115,16 +119,26 @@ const RECIPES: RecipeDef[] = [
   { group: 'dinner', pl: 'Makaron ze szpinakiem w śmietanie', en: 'Creamy spinach pasta', ing: [['pasta', 200, 'g'], ['spinach', 150, 'g'], ['cream', 150, 'ml'], ['garlic', 2, 'szt'], ['parmesan', 30, 'g']] },
   { group: 'dinner', pl: 'Omlet z pieczarkami', en: 'Mushroom omelette', ing: [['eggs', 3, 'szt'], ['mushrooms', 100, 'g'], ['butter', 10, 'g'], ['cheese', 40, 'g'], ['parsley', 0.25, 'szt']] },
 
-  // Desserts
-  { group: 'dessert', pl: 'Naleśniki z dżemem', en: 'Pancakes with jam', ing: [['flour', 150, 'g'], ['milk', 250, 'ml'], ['eggs', 2, 'szt'], ['jam', 3, 'lyzka'], ['oil', 1, 'lyzka']] },
-  { group: 'dessert', pl: 'Brownie', en: 'Brownie', ing: [['chocolate', 150, 'g'], ['butter', 100, 'g'], ['sugar', 120, 'g'], ['eggs', 3, 'szt'], ['flour', 60, 'g'], ['cocoa', 2, 'lyzeczka']] },
-  { group: 'dessert', pl: 'Szarlotka', en: 'Apple pie', ing: [['apple', 5, 'szt'], ['flour', 300, 'g'], ['butter', 150, 'g'], ['sugar', 100, 'g'], ['eggs', 1, 'szt'], ['cinnamon', 2, 'lyzeczka'], ['baking_powder', 1, 'lyzeczka']] },
-  { group: 'dessert', pl: 'Ciasteczka owsiane', en: 'Oat cookies', ing: [['oats', 150, 'g'], ['flour', 100, 'g'], ['butter', 100, 'g'], ['sugar', 80, 'g'], ['eggs', 1, 'szt'], ['baking_powder', 1, 'lyzeczka'], ['chocolate', 50, 'g']] },
-  { group: 'dessert', pl: 'Pudding chia', en: 'Chia pudding', ing: [['chia', 3, 'lyzka'], ['milk', 200, 'ml'], ['honey', 1, 'lyzka'], ['berries', 80, 'g']] },
-  { group: 'dessert', pl: 'Sałatka owocowa', en: 'Fruit salad', ing: [['apple', 2, 'szt'], ['banana', 2, 'szt'], ['strawberries', 150, 'g'], ['lemon', 0.5, 'szt'], ['honey', 1, 'lyzka']] },
-  { group: 'dessert', pl: 'Lody bananowe', en: 'Banana ice cream', ing: [['banana', 3, 'szt'], ['peanut_butter', 1, 'lyzka'], ['cocoa', 1, 'lyzeczka']] },
-  { group: 'dessert', pl: 'Muffinki z owocami leśnymi', en: 'Berry muffins', ing: [['flour', 250, 'g'], ['sugar', 100, 'g'], ['butter', 80, 'g'], ['eggs', 2, 'szt'], ['milk', 150, 'ml'], ['berries', 150, 'g'], ['baking_powder', 2, 'lyzeczka']] },
-  { group: 'dessert', pl: 'Ryż na mleku z jabłkiem', en: 'Rice pudding with apple', ing: [['rice', 100, 'g'], ['milk', 500, 'ml'], ['apple', 1, 'szt'], ['sugar', 20, 'g'], ['cinnamon', 1, 'lyzeczka']] },
+  // Second breakfasts
+  { group: 'second_breakfast', pl: 'Twarożek ze szczypiorkiem i rzodkiewką', en: 'Cottage cheese with chives and radishes', ing: [['cottage', 150, 'g'], ['yogurt', 50, 'g'], ['radish', 4, 'szt'], ['chives', 0.5, 'szt'], ['bread', 2, 'szt']] },
+  { group: 'second_breakfast', pl: 'Koktajl bananowo-truskawkowy', en: 'Banana strawberry smoothie', ing: [['banana', 1, 'szt'], ['strawberries', 150, 'g'], ['yogurt', 150, 'g'], ['honey', 1, 'lyzka']] },
+  { group: 'second_breakfast', pl: 'Tortilla z szynką i warzywami', en: 'Ham and vegetable wrap', ing: [['tortilla', 1, 'szt'], ['ham', 60, 'g'], ['lettuce', 0.25, 'szt'], ['tomato', 1, 'szt'], ['cucumber', 0.5, 'szt']] },
+  { group: 'second_breakfast', pl: 'Sałatka z jajkiem i awokado', en: 'Egg and avocado salad', ing: [['eggs', 2, 'szt'], ['avocado', 0.5, 'szt'], ['tomato', 1, 'szt'], ['lettuce', 0.25, 'szt'], ['olive_oil', 1, 'lyzka']] },
+  { group: 'second_breakfast', pl: 'Jogurt z płatkami i owocami', en: 'Yogurt with oats and berries', ing: [['yogurt', 200, 'g'], ['oats', 40, 'g'], ['berries', 80, 'g'], ['honey', 1, 'lyzka']] },
+  { group: 'second_breakfast', pl: 'Hummus z warzywami', en: 'Hummus with vegetable sticks', ing: [['chickpeas', 1, 'szt'], ['lemon', 0.5, 'szt'], ['garlic', 1, 'szt'], ['olive_oil', 2, 'lyzka'], ['carrot', 2, 'szt'], ['cucumber', 1, 'szt'], ['pepper', 1, 'szt']] },
+  { group: 'second_breakfast', pl: 'Kanapki z twarożkiem i dżemem', en: 'Cottage cheese and jam toast', ing: [['bread', 2, 'szt'], ['cottage', 100, 'g'], ['jam', 1, 'lyzka']] },
+  { group: 'second_breakfast', pl: 'Muffinki jajeczne z warzywami', en: 'Egg and vegetable muffins', ing: [['eggs', 4, 'szt'], ['pepper', 1, 'szt'], ['spinach', 50, 'g'], ['cheese', 40, 'g']] },
+
+  // Snacks (the first sample set called them desserts)
+  { group: 'snack', pl: 'Naleśniki z dżemem', en: 'Pancakes with jam', ing: [['flour', 150, 'g'], ['milk', 250, 'ml'], ['eggs', 2, 'szt'], ['jam', 3, 'lyzka'], ['oil', 1, 'lyzka']] },
+  { group: 'snack', pl: 'Brownie', en: 'Brownie', ing: [['chocolate', 150, 'g'], ['butter', 100, 'g'], ['sugar', 120, 'g'], ['eggs', 3, 'szt'], ['flour', 60, 'g'], ['cocoa', 2, 'lyzeczka']] },
+  { group: 'snack', pl: 'Szarlotka', en: 'Apple pie', ing: [['apple', 5, 'szt'], ['flour', 300, 'g'], ['butter', 150, 'g'], ['sugar', 100, 'g'], ['eggs', 1, 'szt'], ['cinnamon', 2, 'lyzeczka'], ['baking_powder', 1, 'lyzeczka']] },
+  { group: 'snack', pl: 'Ciasteczka owsiane', en: 'Oat cookies', ing: [['oats', 150, 'g'], ['flour', 100, 'g'], ['butter', 100, 'g'], ['sugar', 80, 'g'], ['eggs', 1, 'szt'], ['baking_powder', 1, 'lyzeczka'], ['chocolate', 50, 'g']] },
+  { group: 'snack', pl: 'Pudding chia', en: 'Chia pudding', ing: [['chia', 3, 'lyzka'], ['milk', 200, 'ml'], ['honey', 1, 'lyzka'], ['berries', 80, 'g']] },
+  { group: 'snack', pl: 'Sałatka owocowa', en: 'Fruit salad', ing: [['apple', 2, 'szt'], ['banana', 2, 'szt'], ['strawberries', 150, 'g'], ['lemon', 0.5, 'szt'], ['honey', 1, 'lyzka']] },
+  { group: 'snack', pl: 'Lody bananowe', en: 'Banana ice cream', ing: [['banana', 3, 'szt'], ['peanut_butter', 1, 'lyzka'], ['cocoa', 1, 'lyzeczka']] },
+  { group: 'snack', pl: 'Muffinki z owocami leśnymi', en: 'Berry muffins', ing: [['flour', 250, 'g'], ['sugar', 100, 'g'], ['butter', 80, 'g'], ['eggs', 2, 'szt'], ['milk', 150, 'ml'], ['berries', 150, 'g'], ['baking_powder', 2, 'lyzeczka']] },
+  { group: 'snack', pl: 'Ryż na mleku z jabłkiem', en: 'Rice pudding with apple', ing: [['rice', 100, 'g'], ['milk', 500, 'ml'], ['apple', 1, 'szt'], ['sugar', 20, 'g'], ['cinnamon', 1, 'lyzeczka']] },
 ];
 
 /**
@@ -137,7 +151,7 @@ export function buildSamples(language: Lang): {
   recipes: Recipe[];
 } {
   const groups: Group[] = GROUPS.map((g) => ({
-    id: `sample-g-${g.key}`,
+    id: `sample-g-${g.id}`,
     name: g[language],
     emoji: g.emoji,
   }));
@@ -149,14 +163,16 @@ export function buildSamples(language: Lang): {
     departmentId: dept,
   }));
 
+  const groupId = (key: string) => GROUPS.find((g) => g.key === key)!.id;
   const counters: Record<string, number> = {};
   const recipes: Recipe[] = RECIPES.map((r) => {
-    counters[r.group] = (counters[r.group] ?? 0) + 1;
-    const id = `sample-r-${r.group}-${counters[r.group]}`;
+    const group = groupId(r.group);
+    counters[group] = (counters[group] ?? 0) + 1;
+    const id = `sample-r-${group}-${counters[group]}`;
     return {
       id,
       title: r[language],
-      groupId: `sample-g-${r.group}`,
+      groupId: `sample-g-${groupId(r.group)}`,
       ingredients: r.ing.map(([product, quantity, unit], index) => ({
         id: `${id}-i${index}`,
         productId: `sample-p-${product}`,
