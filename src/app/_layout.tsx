@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Platform, Text, View } from 'react-native';
@@ -21,6 +22,12 @@ const LEGACY_KEYS = [
 
 export const unstable_settings = { anchor: '(tabs)' };
 
+/** The splash stays at least this long, so it does not just flash on a fast launch. */
+const SPLASH_MIN_MS = 1000;
+const launchedAt = Date.now();
+void SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.setOptions({ duration: 300, fade: true });
+
 export default function RootLayout() {
   const scheme = useColorScheme();
   const colors = Colors[scheme];
@@ -34,6 +41,12 @@ export default function RootLayout() {
   useEffect(() => {
     void AsyncStorage.multiRemove(LEGACY_KEYS).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const timer = setTimeout(() => SplashScreen.hide(), Math.max(0, SPLASH_MIN_MS - (Date.now() - launchedAt)));
+    return () => clearTimeout(timer);
+  }, [hydrated]);
 
   const navigationTheme = useMemo(() => {
     const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
