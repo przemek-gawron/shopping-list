@@ -11,6 +11,7 @@ import { RecipePhoto } from '@/components/recipe-photo';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
@@ -88,7 +89,7 @@ export default function RecipesScreen() {
             const group = groupOf(r.groupId);
             return (
               <Card onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: r.id } })} style={styles.row}>
-                <RecipePhoto photo={r.photo} emoji={group?.emoji ?? '🍽️'} size={64} />
+                <RecipePhoto photo={r.photo} emoji={recipeEmoji(r, group)} size={64} />
                 <View style={styles.rowText}>
                   <ThemedText type="default" style={styles.rowTitle} numberOfLines={2}>
                     {r.title}

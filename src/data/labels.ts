@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import type { Group, MealSlot } from '@/data/types';
+import type { Group, MealSlot, Recipe } from '@/data/types';
 import { useT } from '@/i18n';
 
 /** Display name of a meal slot: the user's own name, else the translated default, else "Meal N". */
@@ -37,4 +37,31 @@ export function groupForSlot(slot: MealSlot, displayName: string, groups: Group[
   return groups.find(
     (g) => GROUP_KEYWORDS[slot.key!].some((k) => name(g).includes(k)) && (slot.key !== 'breakfast' || !isSecondBreakfast(g)),
   );
+}
+
+/** Fruit name stems (PL and EN) and their emoji; the meal plan import turns each fruit into its own recipe. */
+const FRUITS: [string[], string][] = [
+  [['arbuz', 'watermelon'], '🍉'],
+  [['banan'], '🍌'],
+  [['borówk', 'jagod', 'blueberr', 'bilberr'], '🫐'],
+  [['brzoskwin', 'nektaryn', 'morel', 'peach', 'nectarine', 'apricot'], '🍑'],
+  [['czereś', 'wiśni', 'cherr'], '🍒'],
+  [['gruszk', 'pear'], '🍐'],
+  [['jabłk', 'jabłek', 'apple'], '🍎'],
+  [['malin', 'truskaw', 'raspberr', 'strawberr'], '🍓'],
+  [['mandaryn', 'pomarańcz', 'grejpfrut', 'tangerine', 'orange', 'grapefruit'], '🍊'],
+  [['melon'], '🍈'],
+  [['śliwk', 'winogr', 'plum', 'grape'], '🍇'],
+  [['kiwi'], '🥝'],
+  [['ananas', 'pineapple'], '🍍'],
+  [['mango'], '🥭'],
+  [['cytryn', 'lemon'], '🍋'],
+];
+
+/** Placeholder emoji for a recipe without a photo: the fruit for a fruit "recipe" ("Truskawki"), else the group's. */
+export function recipeEmoji(recipe: Pick<Recipe, 'title'>, group: Group | undefined): string {
+  const title = recipe.title.trim().toLowerCase();
+  // only one-word titles, so "Banana pancakes" keeps its group's emoji
+  const fruit = /\s/.test(title) ? undefined : FRUITS.find(([stems]) => stems.some((s) => title.startsWith(s)));
+  return fruit?.[1] ?? group?.emoji ?? '🍽️';
 }

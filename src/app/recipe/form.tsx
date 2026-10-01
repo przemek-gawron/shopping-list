@@ -12,6 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing } from '@/constants/theme';
 import { UNITS } from '@/constants/units';
+import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
 import type { Unit } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -127,7 +128,7 @@ export default function RecipeFormScreen() {
     router.back();
   };
 
-  const groupEmoji = groups.find((g) => g.id === group)?.emoji ?? '🍽️';
+  const groupEmoji = recipeEmoji({ title }, groups.find((g) => g.id === group));
 
   return (
     <Page>
