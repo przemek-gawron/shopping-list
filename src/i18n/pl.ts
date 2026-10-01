@@ -1,5 +1,5 @@
 export default {
-  app_name: 'Lista zakupów',
+  app_name: 'Dishdeck',
   back: 'Wstecz',
   all: 'Wszystkie',
   no_group: 'Bez grupy',

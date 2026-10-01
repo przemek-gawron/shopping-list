@@ -17,7 +17,7 @@ There are no automated tests. Run typecheck and lint before finishing a task. Us
 
 ## What the app is
 
-Offline-only Expo + React Native app (Expo Router, file-based). No backend, accounts or AI. Users:
+**Dishdeck** – offline-only Expo + React Native app (Expo Router, file-based). No backend, accounts or AI. Users:
 
 1. keep **recipes** (ingredients, optional photo) organised in **groups**,
 2. put recipes on a **weekly meal plan** (configurable meals per day: breakfast, lunch, ...),

@@ -1,4 +1,4 @@
-# Lista zakupów
+# Dishdeck
 
 Aplikacja mobilna (Expo SDK 57 + React Native) do zapisywania przepisów, planowania posiłków i tworzenia listy zakupów. Działa w całości offline, bez konta i bez serwera. Dane są zapisane lokalnie na urządzeniu.
 
