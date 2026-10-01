@@ -122,7 +122,7 @@ export default function RecipeFormScreen() {
       photo: stored,
       ingredients,
     };
-    if (editing) updateRecipe({ ...data, id: editing.id });
+    if (editing) updateRecipe({ ...editing, ...data });
     else addRecipe(data);
     router.back();
   };
