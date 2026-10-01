@@ -53,8 +53,13 @@ const SECTIONS: { pattern: RegExp; group: string; emoji: string }[] = [
   { pattern: /^Dodatkowo w dniach/, group: 'Po treningu', emoji: '🥞' },
 ];
 const END = /^Uwagi końcowe/;
-/** Free text between recipes (the daily fruit list); nothing after it belongs to the recipe above. */
-const NOT_A_RECIPE = /^Jako „piąty posiłek”/;
+/**
+ * The daily fruit list that some plans give instead of afternoon-snack recipes:
+ * "Truskawki, maliny borówki, jagody: 450g / lub / banan-200g". Each fruit becomes a snack "recipe".
+ */
+const FRUIT_LIST = /^Jako „piąty posiłek”/;
+const FRUIT_LINE = /^(.+?)\s*[:\-–]\s*(\d+)\s*g\b/i;
+const FRUIT_NOTE = 'Owoce na podwieczorek z jadłospisu: w całości, jako koktajl, sałatka owocowa lub sorbet.';
 const KCAL = /^\(?\s*(\d+)\s*kcal\s*\)?\s*$/i;
 const METHOD_HEADER = /^sposób\s+(przygotowania|wykonania)\s*:?\s*$/i;
 /** "Składniki:", "Składniki na dwie porcje:" */
@@ -119,7 +124,7 @@ function parseSections(text: string): RawRecipe[] {
   const recipes: RawRecipe[] = [];
   let group: (typeof SECTIONS)[number] | null = null;
   let current: RawRecipe | null = null;
-  let ignoring = false;
+  let inFruits = false;
 
   const kcalAhead = (from: number) => {
     for (let i = from + 1; i < lines.length && i <= from + 3; i++) {
@@ -139,18 +144,34 @@ function parseSections(text: string): RawRecipe[] {
       continue;
     }
     if (!group) continue;
-    if (NOT_A_RECIPE.test(line)) {
-      ignoring = true;
+    if (FRUIT_LIST.test(line)) {
+      inFruits = true;
       current = null;
       continue;
     }
     if (kcalAhead(i)) {
-      ignoring = false;
+      inFruits = false;
       current = { title: tidyTitle(line), group: group.group, kcal: null, method: [], ingredients: [], inIngredients: false };
       recipes.push(current);
       continue;
     }
-    if (!current || ignoring) continue;
+    if (inFruits) {
+      const fruit = line.match(FRUIT_LINE);
+      if (!fruit) continue;
+      // fruit names are single words; the list does not always separate them with commas
+      for (const name of fruit[1].split(/[,\s]+/).filter(Boolean)) {
+        recipes.push({
+          title: name[0].toUpperCase() + name.slice(1).toLowerCase(),
+          group: 'Podwieczorki',
+          kcal: null,
+          method: [FRUIT_NOTE],
+          ingredients: [{ raw: name.toLowerCase(), quantity: Number(fruit[2]), unit: 'g' }],
+          inIngredients: true,
+        });
+      }
+      continue;
+    }
+    if (!current) continue;
     const kcal = line.match(KCAL);
     if (kcal) {
       current.kcal = Number(kcal[1]);
