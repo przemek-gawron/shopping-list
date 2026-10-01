@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Card } from '@/components/card';
 import { Screen } from '@/components/screen';
@@ -47,7 +47,8 @@ export default function SettingsScreen() {
   const onImport = async () => {
     const picked = await DocumentPicker.getDocumentAsync({
       type: ['application/msword', 'application/json', 'text/plain'],
-      copyToCacheDirectory: true,
+      // Android: read the picked content:// file directly; a copy in the cache is not always readable
+      copyToCacheDirectory: Platform.OS !== 'android',
     });
     if (picked.canceled || !picked.assets[0]) return;
     let file = null;
