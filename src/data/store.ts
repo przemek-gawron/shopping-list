@@ -76,6 +76,7 @@ interface Actions {
   addRecipe: (recipe: Omit<Recipe, 'id'>) => string;
   updateRecipe: (recipe: Recipe) => void;
   removeRecipe: (id: string) => void;
+  setRating: (id: string, rating: number | undefined) => void;
 
   /** Puts a recipe in a day's meal slot; a slot holds one recipe, so it replaces what was there. */
   setPlanEntry: (entry: Omit<PlanEntry, 'id'>) => void;
@@ -110,7 +111,7 @@ interface Actions {
   removeMenu: (id: string) => void;
   /** Adds the built-in example recipes; returns how many recipes were new. */
   loadSamples: (language: 'pl' | 'en') => number;
-  /** Adds recipes from a file; a recipe with the same title is overwritten (its photo is kept). */
+  /** Adds recipes from a file; a recipe with the same title is overwritten (its photo and rating are kept). */
   importRecipes: (file: RecipeFile) => { added: number; updated: number };
   /** Wipes everything except the language setting. */
   clearAll: () => void;
@@ -171,6 +172,8 @@ export const useStore = create<Store>()(
         if (previous?.photo && previous.photo !== recipe.photo) deletePhoto(previous.photo);
         set((s) => ({ recipes: s.recipes.map((r) => (r.id === recipe.id ? recipe : r)) }));
       },
+      setRating: (id, rating) =>
+        set((s) => ({ recipes: s.recipes.map((r) => (r.id === id ? { ...r, rating } : r)) })),
       removeRecipe: (id) => {
         const recipe = get().recipes.find((r) => r.id === id);
         if (recipe?.photo) deletePhoto(recipe.photo);

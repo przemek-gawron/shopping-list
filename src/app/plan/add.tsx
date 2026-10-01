@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/empty-state';
 import { MenuSections } from '@/components/menu-sections';
 import { Page } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
+import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { groupForSlot, useSlotName } from '@/data/labels';
@@ -103,8 +104,9 @@ export default function PlanAddScreen() {
               recipes={matches}
               flat={!!query.trim()}
               renderRecipe={(r) => (
-                <Card onPress={() => setRecipeId(r.id)}>
+                <Card onPress={() => setRecipeId(r.id)} style={styles.chosen}>
                   <ThemedText style={styles.chosenName}>{r.title}</ThemedText>
+                  {r.rating ? <Stars value={r.rating} size={13} /> : null}
                 </Card>
               )}
             />

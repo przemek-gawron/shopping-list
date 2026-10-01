@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/empty-state';
 import { MenuSections } from '@/components/menu-sections';
 import { RecipePhoto } from '@/components/recipe-photo';
 import { Screen } from '@/components/screen';
+import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { recipeEmoji } from '@/data/labels';
@@ -94,6 +95,7 @@ export default function RecipesScreen() {
                   <ThemedText type="default" style={styles.rowTitle} numberOfLines={2}>
                     {r.title}
                   </ThemedText>
+                  {r.rating ? <Stars value={r.rating} size={13} /> : null}
                   <ThemedText type="small" numberOfLines={1}>
                     {group ? `${group.emoji} ${group.name}` : t('no_group')} · {t('ingredients_count', { count: r.ingredients.length })}
                   </ThemedText>

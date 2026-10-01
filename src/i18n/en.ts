@@ -6,6 +6,8 @@ const en: Record<keyof typeof pl, string> = {
   back: 'Back',
   all: 'All',
   no_group: 'No group',
+  rating: 'Rating',
+  rating_label: 'Rating: {{count}} of 5',
   cancel: 'Cancel',
   delete: 'Delete',
   save: 'Save',

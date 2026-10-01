@@ -47,6 +47,8 @@ export interface Recipe {
   groupId: string | null;
   /** Meal plans this recipe appeared in; none for recipes added by hand. */
   menuIds?: string[];
+  /** How much we liked it, 1–5 stars; none = not rated yet. */
+  rating?: number;
   /** File name of the photo inside the app's document directory */
   photo?: string;
 }

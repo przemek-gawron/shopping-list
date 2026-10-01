@@ -7,6 +7,7 @@ import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { RecipePhoto } from '@/components/recipe-photo';
 import { Page } from '@/components/screen';
+import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { formatQuantity } from '@/constants/units';
@@ -33,6 +34,7 @@ export default function RecipeScreen() {
   const group = useStore((s) => s.groups.find((g) => g.id === recipe?.groupId));
   const products = useStore((s) => s.products);
   const removeRecipe = useStore((s) => s.removeRecipe);
+  const setRating = useStore((s) => s.setRating);
 
   if (!recipe) return <Stack.Screen options={{ title: '' }} />;
 
@@ -55,6 +57,7 @@ export default function RecipeScreen() {
       <RecipePhoto photo={recipe.photo} emoji={recipeEmoji(recipe, group)} height={recipe.photo ? 220 : 120} />
       <View style={styles.titleBlock}>
         <ThemedText type="title">{recipe.title}</ThemedText>
+        <Stars value={recipe.rating} onChange={(rating) => setRating(recipe.id, rating)} size={28} />
         <ThemedText type="small">{group ? `${group.emoji} ${group.name}` : t('no_group')}</ThemedText>
       </View>
       {recipe.description ? <ThemedText>{recipe.description}</ThemedText> : null}

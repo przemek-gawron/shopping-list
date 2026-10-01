@@ -3,6 +3,8 @@ export default {
   back: 'Wstecz',
   all: 'Wszystkie',
   no_group: 'Bez grupy',
+  rating: 'Ocena',
+  rating_label: 'Ocena: {{count}} z 5',
   cancel: 'Anuluj',
   delete: 'Usuń',
   save: 'Zapisz',
