@@ -31,6 +31,8 @@ export function substituteOptions(
     const from = convertToBase(quantity, unit);
     const per = convertToBase(source.quantity, source.unit);
     for (const target of group.items) {
+      // a row added in Settings but not named yet
+      if (!target.product.trim()) continue;
       if (target === source || target.product.toLowerCase() === name || options.has(target.product.toLowerCase())) continue;
       let option: SubstituteOption | null = null;
       if (from.baseUnit === per.baseUnit) {
