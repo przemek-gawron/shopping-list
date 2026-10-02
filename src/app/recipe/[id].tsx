@@ -12,6 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { formatQuantity } from '@/constants/units';
 import { recipeEmoji } from '@/data/labels';
+import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
 import { substituteOptions } from '@/data/substitutes';
 import { useT } from '@/i18n';
@@ -37,6 +38,8 @@ export default function RecipeScreen() {
   const setRating = useStore((s) => s.setRating);
 
   if (!recipe) return <Stack.Screen options={{ title: '' }} />;
+  // swaps to a product deleted since are ignored, as on the shopping list
+  const swaps = entry ? appliedSwaps(entry, recipe, products) : [];
 
   return (
     <Page>
@@ -68,7 +71,7 @@ export default function RecipeScreen() {
         {recipe.ingredients.length === 0 && <ThemedText type="small">{t('no_ingredients')}</ThemedText>}
         {recipe.ingredients.map((ing) => {
           const product = products.find((p) => p.id === ing.productId);
-          const swap = entry?.swaps?.find((w) => w.fromProductId === ing.productId);
+          const swap = swaps.find((w) => w.fromProductId === ing.productId);
           const shown = swap ? { name: products.find((p) => p.id === swap.productId)?.name ?? '?', ...swap } : { name: product?.name ?? '?', ...ing };
           const options = entry && product && !swap ? substituteOptions(product.name, ing.quantity, ing.unit, substitutes) : [];
           return (
