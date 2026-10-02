@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isRunningInExpoGo } from 'expo';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -26,7 +27,8 @@ export const unstable_settings = { anchor: '(tabs)' };
 const SPLASH_MIN_MS = 1000;
 const launchedAt = Date.now();
 void SplashScreen.preventAutoHideAsync().catch(() => {});
-SplashScreen.setOptions({ duration: 300, fade: true });
+// Expo Go does not support splash options and warns about them on every launch
+if (!isRunningInExpoGo()) SplashScreen.setOptions({ duration: 300, fade: true });
 
 export default function RootLayout() {
   const scheme = useColorScheme();
