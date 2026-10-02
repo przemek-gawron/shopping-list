@@ -2,57 +2,60 @@
  * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
  * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
  * Native draws itself (`experimental_backgroundImage`, `boxShadow`); undefined means none.
+ *
+ * Midnight Emerald – refined jewel tones: deep emerald with gold, dark mode first with frosted-
+ * glass cards over an emerald → amethyst glow.
  */
 export const Colors = {
   light: {
-    text: '#111827',
-    textSecondary: '#6B7280',
+    text: '#0E1F1C',
+    textSecondary: '#5C6F6B',
     /** Screen canvas */
-    background: '#E8F2ED',
+    background: '#EEF3F1',
     /** Drawn over `background` behind every screen; should start with the background colour at the top. */
-    backgroundGradient: undefined as string | undefined,
+    backgroundGradient: 'linear-gradient(180deg, #EEF3F1 0%, #E1EBE8 100%)',
     /** Brand colour: links, icons, selected states */
-    tint: '#047857',
+    tint: '#0B6E5A',
     /** Fill of primary actions (buttons, add button, selected chips and day); falls back to `tint`. */
-    tintGradient: undefined as string | undefined,
+    tintGradient: 'linear-gradient(135deg, #0F8A6F 0%, #0B4F4A 100%)',
     /** Text and icons on `tint` */
     onPrimary: '#FFFFFF',
-    accent: '#F59E0B',
-    destructive: '#EF4444',
-    icon: '#9CA3AF',
-    border: 'rgba(4, 120, 87, 0.14)',
-    borderSubtle: 'rgba(4, 120, 87, 0.1)',
+    accent: '#C99A2E',
+    destructive: '#C2410C',
+    icon: '#98A8A4',
+    border: 'rgba(11, 79, 74, 0.14)',
+    borderSubtle: 'rgba(11, 79, 74, 0.08)',
     /** Cards, inputs, sheets */
-    cardBackground: '#F7FCFA',
+    cardBackground: 'rgba(255, 255, 255, 0.78)',
     /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
-    surfaceCard: '#DDEDE4',
-    cardShadow: undefined as string | undefined,
+    surfaceCard: '#DCE7E4',
+    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
     /** Shadow under primary actions */
-    tintShadow: undefined as string | undefined,
+    tintShadow: '0 8px 22px rgba(11, 79, 74, 0.35)',
   },
   dark: {
-    text: '#F9FAFB',
-    textSecondary: '#9CA3AF',
-    background: '#0F0F0F',
-    backgroundGradient: undefined as string | undefined,
-    tint: '#10B981',
-    tintGradient: undefined as string | undefined,
-    onPrimary: '#FFFFFF',
-    accent: '#F59E0B',
-    destructive: '#F87171',
-    icon: '#6B7280',
-    border: '#2C2C2E',
+    text: '#E8F5F1',
+    textSecondary: '#8FA9A3',
+    background: '#0B1F1C',
+    backgroundGradient: 'linear-gradient(165deg, #0B1F1C 0%, #081412 45%, #150F24 100%)',
+    tint: '#34D3A6',
+    tintGradient: 'linear-gradient(135deg, #3BE0B0 0%, #15A68A 100%)',
+    onPrimary: '#04211B',
+    accent: '#E9C46A',
+    destructive: '#FB7185',
+    icon: '#55706A',
+    border: 'rgba(52, 211, 166, 0.18)',
     borderSubtle: 'rgba(255, 255, 255, 0.08)',
-    cardBackground: '#1C1C1E',
-    surfaceCard: '#202725',
-    cardShadow: undefined as string | undefined,
-    tintShadow: undefined as string | undefined,
+    cardBackground: 'rgba(255, 255, 255, 0.05)',
+    surfaceCard: 'rgba(255, 255, 255, 0.08)',
+    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
+    tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
   },
 };
 
 /** Corner radii. */
 export const Radius = {
-  card: 16,
+  card: 18,
   /** Buttons, inputs, segmented control */
   control: 12,
   photo: 14,
