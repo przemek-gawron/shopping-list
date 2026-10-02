@@ -115,6 +115,7 @@ const en: Record<keyof typeof pl, string> = {
 
   list_title: 'Shopping list',
   list_add: 'Add item',
+  list_undo: 'Undo the last list change',
   list_add_confirm: 'Add to list',
   list_empty_title: 'The list is empty',
   list_empty_subtitle: 'Select meals in the Plan and generate a list, or add an item with the + button.',

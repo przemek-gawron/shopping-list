@@ -104,6 +104,8 @@ interface Actions {
   removeListItem: (id: string) => void;
   clearChecked: () => void;
   clearList: () => void;
+  /** Brings back the shopping list as it was before its last change. */
+  undoList: () => void;
 
   setLanguage: (language: Language) => void;
   setGroupByMenu: (value: boolean) => void;
@@ -119,255 +121,271 @@ interface Actions {
   clearAll: () => void;
 }
 
-export type Store = Data & Actions;
+/** Kept in memory only, not saved with the rest of the data. */
+interface Session {
+  /** Earlier versions of the shopping list, oldest first, for `undoList`. */
+  listHistory: ListItem[][];
+}
+
+/** How many shopping list changes can be undone. */
+const LIST_HISTORY_LIMIT = 20;
+
+export type Store = Data & Session & Actions;
 
 export const useStore = create<Store>()(
   persist(
-    (set, get) => ({
-      ...initialData(),
+    (set, get) => {
+      /** Changes the shopping list and remembers the previous one for undo. */
+      const changeList = (change: (list: ListItem[]) => ListItem[]) =>
+        set((s) => ({ list: change(s.list), listHistory: [...s.listHistory, s.list].slice(-LIST_HISTORY_LIMIT) }));
 
-      addGroup: (group) => {
-        const id = generateId();
-        set((s) => ({ groups: [...s.groups, { ...group, id }] }));
-        return id;
-      },
-      updateGroup: (group) =>
-        set((s) => ({ groups: s.groups.map((g) => (g.id === group.id ? group : g)) })),
-      moveGroup: (id, direction) =>
-        set((s) => {
-          const index = s.groups.findIndex((g) => g.id === id);
-          const target = index + direction;
-          if (index < 0 || target < 0 || target >= s.groups.length) return s;
-          const groups = [...s.groups];
-          [groups[index], groups[target]] = [groups[target], groups[index]];
-          return { groups };
-        }),
-      removeGroup: (id) =>
-        set((s) => ({
-          groups: s.groups.filter((g) => g.id !== id),
-          recipes: s.recipes.map((r) => (r.groupId === id ? { ...r, groupId: null } : r)),
-        })),
+      return {
+        ...initialData(),
+        listHistory: [],
 
-      addProduct: (product) => {
-        const id = generateId();
-        set((s) => ({ products: [...s.products, { ...product, id }] }));
-        return id;
-      },
-      updateProduct: (product) =>
-        set((s) => ({ products: s.products.map((p) => (p.id === product.id ? product : p)) })),
-      removeProduct: (id) =>
-        set((s) => ({
-          products: s.products.filter((p) => p.id !== id),
-          recipes: s.recipes.map((r) => ({
-            ...r,
-            ingredients: r.ingredients.filter((i) => i.productId !== id),
+        addGroup: (group) => {
+          const id = generateId();
+          set((s) => ({ groups: [...s.groups, { ...group, id }] }));
+          return id;
+        },
+        updateGroup: (group) =>
+          set((s) => ({ groups: s.groups.map((g) => (g.id === group.id ? group : g)) })),
+        moveGroup: (id, direction) =>
+          set((s) => {
+            const index = s.groups.findIndex((g) => g.id === id);
+            const target = index + direction;
+            if (index < 0 || target < 0 || target >= s.groups.length) return s;
+            const groups = [...s.groups];
+            [groups[index], groups[target]] = [groups[target], groups[index]];
+            return { groups };
+          }),
+        removeGroup: (id) =>
+          set((s) => ({
+            groups: s.groups.filter((g) => g.id !== id),
+            recipes: s.recipes.map((r) => (r.groupId === id ? { ...r, groupId: null } : r)),
           })),
-          // a swap to (or from) the deleted product would otherwise drop the ingredient from the list
-          plan: s.plan.map((e) =>
-            e.swaps?.some((w) => w.productId === id || w.fromProductId === id)
-              ? { ...e, swaps: e.swaps.filter((w) => w.productId !== id && w.fromProductId !== id) }
-              : e,
-          ),
-        })),
 
-      addRecipe: (recipe) => {
-        const id = generateId();
-        set((s) => ({ recipes: [...s.recipes, { ...recipe, id }] }));
-        return id;
-      },
-      updateRecipe: (recipe) => {
-        const previous = get().recipes.find((r) => r.id === recipe.id);
-        if (previous?.photo && previous.photo !== recipe.photo) deletePhoto(previous.photo);
-        set((s) => ({ recipes: s.recipes.map((r) => (r.id === recipe.id ? recipe : r)) }));
-      },
-      setRating: (id, rating) =>
-        set((s) => ({ recipes: s.recipes.map((r) => (r.id === id ? { ...r, rating } : r)) })),
-      removeRecipe: (id) => {
-        const recipe = get().recipes.find((r) => r.id === id);
-        if (recipe?.photo) deletePhoto(recipe.photo);
-        set((s) => ({
-          recipes: s.recipes.filter((r) => r.id !== id),
-          plan: s.plan.filter((e) => e.recipeId !== id),
-        }));
-      },
+        addProduct: (product) => {
+          const id = generateId();
+          set((s) => ({ products: [...s.products, { ...product, id }] }));
+          return id;
+        },
+        updateProduct: (product) =>
+          set((s) => ({ products: s.products.map((p) => (p.id === product.id ? product : p)) })),
+        removeProduct: (id) =>
+          set((s) => ({
+            products: s.products.filter((p) => p.id !== id),
+            recipes: s.recipes.map((r) => ({
+              ...r,
+              ingredients: r.ingredients.filter((i) => i.productId !== id),
+            })),
+            // a swap to (or from) the deleted product would otherwise drop the ingredient from the list
+            plan: s.plan.map((e) =>
+              e.swaps?.some((w) => w.productId === id || w.fromProductId === id)
+                ? { ...e, swaps: e.swaps.filter((w) => w.productId !== id && w.fromProductId !== id) }
+                : e,
+            ),
+          })),
 
-      setPlanEntry: (entry) =>
-        set((s) => ({
-          plan: [
-            ...s.plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
-            { ...entry, id: generateId() },
-          ],
-        })),
-      setPlanEntries: (entries) =>
-        set((s) => ({
-          plan: [
-            ...s.plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),
-            ...entries.map((e) => ({ ...e, id: generateId() })),
-          ],
-        })),
-      updatePlanEntry: (id, servings) =>
-        set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
-      removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
-      clearPlan: (from, to) => set((s) => ({ plan: s.plan.filter((e) => e.date < from || e.date > to) })),
-      setSwap: (entryId, fromProductId, substitute) => {
-        const { products } = get();
-        let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());
-        if (!product) {
-          // a new substitute goes to the same store department as what it replaces
-          const departmentId = products.find((p) => p.id === fromProductId)?.departmentId ?? 'other';
-          product = { id: generateId(), name: substitute.product, defaultUnit: substitute.unit, departmentId };
-          set({ products: [...products, product] });
-        }
-        const swap: Swap = { fromProductId, productId: product.id, quantity: substitute.quantity, unit: substitute.unit };
-        set((s) => ({
-          plan: s.plan.map((e) =>
-            e.id === entryId ? { ...e, swaps: [...(e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId), swap] } : e,
-          ),
-        }));
-      },
-      clearSwap: (entryId, fromProductId) =>
-        set((s) => ({
-          plan: s.plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
-        })),
-      setSubstitutes: (substitutes) => set({ substitutes }),
+        addRecipe: (recipe) => {
+          const id = generateId();
+          set((s) => ({ recipes: [...s.recipes, { ...recipe, id }] }));
+          return id;
+        },
+        updateRecipe: (recipe) => {
+          const previous = get().recipes.find((r) => r.id === recipe.id);
+          if (previous?.photo && previous.photo !== recipe.photo) deletePhoto(previous.photo);
+          set((s) => ({ recipes: s.recipes.map((r) => (r.id === recipe.id ? recipe : r)) }));
+        },
+        setRating: (id, rating) =>
+          set((s) => ({ recipes: s.recipes.map((r) => (r.id === id ? { ...r, rating } : r)) })),
+        removeRecipe: (id) => {
+          const recipe = get().recipes.find((r) => r.id === id);
+          if (recipe?.photo) deletePhoto(recipe.photo);
+          set((s) => ({
+            recipes: s.recipes.filter((r) => r.id !== id),
+            plan: s.plan.filter((e) => e.recipeId !== id),
+          }));
+        },
 
-      setMealCount: (count) =>
-        set((s) => {
-          const mealCount = Math.min(MAX_MEALS, Math.max(1, count));
-          const slots = [...s.slots];
-          while (slots.length < mealCount) slots.push({ id: generateId() });
-          return { mealCount, slots };
-        }),
-      moveSlot: (id, direction) =>
-        set((s) => {
-          const index = s.slots.findIndex((slot) => slot.id === id);
-          const target = index + direction;
-          if (index < 0 || target < 0 || target >= s.mealCount) return s;
-          const slots = [...s.slots];
-          [slots[index], slots[target]] = [slots[target], slots[index]];
-          return { slots };
-        }),
-      renameSlot: (id, name) =>
-        set((s) => ({
-          slots: s.slots.map((slot) =>
-            slot.id === id ? { ...slot, name: name.trim() || undefined } : slot,
-          ),
-        })),
-
-      generateList: (entryIds) => {
-        const { plan, recipes, products } = get();
-        const chosen = plan.filter((e) => entryIds.includes(e.id));
-        const items = buildShoppingList(chosen, recipes, products)
-          .map((item) => ({ ...item, id: generateId() }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        set({ list: items });
-      },
-      addListItem: (item) =>
-        set((s) => ({ list: [...s.list, { ...item, id: generateId(), checked: false }] })),
-      updateListItem: (item) => set((s) => ({ list: s.list.map((i) => (i.id === item.id ? item : i)) })),
-      toggleListItem: (id) =>
-        set((s) => ({ list: s.list.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)) })),
-      removeListItem: (id) => set((s) => ({ list: s.list.filter((i) => i.id !== id) })),
-      clearChecked: () => set((s) => ({ list: s.list.filter((i) => !i.checked) })),
-      clearList: () => set({ list: [] }),
-
-      setLanguage: (language) => set({ language }),
-      setGroupByMenu: (groupByMenu) => set({ groupByMenu }),
-      renameMenu: (id, name) =>
-        set((s) => ({ menus: s.menus.map((m) => (m.id === id && name.trim() ? { ...m, name: name.trim() } : m)) })),
-      moveMenu: (id, direction) =>
-        set((s) => {
-          const index = s.menus.findIndex((m) => m.id === id);
-          const target = index + direction;
-          if (index < 0 || target < 0 || target >= s.menus.length) return s;
-          const menus = [...s.menus];
-          [menus[index], menus[target]] = [menus[target], menus[index]];
-          return { menus };
-        }),
-      removeMenu: (id) =>
-        set((s) => ({
-          menus: s.menus.filter((m) => m.id !== id),
-          recipes: s.recipes.map((r) => (r.menuIds?.includes(id) ? { ...r, menuIds: r.menuIds.filter((m) => m !== id) } : r)),
-        })),
-
-      loadSamples: (language) => {
-        const samples = buildSamples(language);
-        const { groups, products, recipes } = get();
-        const newGroups = samples.groups.filter((g) => !groups.some((x) => x.id === g.id));
-        const newProducts = samples.products.filter((p) => !products.some((x) => x.id === p.id));
-        const newRecipes = samples.recipes.filter((r) => !recipes.some((x) => x.id === r.id));
-        set({
-          groups: [...groups, ...newGroups],
-          products: [...products, ...newProducts],
-          recipes: [...recipes, ...newRecipes],
-        });
-        return newRecipes.length;
-      },
-
-      importRecipes: (file) => {
-        const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-        const groups = [...get().groups];
-        const products = [...get().products];
-        const recipes = [...get().recipes];
-        let menus = [...get().menus];
-        // newest first; a plan imported again keeps its place
-        const menuId = (name: string) => {
-          let menu = menus.find((m) => same(m.name, name));
-          if (!menu) {
-            menu = { id: generateId(), name };
-            menus = [menu, ...menus];
+        setPlanEntry: (entry) =>
+          set((s) => ({
+            plan: [
+              ...s.plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
+              { ...entry, id: generateId() },
+            ],
+          })),
+        setPlanEntries: (entries) =>
+          set((s) => ({
+            plan: [
+              ...s.plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),
+              ...entries.map((e) => ({ ...e, id: generateId() })),
+            ],
+          })),
+        updatePlanEntry: (id, servings) =>
+          set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
+        removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
+        clearPlan: (from, to) => set((s) => ({ plan: s.plan.filter((e) => e.date < from || e.date > to) })),
+        setSwap: (entryId, fromProductId, substitute) => {
+          const { products } = get();
+          let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());
+          if (!product) {
+            // a new substitute goes to the same store department as what it replaces
+            const departmentId = products.find((p) => p.id === fromProductId)?.departmentId ?? 'other';
+            product = { id: generateId(), name: substitute.product, defaultUnit: substitute.unit, departmentId };
+            set({ products: [...products, product] });
           }
-          return menu.id;
-        };
-        file.menus.forEach(menuId);
-        let added = 0;
-        let updated = 0;
+          const swap: Swap = { fromProductId, productId: product.id, quantity: substitute.quantity, unit: substitute.unit };
+          set((s) => ({
+            plan: s.plan.map((e) =>
+              e.id === entryId ? { ...e, swaps: [...(e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId), swap] } : e,
+            ),
+          }));
+        },
+        clearSwap: (entryId, fromProductId) =>
+          set((s) => ({
+            plan: s.plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
+          })),
+        setSubstitutes: (substitutes) => set({ substitutes }),
 
-        const groupId = (name: string | null) => {
-          if (!name) return null;
-          let group = groups.find((g) => same(g.name, name));
-          if (!group) {
-            const emoji = file.groups.find((g) => same(g.name, name))?.emoji ?? '🍽️';
-            group = { id: generateId(), name, emoji };
-            groups.push(group);
-          }
-          return group.id;
-        };
+        setMealCount: (count) =>
+          set((s) => {
+            const mealCount = Math.min(MAX_MEALS, Math.max(1, count));
+            const slots = [...s.slots];
+            while (slots.length < mealCount) slots.push({ id: generateId() });
+            return { mealCount, slots };
+          }),
+        moveSlot: (id, direction) =>
+          set((s) => {
+            const index = s.slots.findIndex((slot) => slot.id === id);
+            const target = index + direction;
+            if (index < 0 || target < 0 || target >= s.mealCount) return s;
+            const slots = [...s.slots];
+            [slots[index], slots[target]] = [slots[target], slots[index]];
+            return { slots };
+          }),
+        renameSlot: (id, name) =>
+          set((s) => ({
+            slots: s.slots.map((slot) =>
+              slot.id === id ? { ...slot, name: name.trim() || undefined } : slot,
+            ),
+          })),
 
-        for (const incoming of file.recipes) {
-          const ingredients = incoming.ingredients.map((ing) => {
-            let product = products.find((p) => same(p.name, ing.name));
-            if (!product) {
-              product = { id: generateId(), name: ing.name, defaultUnit: ing.unit, departmentId: ing.department };
-              products.push(product);
-            }
-            return { id: generateId(), productId: product.id, quantity: ing.quantity, unit: ing.unit };
+        generateList: (entryIds) => {
+          const { plan, recipes, products } = get();
+          const chosen = plan.filter((e) => entryIds.includes(e.id));
+          const items = buildShoppingList(chosen, recipes, products)
+            .map((item) => ({ ...item, id: generateId() }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          changeList(() => items);
+        },
+        addListItem: (item) => changeList((list) => [...list, { ...item, id: generateId(), checked: false }]),
+        updateListItem: (item) => changeList((list) => list.map((i) => (i.id === item.id ? item : i))),
+        toggleListItem: (id) => changeList((list) => list.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i))),
+        removeListItem: (id) => changeList((list) => list.filter((i) => i.id !== id)),
+        clearChecked: () => changeList((list) => list.filter((i) => !i.checked)),
+        clearList: () => changeList(() => []),
+        undoList: () =>
+          set((s) => (s.listHistory.length ? { list: s.listHistory[s.listHistory.length - 1], listHistory: s.listHistory.slice(0, -1) } : s)),
+
+        setLanguage: (language) => set({ language }),
+        setGroupByMenu: (groupByMenu) => set({ groupByMenu }),
+        renameMenu: (id, name) =>
+          set((s) => ({ menus: s.menus.map((m) => (m.id === id && name.trim() ? { ...m, name: name.trim() } : m)) })),
+        moveMenu: (id, direction) =>
+          set((s) => {
+            const index = s.menus.findIndex((m) => m.id === id);
+            const target = index + direction;
+            if (index < 0 || target < 0 || target >= s.menus.length) return s;
+            const menus = [...s.menus];
+            [menus[index], menus[target]] = [menus[target], menus[index]];
+            return { menus };
+          }),
+        removeMenu: (id) =>
+          set((s) => ({
+            menus: s.menus.filter((m) => m.id !== id),
+            recipes: s.recipes.map((r) => (r.menuIds?.includes(id) ? { ...r, menuIds: r.menuIds.filter((m) => m !== id) } : r)),
+          })),
+
+        loadSamples: (language) => {
+          const samples = buildSamples(language);
+          const { groups, products, recipes } = get();
+          const newGroups = samples.groups.filter((g) => !groups.some((x) => x.id === g.id));
+          const newProducts = samples.products.filter((p) => !products.some((x) => x.id === p.id));
+          const newRecipes = samples.recipes.filter((r) => !recipes.some((x) => x.id === r.id));
+          set({
+            groups: [...groups, ...newGroups],
+            products: [...products, ...newProducts],
+            recipes: [...recipes, ...newRecipes],
           });
-          const data = {
-            title: incoming.title,
-            description: incoming.description,
-            groupId: groupId(incoming.group),
-            ingredients,
-          };
-          const index = recipes.findIndex((r) => same(r.title, incoming.title));
-          const menuIds = [...new Set([...((index >= 0 && recipes[index].menuIds) || []), ...incoming.menus.map(menuId)])];
-          if (index >= 0) {
-            recipes[index] = { ...recipes[index], ...data, menuIds };
-            updated++;
-          } else {
-            recipes.push({ ...data, menuIds, id: generateId() });
-            added++;
-          }
-        }
-        set({ groups, products, recipes, menus });
-        return { added, updated };
-      },
+          return newRecipes.length;
+        },
 
-      clearAll: () => {
-        get().recipes.forEach((r) => r.photo && deletePhoto(r.photo));
-        set({ ...initialData(), language: get().language });
-      },
-    }),
+        importRecipes: (file) => {
+          const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+          const groups = [...get().groups];
+          const products = [...get().products];
+          const recipes = [...get().recipes];
+          let menus = [...get().menus];
+          // newest first; a plan imported again keeps its place
+          const menuId = (name: string) => {
+            let menu = menus.find((m) => same(m.name, name));
+            if (!menu) {
+              menu = { id: generateId(), name };
+              menus = [menu, ...menus];
+            }
+            return menu.id;
+          };
+          file.menus.forEach(menuId);
+          let added = 0;
+          let updated = 0;
+
+          const groupId = (name: string | null) => {
+            if (!name) return null;
+            let group = groups.find((g) => same(g.name, name));
+            if (!group) {
+              const emoji = file.groups.find((g) => same(g.name, name))?.emoji ?? '🍽️';
+              group = { id: generateId(), name, emoji };
+              groups.push(group);
+            }
+            return group.id;
+          };
+
+          for (const incoming of file.recipes) {
+            const ingredients = incoming.ingredients.map((ing) => {
+              let product = products.find((p) => same(p.name, ing.name));
+              if (!product) {
+                product = { id: generateId(), name: ing.name, defaultUnit: ing.unit, departmentId: ing.department };
+                products.push(product);
+              }
+              return { id: generateId(), productId: product.id, quantity: ing.quantity, unit: ing.unit };
+            });
+            const data = {
+              title: incoming.title,
+              description: incoming.description,
+              groupId: groupId(incoming.group),
+              ingredients,
+            };
+            const index = recipes.findIndex((r) => same(r.title, incoming.title));
+            const menuIds = [...new Set([...((index >= 0 && recipes[index].menuIds) || []), ...incoming.menus.map(menuId)])];
+            if (index >= 0) {
+              recipes[index] = { ...recipes[index], ...data, menuIds };
+              updated++;
+            } else {
+              recipes.push({ ...data, menuIds, id: generateId() });
+              added++;
+            }
+          }
+          set({ groups, products, recipes, menus });
+          return { added, updated };
+        },
+
+        clearAll: () => {
+          get().recipes.forEach((r) => r.photo && deletePhoto(r.photo));
+          set({ ...initialData(), listHistory: [], language: get().language });
+        },
+      };
+    },
     {
       name: 'shopping-list:v2',
       version: 2,

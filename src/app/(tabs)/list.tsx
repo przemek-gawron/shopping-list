@@ -28,6 +28,8 @@ export default function ListScreen() {
   const remove = useStore((s) => s.removeListItem);
   const clearChecked = useStore((s) => s.clearChecked);
   const clearList = useStore((s) => s.clearList);
+  const undo = useStore((s) => s.undoList);
+  const canUndo = useStore((s) => s.listHistory.length > 0);
 
   const sections = useMemo(
     () =>
@@ -79,7 +81,24 @@ export default function ListScreen() {
   );
 
   return (
-    <Screen wide title={t('list_title')} action={<AddButton onPress={() => router.push('/list/add')} accessibilityLabel={t('list_add')} />}>
+    <Screen
+      wide
+      title={t('list_title')}
+      action={
+        <View style={styles.headerActions}>
+          {canUndo && (
+            <Pressable
+              onPress={undo}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={t('list_undo')}
+              style={({ pressed }) => [styles.undo, { backgroundColor: theme.surfaceCard }, pressed && styles.pressed]}>
+              <IconSymbol name="arrow.uturn.backward" size={18} color={theme.tint} />
+            </Pressable>
+          )}
+          <AddButton onPress={() => router.push('/list/add')} accessibilityLabel={t('list_add')} />
+        </View>
+      }>
       {list.length === 0 ? (
         <EmptyState emoji="🛒" title={t('list_empty_title')} subtitle={t('list_empty_subtitle')} />
       ) : (
@@ -143,6 +162,8 @@ export default function ListScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  undo: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   progress: { gap: Spacing.two },
   progressText: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   count: { fontWeight: '700' },

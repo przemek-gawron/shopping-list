@@ -37,6 +37,7 @@ const MAPPING = {
   'trash.fill': 'delete',
   'key': 'key',
   'sparkles': 'flare',
+  'arrow.uturn.backward': 'undo',
 } as IconMapping;
 
 /**
