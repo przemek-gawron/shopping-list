@@ -1,116 +1,72 @@
-import { Platform } from 'react-native';
-
-const primaryLight = '#047857';
-const primaryDark = '#10B981';
-
 /**
- * Light mode: soft green-tinted canvas, glass-like elevated surfaces, semantic tokens for overlays.
- * Dark mode: keep existing character; tokens mirror structure for type-safe access.
+ * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
+ * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
+ * Native draws itself (`experimental_backgroundImage`, `boxShadow`); undefined means none.
  */
 export const Colors = {
   light: {
     text: '#111827',
     textSecondary: '#6B7280',
-    /** Main screen canvas — soft mint (replaces flat iOS gray) */
+    /** Screen canvas */
     background: '#E8F2ED',
-    backgroundSecondary: '#F0F9F5',
-    tint: primaryLight,
-    tintSecondary: '#065F46',
-    icon: '#9CA3AF',
-    tabIconDefault: '#9CA3AF',
-    tabIconSelected: primaryLight,
-    border: 'rgba(4, 120, 87, 0.14)',
-    /** Cards, sheets — not pure white */
-    cardBackground: '#F7FCFA',
-    success: '#059669',
-    error: '#DC2626',
-    accent: '#F59E0B',
-
-    surfacePrimary: '#E8F2ED',
-    surfaceElevated: '#F7FCFA',
-    /** Frosted list rows / chips */
-    surfaceGlass: 'rgba(255, 255, 255, 0.82)',
-    /** More solid list tiles */
-    surfaceCard: '#DDEDE4',
-    surfaceOverlay: 'rgba(4, 120, 87, 0.45)',
+    /** Drawn over `background` behind every screen; should start with the background colour at the top. */
+    backgroundGradient: undefined as string | undefined,
+    /** Brand colour: links, icons, selected states */
+    tint: '#047857',
+    /** Fill of primary actions (buttons, add button, selected chips and day); falls back to `tint`. */
+    tintGradient: undefined as string | undefined,
+    /** Text and icons on `tint` */
     onPrimary: '#FFFFFF',
-    onPrimaryMuted: 'rgba(255, 255, 255, 0.75)',
-    borderSubtle: 'rgba(4, 120, 87, 0.1)',
-    shadowColor: 'rgba(6, 95, 70, 0.16)',
-    tabBarBackground: '#F4FBF8',
-    backdropTint: '#E8F2ED',
-    headerGradientStart: '#047857',
-    headerGradientEnd: '#0A5C47',
-    overlayOnPrimary: 'rgba(255, 255, 255, 0.26)',
-    overlayOnPrimarySubtle: 'rgba(255, 255, 255, 0.17)',
-    /** Solid nav / modal header (matches gradient start) */
-    headerChrome: '#047857',
-    headerBackgroundDark: '#064E3B',
+    accent: '#F59E0B',
     destructive: '#EF4444',
-    modalOverlay: 'rgba(15, 23, 42, 0.48)',
+    icon: '#9CA3AF',
+    border: 'rgba(4, 120, 87, 0.14)',
+    borderSubtle: 'rgba(4, 120, 87, 0.1)',
+    /** Cards, inputs, sheets */
+    cardBackground: '#F7FCFA',
+    /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
+    surfaceCard: '#DDEDE4',
+    cardShadow: undefined as string | undefined,
+    /** Shadow under primary actions */
+    tintShadow: undefined as string | undefined,
   },
   dark: {
     text: '#F9FAFB',
     textSecondary: '#9CA3AF',
     background: '#0F0F0F',
-    backgroundSecondary: '#1C1C1E',
-    tint: primaryDark,
-    tintSecondary: '#34D399',
-    icon: '#6B7280',
-    tabIconDefault: '#48484A',
-    tabIconSelected: primaryDark,
-    border: '#2C2C2E',
-    cardBackground: '#1C1C1E',
-    success: '#10B981',
-    error: '#F87171',
-    accent: '#F59E0B',
-
-    surfacePrimary: '#0F0F0F',
-    surfaceElevated: '#1C1C1E',
-    surfaceGlass: 'rgba(28, 28, 30, 0.88)',
-    surfaceCard: '#202725',
-    surfaceOverlay: 'rgba(16, 185, 129, 0.35)',
+    backgroundGradient: undefined as string | undefined,
+    tint: '#10B981',
+    tintGradient: undefined as string | undefined,
     onPrimary: '#FFFFFF',
-    onPrimaryMuted: 'rgba(255, 255, 255, 0.72)',
-    borderSubtle: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: 'rgba(0, 0, 0, 0.5)',
-    tabBarBackground: '#141414',
-    backdropTint: '#0F0F0F',
-    headerGradientStart: '#064E3B',
-    headerGradientEnd: '#052E24',
-    overlayOnPrimary: 'rgba(255, 255, 255, 0.22)',
-    overlayOnPrimarySubtle: 'rgba(255, 255, 255, 0.12)',
-    headerChrome: '#064E3B',
-    headerBackgroundDark: '#064E3B',
+    accent: '#F59E0B',
     destructive: '#F87171',
-    modalOverlay: 'rgba(0, 0, 0, 0.62)',
-  },
-  gradients: {
-    primary: ['#047857', '#065F46'],
-    primaryDark: ['#10B981', '#059669'],
+    icon: '#6B7280',
+    border: '#2C2C2E',
+    borderSubtle: 'rgba(255, 255, 255, 0.08)',
+    cardBackground: '#1C1C1E',
+    surfaceCard: '#202725',
+    cardShadow: undefined as string | undefined,
+    tintShadow: undefined as string | undefined,
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    sans: 'system-ui',
-    serif: 'ui-serif',
-    rounded: 'ui-rounded',
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+/** Corner radii. */
+export const Radius = {
+  card: 16,
+  /** Buttons, inputs, segmented control */
+  control: 12,
+  photo: 14,
+};
+
+/** Style of a screen's background: the canvas colour with its gradient. */
+export function screenFill(theme: ThemeColors) {
+  return { backgroundColor: theme.background, experimental_backgroundImage: theme.backgroundGradient };
+}
+
+/** Style of a primary-action fill: the tint gradient (or plain tint) with its shadow. */
+export function tintFill(theme: ThemeColors) {
+  return { backgroundColor: theme.tint, experimental_backgroundImage: theme.tintGradient, boxShadow: theme.tintShadow };
+}
 
 export const Spacing = {
   half: 2,

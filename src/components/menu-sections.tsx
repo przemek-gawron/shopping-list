@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Grid } from '@/components/columns';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
@@ -68,7 +68,7 @@ export function MenuSections<T extends { id: string; menuIds?: string[] }>({ rec
 
 const styles = StyleSheet.create({
   list: { gap: Spacing.two },
-  header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: Radius.control, paddingHorizontal: 12, paddingVertical: 10 },
   title: { flex: 1, fontWeight: '700' },
   pressed: { opacity: 0.6 },
 });

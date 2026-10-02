@@ -6,6 +6,7 @@ import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
+import { tintFill } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
 
@@ -90,7 +91,7 @@ export function UpdateToast() {
             onPress={() => Updates.reloadAsync().catch(() => {})}
             hitSlop={8}
             accessibilityRole="button"
-            style={[styles.action, { backgroundColor: theme.tint }]}>
+            style={[styles.action, tintFill(theme)]}>
             <ThemedText type="small" color="onPrimary" style={styles.title}>
               {t('update_restart')}
             </ThemedText>

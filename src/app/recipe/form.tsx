@@ -10,7 +10,7 @@ import { RecipePhoto } from '@/components/recipe-photo';
 import { Page } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { UNITS } from '@/constants/units';
 import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
@@ -236,6 +236,6 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   ingredient: { gap: Spacing.two },
   ingredientTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  name: { flex: 1, minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
-  quantity: { width: 70, minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, fontSize: 16, textAlign: 'center' },
+  name: { flex: 1, minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
+  quantity: { width: 70, minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 10, fontSize: 16, textAlign: 'center' },
 });

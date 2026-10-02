@@ -9,7 +9,7 @@ import { Screen } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
@@ -75,7 +75,7 @@ export default function PlanScreen() {
         <Pressable
           onPress={() => router.push({ pathname: '/plan/random', params: { date: selectedDate } })}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.random, { backgroundColor: theme.tint }, pressed && { opacity: 0.7 }]}>
+          style={({ pressed }) => [styles.random, tintFill(theme), pressed && { opacity: 0.7 }]}>
           <ThemedText color="onPrimary" style={styles.randomLabel}>
             🎲 {t('random_title')}
           </ThemedText>
@@ -106,7 +106,8 @@ export default function PlanScreen() {
               accessibilityLabel={formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
               style={[
                 styles.day,
-                { backgroundColor: isSelected ? theme.tint : theme.cardBackground, borderColor: isToday ? theme.tint : theme.borderSubtle },
+                isSelected ? tintFill(theme) : { backgroundColor: theme.cardBackground, boxShadow: theme.cardShadow },
+                { borderColor: isToday ? theme.tint : isSelected ? 'transparent' : theme.borderSubtle },
               ]}>
               <ThemedText type="caption" color={isSelected ? 'onPrimary' : 'textSecondary'}>
                 {formatDate(date, locale, { weekday: 'short' })}
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   randomLabel: { fontWeight: '700', fontSize: 14 },
   weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   days: { flexDirection: 'row', gap: 6 },
-  day: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 12, borderWidth: 1, gap: 2 },
+  day: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
   dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
   dot: { width: 5, height: 5, borderRadius: 3 },
   slot: { gap: Spacing.two },

@@ -11,7 +11,7 @@ import { RecipePhoto } from '@/components/recipe-photo';
 import { Screen } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
@@ -111,7 +111,7 @@ export default function RecipesScreen() {
 }
 
 const styles = StyleSheet.create({
-  search: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
+  search: { minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
   chips: { gap: Spacing.two, paddingVertical: 2 },
   // flexGrow: cards in one grid row get the same height
   row: { flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: 10 },

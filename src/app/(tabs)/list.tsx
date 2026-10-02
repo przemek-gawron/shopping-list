@@ -12,7 +12,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { DEPARTMENTS } from '@/constants/departments';
-import { Spacing } from '@/constants/theme';
+import { Spacing, tintFill } from '@/constants/theme';
 import { formatQuantity } from '@/constants/units';
 import { useStore } from '@/data/store';
 import type { ListItem } from '@/data/types';
@@ -92,7 +92,7 @@ export default function ListScreen() {
               </ThemedText>
             </View>
             <View style={[styles.track, { backgroundColor: theme.surfaceCard }]}>
-              <View style={[styles.fill, { width: `${(done / list.length) * 100}%`, backgroundColor: theme.tint }]} />
+              <View style={[styles.fill, { width: `${(done / list.length) * 100}%` }, tintFill(theme), { boxShadow: undefined }]} />
             </View>
           </Card>
 

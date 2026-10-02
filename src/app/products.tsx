@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Page } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { DEPARTMENT_EMOJI } from '@/constants/departments';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
@@ -50,7 +50,7 @@ export default function ProductsScreen() {
 }
 
 const styles = StyleSheet.create({
-  search: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
+  search: { minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, paddingVertical: 10 },
   emoji: { fontSize: 24, lineHeight: 30 },
   text: { flex: 1 },

@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { photoUri } from '@/utils/photos';
 
@@ -23,5 +24,5 @@ export function RecipePhoto({ photo, uri, emoji, size, height }: Props) {
 }
 
 const styles = StyleSheet.create({
-  box: { borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  box: { borderRadius: Radius.photo, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
 });

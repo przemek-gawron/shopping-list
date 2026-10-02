@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { MaxContentWidth, Spacing, WideContentWidth } from '@/constants/theme';
+import { MaxContentWidth, screenFill, Spacing, WideContentWidth } from '@/constants/theme';
 import { useTabBarInset } from '@/hooks/use-tab-bar-inset';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -34,7 +34,7 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.background }]}>
+    <View style={[styles.root, screenFill(theme)]}>
       <SafeAreaView edges={['top']} style={styles.root}>
         {scroll ? (
           <ScrollView
@@ -61,7 +61,7 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
   const theme = useTheme();
   return (
     <ScrollView
-      style={{ backgroundColor: theme.background }}
+      style={screenFill(theme)}
       contentInsetAdjustmentBehavior="automatic"
       // keeps the focused field above the keyboard on iOS; Android resizes the window itself
       automaticallyAdjustKeyboardInsets

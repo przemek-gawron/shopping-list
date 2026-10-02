@@ -11,7 +11,7 @@ import { Page } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { groupForSlot, useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   servings: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   chips: { gap: Spacing.two },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  search: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, fontSize: 16 },
+  search: { minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
   chosen: { flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
   chosenName: { flex: 1, fontWeight: '700' },
   change: { fontWeight: '700' },

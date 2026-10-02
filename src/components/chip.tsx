@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
+import { tintFill } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props = { label: string; selected?: boolean; onPress?: () => void };
@@ -15,10 +16,7 @@ export function Chip({ label, selected, onPress }: Props) {
       accessibilityState={{ selected: !!selected }}
       style={({ pressed }) => [
         styles.chip,
-        {
-          borderColor: selected ? theme.tint : theme.border,
-          backgroundColor: selected ? theme.tint : 'transparent',
-        },
+        selected ? [tintFill(theme), { borderColor: 'transparent', boxShadow: undefined }] : { borderColor: theme.border },
         pressed && styles.pressed,
       ]}>
       <Text style={[styles.label, { color: selected ? theme.onPrimary : theme.textSecondary }]}>{label}</Text>

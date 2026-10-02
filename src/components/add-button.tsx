@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { tintFill } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props = { onPress: () => void; accessibilityLabel: string };
@@ -13,7 +14,7 @@ export function AddButton({ onPress, accessibilityLabel }: Props) {
       hitSlop={10}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      style={({ pressed }) => [styles.button, { backgroundColor: theme.tint }, pressed && styles.pressed]}>
+      style={({ pressed }) => [styles.button, tintFill(theme), pressed && styles.pressed]}>
       <View style={[styles.horizontal, { backgroundColor: theme.onPrimary }]} />
       <View style={[styles.vertical, { backgroundColor: theme.onPrimary }]} />
     </Pressable>
