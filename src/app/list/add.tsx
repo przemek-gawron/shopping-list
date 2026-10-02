@@ -47,7 +47,17 @@ export default function ListAddScreen() {
 
   return (
     <Page>
-      <Stack.Screen options={{ title: editing ? t('list_edit') : t('list_add') }} />
+      <Stack.Screen
+        options={{
+          title: editing ? t('list_edit') : t('list_add'),
+          // saving without scrolling down past the unit and department chips
+          headerRight: () => (
+            <ThemedText color="tint" accessibilityRole="button" style={styles.headerAction} onPress={save}>
+              {editing ? t('save') : t('add')}
+            </ThemedText>
+          ),
+        }}
+      />
       <Field label={t('product_name')} value={name} onChangeText={setName} placeholder={t('product_name_placeholder')} autoFocus={!editing} />
       {suggestions.length > 0 && (
         <View style={styles.wrap}>
@@ -89,4 +99,5 @@ export default function ListAddScreen() {
 const styles = StyleSheet.create({
   section: { gap: Spacing.two },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  headerAction: { fontWeight: '700', fontSize: 16, paddingHorizontal: 6 },
 });
