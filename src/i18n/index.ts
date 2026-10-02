@@ -3,7 +3,7 @@ import { I18n } from 'i18n-js';
 import { useCallback } from 'react';
 
 import { useStore } from '@/data/store';
-import type { Language } from '@/data/types';
+import type { Language, Unit } from '@/data/types';
 import en from './en';
 import pl from './pl';
 
@@ -29,4 +29,35 @@ export function useT(): TFunction {
 
 export function useLocale(): Locale {
   return resolveLocale(useStore((s) => s.language));
+}
+
+/** Polish forms for one, a few (2–4, and fractions) and many; other units are abbreviations. */
+const PL_UNIT_FORMS: Partial<Record<Unit, [string, string, string]>> = {
+  lyzka: ['łyżka', 'łyżki', 'łyżek'],
+  lyzeczka: ['łyżeczka', 'łyżeczki', 'łyżeczek'],
+  szklanka: ['szklanka', 'szklanki', 'szklanek'],
+};
+
+function polishForm(quantity: number, [one, few, many]: [string, string, string]) {
+  if (!Number.isInteger(quantity)) return few;
+  if (quantity === 1) return one;
+  const last = quantity % 10;
+  const lastTwo = quantity % 100;
+  return last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14) ? few : many;
+}
+
+/** "0,5 łyżki", "2 łyżki", "1.5 cups": an amount with its unit in the app's language. */
+export function useFormatAmount() {
+  const t = useT();
+  const locale = useLocale();
+  return useCallback(
+    (quantity: number, unit: Unit) => {
+      const number = quantity.toLocaleString(locale, { maximumFractionDigits: 2, useGrouping: false });
+      const forms = locale === 'pl' ? PL_UNIT_FORMS[unit] : undefined;
+      let label = forms ? polishForm(quantity, forms) : t(`unit_${unit}`);
+      if (locale === 'en' && unit === 'szklanka' && quantity !== 1) label = 'cups';
+      return `${number} ${label}`;
+    },
+    [t, locale],
+  );
 }

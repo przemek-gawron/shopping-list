@@ -10,12 +10,11 @@ import { Page } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { formatQuantity } from '@/constants/units';
 import { recipeEmoji } from '@/data/labels';
 import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
 import { substituteOptions } from '@/data/substitutes';
-import { useT } from '@/i18n';
+import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
 
 /**
@@ -25,6 +24,7 @@ import { confirm } from '@/utils/confirm';
 export default function RecipeScreen() {
   const { id, entryId } = useLocalSearchParams<{ id: string; entryId?: string }>();
   const t = useT();
+  const formatAmount = useFormatAmount();
   const entry = useStore((s) => (entryId ? s.plan.find((e) => e.id === entryId) : undefined));
   const substitutes = useStore((s) => s.substitutes);
   const setSwap = useStore((s) => s.setSwap);
@@ -82,7 +82,7 @@ export default function RecipeScreen() {
                   {swap && <ThemedText type="caption">{t('swap_instead_of', { name: product?.name ?? '?' })}</ThemedText>}
                 </View>
                 <ThemedText type="small">
-                  {formatQuantity(shown.quantity)} {t(`unit_${shown.unit}`)}
+                  {formatAmount(shown.quantity, shown.unit)}
                 </ThemedText>
                 {swap && entry && (
                   <ThemedText color="tint" style={styles.action} accessibilityRole="button" onPress={() => clearSwap(entry.id, ing.productId)}>
@@ -104,7 +104,7 @@ export default function RecipeScreen() {
                   {options.map((o) => (
                     <Chip
                       key={o.product}
-                      label={`${o.product} · ${formatQuantity(o.quantity)} ${t(`unit_${o.unit}`)}`}
+                      label={`${o.product} · ${formatAmount(o.quantity, o.unit)}`}
                       onPress={() => {
                         setSwap(entry.id, ing.productId, o);
                         setChoosing(null);

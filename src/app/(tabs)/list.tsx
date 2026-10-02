@@ -13,16 +13,16 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { DEPARTMENTS } from '@/constants/departments';
 import { Spacing, tintFill } from '@/constants/theme';
-import { formatQuantity } from '@/constants/units';
 import { useStore } from '@/data/store';
 import type { ListItem } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
-import { useT } from '@/i18n';
+import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
 
 export default function ListScreen() {
   const theme = useTheme();
   const t = useT();
+  const formatAmount = useFormatAmount();
   const list = useStore((s) => s.list);
   const toggle = useStore((s) => s.toggleListItem);
   const remove = useStore((s) => s.removeListItem);
@@ -42,7 +42,7 @@ export default function ListScreen() {
 
   const copy = async () => {
     const lines = [...sections.flatMap((s) => s.items), ...checked].map(
-      (i) => `${i.checked ? '[x]' : '[ ]'} ${i.name}: ${formatQuantity(i.quantity)} ${t(`unit_${i.unit}`)}`,
+      (i) => `${i.checked ? '[x]' : '[ ]'} ${i.name}: ${formatAmount(i.quantity, i.unit)}`,
     );
     await Clipboard.setStringAsync(lines.join('\n'));
     Alert.alert(t('list_copied'));
@@ -69,7 +69,7 @@ export default function ListScreen() {
           {item.name}
         </ThemedText>
         <ThemedText type="small" style={item.checked && styles.doneText}>
-          {formatQuantity(item.quantity)} {t(`unit_${item.unit}`)}
+          {formatAmount(item.quantity, item.unit)}
         </ThemedText>
       </Pressable>
       <Pressable hitSlop={8} accessibilityRole="button" onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
