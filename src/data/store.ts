@@ -162,6 +162,12 @@ export const useStore = create<Store>()(
             ...r,
             ingredients: r.ingredients.filter((i) => i.productId !== id),
           })),
+          // a swap to (or from) the deleted product would otherwise drop the ingredient from the list
+          plan: s.plan.map((e) =>
+            e.swaps?.some((w) => w.productId === id || w.fromProductId === id)
+              ? { ...e, swaps: e.swaps.filter((w) => w.productId !== id && w.fromProductId !== id) }
+              : e,
+          ),
         })),
 
       addRecipe: (recipe) => {
