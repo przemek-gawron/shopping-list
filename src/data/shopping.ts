@@ -2,6 +2,16 @@ import { convertFromBase, convertToBase } from '@/constants/units';
 import type { ListItem, PlanEntry, Product, Recipe, Unit } from '@/data/types';
 
 /**
+ * The swaps of a planned meal that still apply: the recipe has the replaced ingredient and the
+ * substitute product exists. Others are left over after the recipe or the products were edited.
+ */
+export function appliedSwaps(entry: PlanEntry, recipe: Recipe | undefined, products: Product[]) {
+  return (entry.swaps ?? []).filter(
+    (s) => recipe?.ingredients.some((i) => i.productId === s.fromProductId) && products.some((p) => p.id === s.productId),
+  );
+}
+
+/**
  * Adds up the ingredients of the chosen plan entries. The same product in the same kind of unit
  * (weight, volume, pieces...) is merged into one line, e.g. 200 g + 0.3 kg = 500 g.
  */

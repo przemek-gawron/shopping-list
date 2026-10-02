@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { useSlotName } from '@/data/labels';
+import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
@@ -24,6 +25,7 @@ export default function PlanScreen() {
   const slotName = useSlotName();
   const plan = useStore((s) => s.plan);
   const recipes = useStore((s) => s.recipes);
+  const products = useStore((s) => s.products);
   const allSlots = useStore((s) => s.slots);
   const mealCount = useStore((s) => s.mealCount);
   const list = useStore((s) => s.list);
@@ -129,6 +131,7 @@ export default function PlanScreen() {
         const entry = dayEntries(selectedDate).find((e) => e.slotId === slot.id);
         const recipe = entry && recipes.find((r) => r.id === entry.recipeId);
         const isPicked = !!entry && picked.includes(entry.id);
+        const swapCount = entry ? appliedSwaps(entry, recipe, products).length : 0;
         const action = entry ? t('change') : `+ ${t('plan_add_meal')}`;
         return (
           <Card key={slot.id} style={styles.slot}>
@@ -163,9 +166,9 @@ export default function PlanScreen() {
                     <ThemedText style={styles.entryName} numberOfLines={2}>
                       {recipe?.title ?? '?'}
                     </ThemedText>
-                    {!!entry.swaps?.length && (
+                    {swapCount > 0 && (
                       <ThemedText type="caption" color="tint">
-                        {t('swap_count', { count: entry.swaps.length })}
+                        {t('swap_count', { count: swapCount })}
                       </ThemedText>
                     )}
                   </Pressable>
