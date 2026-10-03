@@ -74,7 +74,7 @@ export default function PlanAddScreen() {
       <View style={styles.section}>
         <ThemedText type="label">{t('recipe')}</ThemedText>
         {chosen ? (
-          <Card style={styles.chosen}>
+          <Card style={styles.chosen} onPress={() => setRecipeId(null)}>
             <ThemedText style={styles.chosenName} numberOfLines={2}>
               {chosen.title}
             </ThemedText>

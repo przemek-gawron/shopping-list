@@ -115,7 +115,8 @@ export default function PlanScreen() {
         const swapCount = entry ? appliedSwaps(entry, recipe, products).length : 0;
         const action = entry ? t('change') : `+ ${t('plan_add_meal')}`;
         return (
-          <Card key={slot.id} style={styles.slot}>
+          // the whole card picks the recipe; the recipe name, checkbox, stepper and ✕ keep their own actions
+          <Card key={slot.id} style={styles.slot} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
             <View style={styles.slotHeader}>
               <ThemedText type="label">{slotName(slot, index)}</ThemedText>
               <Pressable
