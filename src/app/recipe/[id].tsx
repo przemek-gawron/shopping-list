@@ -6,6 +6,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { RecipePhoto } from '@/components/recipe-photo';
+import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { Page } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
@@ -36,6 +37,13 @@ export default function RecipeScreen() {
   const products = useStore((s) => s.products);
   const removeRecipe = useStore((s) => s.removeRecipe);
   const setRating = useStore((s) => s.setRating);
+  const updatePlanEntry = useStore((s) => s.updatePlanEntry);
+  // opened from the plan the multiplier is the planned meal's and changing it updates the plan;
+  // otherwise it only scales the amounts shown here
+  const [previewServings, setPreviewServings] = useState(1);
+  const [showMultipliers, setShowMultipliers] = useState(false);
+  const servings = entry ? entry.servings : previewServings;
+  const setServings = (value: number) => (entry ? updatePlanEntry(entry.id, value) : setPreviewServings(value));
 
   if (!recipe) return <Stack.Screen options={{ title: '' }} />;
   // swaps to a product deleted since are ignored, as on the shopping list
@@ -65,7 +73,19 @@ export default function RecipeScreen() {
       </View>
       {recipe.description ? <ThemedText>{recipe.description}</ThemedText> : null}
 
-      <ThemedText type="label">{t('ingredients')}</ThemedText>
+      <View style={styles.servings}>
+        <ThemedText type="label">{t('ingredients')}</ThemedText>
+        <ServingsStepper value={servings} onChange={setServings} onValuePress={() => setShowMultipliers(!showMultipliers)} />
+      </View>
+      {showMultipliers && (
+        <ServingsChips
+          value={servings}
+          onChange={(value) => {
+            setServings(value);
+            setShowMultipliers(false);
+          }}
+        />
+      )}
       {entry && <ThemedText type="small">{t('swap_hint')}</ThemedText>}
       <Card style={styles.ingredients}>
         {recipe.ingredients.length === 0 && <ThemedText type="small">{t('no_ingredients')}</ThemedText>}
@@ -82,7 +102,7 @@ export default function RecipeScreen() {
                   {swap && <ThemedText type="caption">{t('swap_instead_of', { name: product?.name ?? '?' })}</ThemedText>}
                 </View>
                 <ThemedText type="small">
-                  {formatAmount(shown.quantity, shown.unit)}
+                  {formatAmount(shown.quantity * servings, shown.unit)}
                 </ThemedText>
                 {swap && entry && (
                   <ThemedText color="tint" style={styles.action} accessibilityRole="button" onPress={() => clearSwap(entry.id, ing.productId)}>
@@ -104,7 +124,7 @@ export default function RecipeScreen() {
                   {options.map((o) => (
                     <Chip
                       key={o.product}
-                      label={`${o.product} · ${formatAmount(o.quantity, o.unit)}`}
+                      label={`${o.product} · ${formatAmount(o.quantity * servings, o.unit)}`}
                       onPress={() => {
                         setSwap(entry.id, ing.productId, o);
                         setChoosing(null);
@@ -139,6 +159,7 @@ export default function RecipeScreen() {
 const styles = StyleSheet.create({
   edit: { fontWeight: '700', fontSize: 16 },
   titleBlock: { gap: Spacing.one },
+  servings: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ingredients: { gap: Spacing.two },
   ingredientBlock: { gap: Spacing.two },
   ingredient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
