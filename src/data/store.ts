@@ -86,6 +86,8 @@ interface Actions {
   removePlanEntry: (id: string) => void;
   /** Removes every planned meal from `from` to `to` (YYYY-MM-DD, inclusive), hidden meal slots included. */
   clearPlan: (from: string, to: string) => void;
+  /** Brings back the plan as it was before its last change. */
+  undoPlan: () => void;
   /** Replaces one ingredient of a planned meal; creates the substitute product when it is new. */
   setSwap: (entryId: string, fromProductId: string, substitute: { product: string; quantity: number; unit: Unit }) => void;
   clearSwap: (entryId: string, fromProductId: string) => void;
@@ -125,10 +127,12 @@ interface Actions {
 interface Session {
   /** Earlier versions of the shopping list, oldest first, for `undoList`. */
   listHistory: ListItem[][];
+  /** Earlier versions of the plan, oldest first, for `undoPlan`. */
+  planHistory: PlanEntry[][];
 }
 
-/** How many shopping list changes can be undone. */
-const LIST_HISTORY_LIMIT = 20;
+/** How many shopping list or plan changes can be undone. */
+const HISTORY_LIMIT = 20;
 
 export type Store = Data & Session & Actions;
 
@@ -137,11 +141,15 @@ export const useStore = create<Store>()(
     (set, get) => {
       /** Changes the shopping list and remembers the previous one for undo. */
       const changeList = (change: (list: ListItem[]) => ListItem[]) =>
-        set((s) => ({ list: change(s.list), listHistory: [...s.listHistory, s.list].slice(-LIST_HISTORY_LIMIT) }));
+        set((s) => ({ list: change(s.list), listHistory: [...s.listHistory, s.list].slice(-HISTORY_LIMIT) }));
+      /** Changes the plan and remembers the previous one for undo. */
+      const changePlan = (change: (plan: PlanEntry[]) => PlanEntry[]) =>
+        set((s) => ({ plan: change(s.plan), planHistory: [...s.planHistory, s.plan].slice(-HISTORY_LIMIT) }));
 
       return {
         ...initialData(),
         listHistory: [],
+        planHistory: [],
 
         addGroup: (group) => {
           const id = generateId();
@@ -209,23 +217,20 @@ export const useStore = create<Store>()(
         },
 
         setPlanEntry: (entry) =>
-          set((s) => ({
-            plan: [
-              ...s.plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
-              { ...entry, id: generateId() },
-            ],
-          })),
+          changePlan((plan) => [
+            ...plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
+            { ...entry, id: generateId() },
+          ]),
         setPlanEntries: (entries) =>
-          set((s) => ({
-            plan: [
-              ...s.plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),
-              ...entries.map((e) => ({ ...e, id: generateId() })),
-            ],
-          })),
-        updatePlanEntry: (id, servings) =>
-          set((s) => ({ plan: s.plan.map((e) => (e.id === id ? { ...e, servings } : e)) })),
-        removePlanEntry: (id) => set((s) => ({ plan: s.plan.filter((e) => e.id !== id) })),
-        clearPlan: (from, to) => set((s) => ({ plan: s.plan.filter((e) => e.date < from || e.date > to) })),
+          changePlan((plan) => [
+            ...plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),
+            ...entries.map((e) => ({ ...e, id: generateId() })),
+          ]),
+        updatePlanEntry: (id, servings) => changePlan((plan) => plan.map((e) => (e.id === id ? { ...e, servings } : e))),
+        removePlanEntry: (id) => changePlan((plan) => plan.filter((e) => e.id !== id)),
+        clearPlan: (from, to) => changePlan((plan) => plan.filter((e) => e.date < from || e.date > to)),
+        undoPlan: () =>
+          set((s) => (s.planHistory.length ? { plan: s.planHistory[s.planHistory.length - 1], planHistory: s.planHistory.slice(0, -1) } : s)),
         setSwap: (entryId, fromProductId, substitute) => {
           const { products } = get();
           let product = products.find((p) => p.name.toLowerCase() === substitute.product.toLowerCase());
@@ -236,16 +241,16 @@ export const useStore = create<Store>()(
             set({ products: [...products, product] });
           }
           const swap: Swap = { fromProductId, productId: product.id, quantity: substitute.quantity, unit: substitute.unit };
-          set((s) => ({
-            plan: s.plan.map((e) =>
+          changePlan((plan) =>
+            plan.map((e) =>
               e.id === entryId ? { ...e, swaps: [...(e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId), swap] } : e,
             ),
-          }));
+          );
         },
         clearSwap: (entryId, fromProductId) =>
-          set((s) => ({
-            plan: s.plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
-          })),
+          changePlan((plan) =>
+            plan.map((e) => (e.id === entryId ? { ...e, swaps: (e.swaps ?? []).filter((w) => w.fromProductId !== fromProductId) } : e)),
+          ),
         setSubstitutes: (substitutes) => set({ substitutes }),
 
         setMealCount: (count) =>
@@ -382,7 +387,7 @@ export const useStore = create<Store>()(
 
         clearAll: () => {
           get().recipes.forEach((r) => r.photo && deletePhoto(r.photo));
-          set({ ...initialData(), listHistory: [], language: get().language });
+          set({ ...initialData(), listHistory: [], planHistory: [], language: get().language });
         },
       };
     },

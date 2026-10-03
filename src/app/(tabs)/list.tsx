@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { UndoButton } from '@/components/undo-button';
 import { DEPARTMENTS } from '@/constants/departments';
 import { Spacing, tintFill } from '@/constants/theme';
 import { useStore } from '@/data/store';
@@ -86,16 +87,7 @@ export default function ListScreen() {
       title={t('list_title')}
       action={
         <View style={styles.headerActions}>
-          {canUndo && (
-            <Pressable
-              onPress={undo}
-              hitSlop={6}
-              accessibilityRole="button"
-              accessibilityLabel={t('list_undo')}
-              style={({ pressed }) => [styles.undo, { backgroundColor: theme.surfaceCard }, pressed && styles.pressed]}>
-              <IconSymbol name="arrow.uturn.backward" size={18} color={theme.tint} />
-            </Pressable>
-          )}
+          {canUndo && <UndoButton onPress={undo} accessibilityLabel={t('list_undo')} />}
           <AddButton onPress={() => router.push('/list/add')} accessibilityLabel={t('list_add')} />
         </View>
       }>
@@ -163,7 +155,6 @@ export default function ListScreen() {
 
 const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  undo: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   progress: { gap: Spacing.two },
   progressText: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   count: { fontWeight: '700' },

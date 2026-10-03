@@ -113,6 +113,7 @@ export default {
   list_title: 'Lista zakupów',
   list_add: 'Dodaj pozycję',
   list_undo: 'Cofnij ostatnią zmianę listy',
+  plan_undo: 'Cofnij ostatnią zmianę planu',
   list_add_confirm: 'Dodaj do listy',
   list_empty_title: 'Lista jest pusta',
   list_empty_subtitle: 'Zaznacz posiłki w Planie i wygeneruj listę albo dodaj pozycję przyciskiem +.',

@@ -9,6 +9,7 @@ import { Screen } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { UndoButton } from '@/components/undo-button';
 import { WeekStrip } from '@/components/week-strip';
 import { Spacing, tintFill } from '@/constants/theme';
 import { useSlotName } from '@/data/labels';
@@ -34,6 +35,8 @@ export default function PlanScreen() {
   const removePlanEntry = useStore((s) => s.removePlanEntry);
   const generateList = useStore((s) => s.generateList);
   const clearPlan = useStore((s) => s.clearPlan);
+  const undo = useStore((s) => s.undoPlan);
+  const canUndo = useStore((s) => s.planHistory.length > 0);
 
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
   const [selectedDate, setSelectedDate] = useState(today());
@@ -75,14 +78,17 @@ export default function PlanScreen() {
     <Screen
       title={t('plan_title')}
       action={
-        <Pressable
-          onPress={() => router.push({ pathname: '/plan/random', params: { date: selectedDate } })}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.random, tintFill(theme), pressed && { opacity: 0.7 }]}>
-          <ThemedText color="onPrimary" style={styles.randomLabel}>
-            🎲 {t('random_title')}
-          </ThemedText>
-        </Pressable>
+        <View style={styles.headerActions}>
+          {canUndo && <UndoButton onPress={undo} accessibilityLabel={t('plan_undo')} />}
+          <Pressable
+            onPress={() => router.push({ pathname: '/plan/random', params: { date: selectedDate } })}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.random, tintFill(theme), pressed && { opacity: 0.7 }]}>
+            <ThemedText color="onPrimary" style={styles.randomLabel}>
+              🎲 {t('random_title')}
+            </ThemedText>
+          </Pressable>
+        </View>
       }>
       <View style={styles.weekNav}>
         <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(weekStart, -7))} accessibilityLabel={t('plan_prev_week')}>
@@ -231,6 +237,7 @@ export default function PlanScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   random: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
   randomLabel: { fontWeight: '700', fontSize: 14 },
   weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
