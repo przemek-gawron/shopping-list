@@ -12,7 +12,7 @@ import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
-import { groupForSlot, useSlotName } from '@/data/labels';
+import { byGroupThenTitle, groupForSlot, useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
@@ -52,8 +52,9 @@ export default function PlanAddScreen() {
     const q = query.trim().toLowerCase();
     return recipes
       .filter((r) => (!groupFilter || r.groupId === groupFilter) && (!q || r.title.toLowerCase().includes(q)))
-      .sort((a, b) => a.title.localeCompare(b.title));
-  }, [recipes, query, groupFilter]);
+      // with a group filter on this is plain alphabetical
+      .sort(byGroupThenTitle(groups));
+  }, [recipes, groups, query, groupFilter]);
 
   const chosen = recipes.find((r) => r.id === recipeId);
   // a slot holds one recipe, so saving onto a taken slot replaces it

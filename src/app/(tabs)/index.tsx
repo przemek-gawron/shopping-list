@@ -12,7 +12,7 @@ import { Screen } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
-import { recipeEmoji } from '@/data/labels';
+import { byGroupThenTitle, recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
@@ -35,8 +35,9 @@ export default function RecipesScreen() {
         if (groupFilter && groupFilter !== NO_GROUP && r.groupId !== groupFilter) return false;
         return !q || r.title.toLowerCase().includes(q);
       })
-      .sort((a, b) => a.title.localeCompare(b.title));
-  }, [recipes, query, groupFilter]);
+      // with a group filter on this is plain alphabetical
+      .sort(byGroupThenTitle(groups));
+  }, [recipes, groups, query, groupFilter]);
 
   const hasUngrouped = recipes.some((r) => r.groupId === null);
   const groupOf = (id: string | null) => groups.find((g) => g.id === id);

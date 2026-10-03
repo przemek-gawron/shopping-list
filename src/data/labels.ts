@@ -65,3 +65,14 @@ export function recipeEmoji(recipe: Pick<Recipe, 'title'>, group: Group | undefi
   const fruit = /\s/.test(title) ? undefined : FRUITS.find(([stems]) => stems.some((s) => title.startsWith(s)));
   return fruit?.[1] ?? group?.emoji ?? '🍽️';
 }
+
+/**
+ * Orders recipes by their group, in the order the groups have in Settings (breakfasts, second
+ * breakfasts, lunches...), then by title; recipes without a group come last.
+ */
+export function byGroupThenTitle(groups: Group[]) {
+  const position = new Map(groups.map((g, i) => [g.id, i]));
+  const rank = (r: Pick<Recipe, 'groupId'>) => (r.groupId !== null && position.has(r.groupId) ? position.get(r.groupId)! : groups.length);
+  return (a: Pick<Recipe, 'groupId' | 'title'>, b: Pick<Recipe, 'groupId' | 'title'>) =>
+    rank(a) - rank(b) || a.title.localeCompare(b.title);
+}
