@@ -9,7 +9,8 @@ import { Screen } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Radius, Spacing, tintFill } from '@/constants/theme';
+import { WeekStrip } from '@/components/week-strip';
+import { Spacing, tintFill } from '@/constants/theme';
 import { useSlotName } from '@/data/labels';
 import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
@@ -95,33 +96,13 @@ export default function PlanScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.days}>
-        {days.map((date) => {
-          const isSelected = date === selectedDate;
-          const isToday = date === today();
-          const count = dayEntries(date).length;
-          return (
-            <Pressable
-              key={date}
-              onPress={() => setSelectedDate(date)}
-              accessibilityRole="button"
-              accessibilityLabel={formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
-              style={[
-                styles.day,
-                isSelected ? tintFill(theme) : { backgroundColor: theme.cardBackground, boxShadow: theme.cardShadow },
-                { borderColor: isToday ? theme.tint : isSelected ? 'transparent' : theme.borderSubtle },
-              ]}>
-              <ThemedText type="caption" color={isSelected ? 'onPrimary' : 'textSecondary'}>
-                {formatDate(date, locale, { weekday: 'short' })}
-              </ThemedText>
-              <ThemedText style={styles.dayNumber} color={isSelected ? 'onPrimary' : 'text'}>
-                {new Date(date + 'T00:00:00').getDate()}
-              </ThemedText>
-              <View style={[styles.dot, { backgroundColor: count > 0 ? (isSelected ? theme.onPrimary : theme.tint) : 'transparent' }]} />
-            </Pressable>
-          );
-        })}
-      </View>
+      <WeekStrip
+        days={days}
+        selected={selectedDate}
+        onSelect={setSelectedDate}
+        onSwipe={(direction) => setSelectedDate(addDays(weekStart, 7 * direction))}
+        hasMeals={(date) => dayEntries(date).length > 0}
+      />
 
       <ThemedText type="heading">
         {formatDate(selectedDate, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -252,10 +233,6 @@ const styles = StyleSheet.create({
   random: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
   randomLabel: { fontWeight: '700', fontSize: 14 },
   weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  days: { flexDirection: 'row', gap: 6 },
-  day: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
-  dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
-  dot: { width: 5, height: 5, borderRadius: 3 },
   slot: { gap: Spacing.two },
   slotHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   addLink: { fontSize: 14, fontWeight: '700' },
