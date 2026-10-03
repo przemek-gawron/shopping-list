@@ -5,11 +5,11 @@
     "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "shoppinglist",
+    "scheme": "dishdeck",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.przemekgawron.shoppinglist",
+      "bundleIdentifier": "com.przemekgawron.dishdeck",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby dodać zdjęcie do przepisu.",
@@ -24,7 +24,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.przemekgawron.shoppinglist"
+      "package": "com.przemekgawron.dishdeck"
     },
     "web": {
       "output": "static",
