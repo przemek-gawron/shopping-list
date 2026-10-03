@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
@@ -62,7 +62,8 @@ export default function RecipesScreen() {
             clearButtonMode="while-editing"
             style={[styles.search, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
           />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+          {/* wrapped, so every group is one tap away without scrolling the row */}
+          <View style={styles.chips}>
             <Chip label={t('all')} selected={groupFilter === null} onPress={() => setGroupFilter(null)} />
             {groups.map((g) => (
               <Chip
@@ -76,7 +77,7 @@ export default function RecipesScreen() {
               <Chip label={t('no_group')} selected={groupFilter === NO_GROUP} onPress={() => setGroupFilter(NO_GROUP)} />
             )}
             <Chip label={t('groups_manage')} onPress={() => router.push('/groups')} />
-          </ScrollView>
+          </View>
         </>
       )}
 
@@ -113,7 +114,7 @@ export default function RecipesScreen() {
 
 const styles = StyleSheet.create({
   search: { minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
-  chips: { gap: Spacing.two, paddingVertical: 2 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   // flexGrow: cards in one grid row get the same height
   row: { flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: 10 },
   rowText: { flex: 1, gap: 2 },

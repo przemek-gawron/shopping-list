@@ -92,12 +92,12 @@ export default function PlanAddScreen() {
               style={[styles.search, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
             />
             {groups.length > 0 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+              <View style={styles.wrap}>
                 <Chip label={t('all')} selected={groupFilter === null} onPress={() => setGroupFilter(null)} />
                 {groups.map((g) => (
                   <Chip key={g.id} label={`${g.emoji} ${g.name}`} selected={groupFilter === g.id} onPress={() => setGroupFilter(g.id)} />
                 ))}
-              </ScrollView>
+              </View>
             )}
             {recipes.length > 0 && matches.length === 0 && <EmptyState emoji="🔎" title={t('recipes_none_found')} />}
             {recipes.length === 0 && <EmptyState emoji="🍽️" title={t('recipes_empty_title')} subtitle={t('plan_no_recipes')} />}
