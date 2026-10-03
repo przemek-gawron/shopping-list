@@ -84,13 +84,13 @@ export default function PlanScreen() {
         </Pressable>
       }>
       <View style={styles.weekNav}>
-        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(selectedDate, -7))} accessibilityLabel={t('plan_prev_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(weekStart, -7))} accessibilityLabel={t('plan_prev_week')}>
           <IconSymbol name="chevron.left" size={22} color={theme.tint} />
         </Pressable>
         <Pressable accessibilityRole="button" onPress={() => setSelectedDate(today())} accessibilityLabel={t('plan_today')}>
           <ThemedText type="heading">{weekLabel}</ThemedText>
         </Pressable>
-        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(selectedDate, 7))} accessibilityLabel={t('plan_next_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(weekStart, 7))} accessibilityLabel={t('plan_next_week')}>
           <IconSymbol name="chevron.right" size={22} color={theme.tint} />
         </Pressable>
       </View>
