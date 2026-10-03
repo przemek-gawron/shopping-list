@@ -55,7 +55,18 @@ export default function PlanScreen() {
   const shown = useMemo(() => plan.filter((e) => visibleSlotIds.has(e.slotId)), [plan, visibleSlotIds]);
   const pickedShown = picked.filter((id) => shown.some((e) => e.id === id));
 
-  const weekLabel = `${formatDate(days[0], locale, { day: 'numeric', month: 'short' })} – ${formatDate(days[6], locale, { day: 'numeric', month: 'short' })}`;
+  // the strip scrolls freely, so the heading names the days in view, not the selected day's week
+  const [visibleStart, setVisibleStart] = useState(() => startOfWeek(today()));
+  const range = (from: string, to: string) =>
+    `${formatDate(from, locale, { day: 'numeric', month: 'short' })} – ${formatDate(to, locale, { day: 'numeric', month: 'short' })}`;
+  const visibleLabel = range(visibleStart, addDays(visibleStart, 6));
+  const [jump, setJump] = useState({ date: visibleStart, key: 0 });
+  /** Shows the week starting at `monday` and selects `select` (the Monday itself by default). */
+  const goToWeek = (monday: string, select = monday) => {
+    setSelectedDate(select);
+    setJump((j) => ({ date: monday, key: j.key + 1 }));
+  };
+  const weekLabel = range(days[0], days[6]);
   const dayEntries = (date: string) => shown.filter((e) => e.date === date);
   const weekEntries = shown.filter((e) => e.date >= days[0] && e.date <= days[6]);
 
@@ -105,23 +116,23 @@ export default function PlanScreen() {
         </View>
       }>
       <View style={styles.weekNav}>
-        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(weekStart, -7))} accessibilityLabel={t('plan_prev_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => goToWeek(addDays(startOfWeek(visibleStart), -7))} accessibilityLabel={t('plan_prev_week')}>
           <IconSymbol name="chevron.left" size={22} color={theme.tint} />
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => setSelectedDate(today())} accessibilityLabel={t('plan_today')}>
-          <ThemedText type="heading">{weekLabel}</ThemedText>
+        <Pressable accessibilityRole="button" onPress={() => goToWeek(startOfWeek(today()), today())} accessibilityLabel={t('plan_today')}>
+          <ThemedText type="heading">{visibleLabel}</ThemedText>
         </Pressable>
-        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => setSelectedDate(addDays(weekStart, 7))} accessibilityLabel={t('plan_next_week')}>
+        <Pressable hitSlop={10} accessibilityRole="button" onPress={() => goToWeek(addDays(startOfWeek(visibleStart), 7))} accessibilityLabel={t('plan_next_week')}>
           <IconSymbol name="chevron.right" size={22} color={theme.tint} />
         </Pressable>
       </View>
 
       <WeekStrip
-        days={days}
         selected={selectedDate}
         onSelect={setSelectedDate}
-        onSwipe={(direction) => setSelectedDate(addDays(weekStart, 7 * direction))}
+        onVisibleStart={setVisibleStart}
         hasMeals={(date) => dayEntries(date).length > 0}
+        jump={jump}
       />
 
       <ThemedText type="heading">
