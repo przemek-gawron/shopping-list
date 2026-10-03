@@ -12,9 +12,11 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { UndoButton } from '@/components/undo-button';
 import { WeekStrip } from '@/components/week-strip';
 import { Spacing, tintFill } from '@/constants/theme';
-import { useSlotName } from '@/data/labels';
+import { groupForSlot, useSlotName } from '@/data/labels';
+import { randomPlan } from '@/data/random-plan';
 import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
+import type { MealSlot } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -35,6 +37,8 @@ export default function PlanScreen() {
   const removePlanEntry = useStore((s) => s.removePlanEntry);
   const generateList = useStore((s) => s.generateList);
   const clearPlan = useStore((s) => s.clearPlan);
+  const setPlanEntry = useStore((s) => s.setPlanEntry);
+  const groups = useStore((s) => s.groups);
   const undo = useStore((s) => s.undoPlan);
   const canUndo = useStore((s) => s.planHistory.length > 0);
 
@@ -60,6 +64,16 @@ export default function PlanScreen() {
 
   const toggle = (id: string) =>
     setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+
+  /** Draws a different recipe from the meal's group for the selected day, keeping its multiplier. */
+  const drawMeal = (slot: MealSlot, index: number) => {
+    const group = groupForSlot(slot, slotName(slot, index), groups);
+    const current = dayEntries(selectedDate).find((e) => e.slotId === slot.id);
+    const recipeIds = recipes.filter((r) => group && r.groupId === group.id && r.id !== current?.recipeId).map((r) => r.id);
+    if (recipeIds.length === 0) return Alert.alert(t('random_no_recipes', { meals: slotName(slot, index) }));
+    const [drawn] = randomPlan({ dates: [selectedDate], slots: [{ id: slot.id, recipeIds }], plan, replace: true });
+    if (drawn) setPlanEntry(drawn);
+  };
 
   const generate = () => {
     const run = () => {
@@ -125,15 +139,24 @@ export default function PlanScreen() {
           <Card key={slot.id} style={styles.slot} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
             <View style={styles.slotHeader}>
               <ThemedText type="label">{slotName(slot, index)}</ThemedText>
-              <Pressable
-                hitSlop={8}
-                accessibilityRole="button"
-                onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
-                accessibilityLabel={`${entry ? t('change') : t('plan_add_meal')} – ${slotName(slot, index)}`}>
-                <ThemedText color="tint" style={styles.addLink}>
-                  {action}
-                </ThemedText>
-              </Pressable>
+              <View style={styles.slotActions}>
+                <Pressable
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  onPress={() => drawMeal(slot, index)}
+                  accessibilityLabel={`${t('random_meal')} – ${slotName(slot, index)}`}>
+                  <ThemedText style={styles.dice}>🎲</ThemedText>
+                </Pressable>
+                <Pressable
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
+                  accessibilityLabel={`${entry ? t('change') : t('plan_add_meal')} – ${slotName(slot, index)}`}>
+                  <ThemedText color="tint" style={styles.addLink}>
+                    {action}
+                  </ThemedText>
+                </Pressable>
+              </View>
             </View>
             {entry ? (
               <>
@@ -244,6 +267,8 @@ const styles = StyleSheet.create({
   slot: { gap: Spacing.two },
   slotHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   addLink: { fontSize: 14, fontWeight: '700' },
+  slotActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  dice: { fontSize: 16, lineHeight: 20 },
   entry: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 2 },
   entryTitle: { flex: 1 },
   entryName: { fontWeight: '600' },

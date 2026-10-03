@@ -147,6 +147,7 @@ const en: Record<keyof typeof pl, string> = {
   menu_delete_message: 'Remove "{{name}}"? Its recipes stay.',
   list_edit: 'Edit item',
   random_title: 'Random',
+  random_meal: 'Draw a recipe',
   random_hint: 'Recipes are drawn from the group that matches each meal. A meal never gets the same recipe two days in a row.',
   random_range: 'Range',
   random_range_day: 'This day',

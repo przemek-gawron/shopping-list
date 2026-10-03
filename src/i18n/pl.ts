@@ -144,6 +144,7 @@ export default {
   menu_delete_message: 'Usunąć „{{name}}"? Przepisy zostaną.',
   list_edit: 'Edytuj pozycję',
   random_title: 'Wylosuj',
+  random_meal: 'Wylosuj przepis',
   random_hint: 'Przepisy są losowane z grupy pasującej do posiłku. Ten sam przepis nie trafi na ten sam posiłek dwa dni pod rząd.',
   random_range: 'Zakres',
   random_range_day: 'Ten dzień',
