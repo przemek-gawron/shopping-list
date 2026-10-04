@@ -38,6 +38,7 @@ const MAPPING = {
   'key': 'key',
   'sparkles': 'flare',
   'arrow.uturn.backward': 'undo',
+  'square.and.arrow.up': 'ios-share',
 } as IconMapping;
 
 /**

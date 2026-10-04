@@ -106,6 +106,7 @@ export default function RootLayout() {
           <Stack.Screen name="product/form" options={modal} />
           <Stack.Screen name="plan/add" options={modal} />
           <Stack.Screen name="plan/random" options={modal} />
+          <Stack.Screen name="plan/share" options={modal} />
           <Stack.Screen name="list/add" options={modal} />
           <Stack.Screen name="meals" options={{ title: t('meals_title') }} />
           <Stack.Screen name="menus" options={{ title: t('menus_title') }} />
