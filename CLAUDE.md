@@ -15,6 +15,8 @@ npx expo-doctor      # dependency / config check
 
 There are no automated tests. Run typecheck and lint before finishing a task. Use `npx expo install <pkg>` (not `npm i`) so versions match the Expo SDK (57).
 
+Work in small commits: commit every finished change as soon as typecheck and lint pass, one logical change per commit (split unrelated changes into separate commits, docs separately). Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`) with a short body saying what changed and why.
+
 ## What the app is
 
 **Dishdeck** – offline-only Expo + React Native app (Expo Router, file-based). No backend, accounts or AI. Users:
