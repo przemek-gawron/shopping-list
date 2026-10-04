@@ -47,24 +47,43 @@ export default function SettingsScreen() {
   const onImport = async () => {
     const picked = await DocumentPicker.getDocumentAsync({
       type: ['application/msword', 'application/json', 'text/plain'],
+      multiple: true,
       // Android: read the picked content:// file directly; a copy in the cache is not always readable
       copyToCacheDirectory: Platform.OS !== 'android',
     });
-    if (picked.canceled || !picked.assets[0]) return;
-    let file = null;
+    if (picked.canceled || picked.assets.length === 0) return;
+    // the last imported meal plan ends up on top, so "week 2" is imported before "week 10"
+    const assets = [...picked.assets].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const failed: string[] = [];
+    let added = 0;
+    let updated = 0;
     let unknown = 0;
-    try {
-      const source = new File(picked.assets[0].uri);
-      // a Word meal plan is parsed on the device; anything else must be a recipe JSON file
-      const doc = parseMealPlanDoc(new Uint8Array(await source.arrayBuffer()), picked.assets[0].name);
-      file = doc ? doc.file : parseRecipeFile(await source.text());
-      unknown = doc?.unknown ?? 0;
-    } catch {
-      // unreadable file: reported below
+    for (const asset of assets) {
+      let file = null;
+      try {
+        const source = new File(asset.uri);
+        // a Word meal plan is parsed on the device; anything else must be a recipe JSON file
+        const doc = parseMealPlanDoc(new Uint8Array(await source.arrayBuffer()), asset.name);
+        file = doc ? doc.file : parseRecipeFile(await source.text());
+        unknown += doc?.unknown ?? 0;
+      } catch {
+        // unreadable file: reported below
+      }
+      if (!file || file.recipes.length === 0) {
+        failed.push(asset.name);
+        continue;
+      }
+      const result = importRecipes(file);
+      added += result.added;
+      updated += result.updated;
     }
-    if (!file || file.recipes.length === 0) return Alert.alert(t('import_invalid'));
-    const { added, updated } = importRecipes(file);
-    Alert.alert(t('import_done', { added, updated }), unknown > 0 ? t('import_unknown', { count: unknown }) : undefined);
+    if (failed.length === assets.length) return Alert.alert(t('import_invalid'), assets.length > 1 ? failed.join('\n') : undefined);
+    const details = [
+      assets.length > 1 && t('import_files', { count: assets.length - failed.length, total: assets.length }),
+      failed.length > 0 && t('import_failed', { files: failed.join(', ') }),
+      unknown > 0 && t('import_unknown', { count: unknown }),
+    ].filter(Boolean);
+    Alert.alert(t('import_done', { added, updated }), details.length > 0 ? details.join('\n\n') : undefined);
   };
 
   return (
