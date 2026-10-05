@@ -66,8 +66,8 @@ export default function SharePlanScreen() {
     setBusy(true);
     try {
       await share();
-    } catch {
-      Alert.alert(t('share_failed'));
+    } catch (error) {
+      Alert.alert(t('share_failed'), error instanceof Error ? error.message : undefined);
     } finally {
       setBusy(false);
     }

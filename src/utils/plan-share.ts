@@ -53,10 +53,17 @@ function planHtml(title: string, range: string, days: ShareDay[]): string {
 
 /** Opens the share sheet for a generated file, renamed to `name` so the recipient sees e.g. `plan-2026-10-06.pdf`. */
 async function shareFile(uri: string, name: string, mimeType: string, UTI: string, dialogTitle: string): Promise<void> {
-  const target = new File(Paths.cache, name);
-  if (target.exists) target.delete();
-  new File(uri).move(target);
-  await shareAsync(target.uri, { mimeType, UTI, dialogTitle });
+  // iOS view-shot returns a bare path; expo-file-system and expo-sharing expect a file:// URI
+  let shared = uri.startsWith('file://') ? uri : `file://${uri}`;
+  try {
+    const target = new File(Paths.cache, name);
+    if (target.exists) target.delete();
+    new File(shared).move(target);
+    shared = target.uri;
+  } catch {
+    // the name is cosmetic: share the file under its generated name rather than fail
+  }
+  await shareAsync(shared, { mimeType, UTI, dialogTitle });
 }
 
 /** Prints the plan to `plan-<first day>.pdf` and shares it. */
