@@ -53,8 +53,7 @@ function planHtml(title: string, range: string, days: ShareDay[]): string {
 
 /** Opens the share sheet for a generated file, renamed to `name` so the recipient sees e.g. `plan-2026-10-06.pdf`. */
 async function shareFile(uri: string, name: string, mimeType: string, UTI: string, dialogTitle: string): Promise<void> {
-  // iOS view-shot returns a bare path; expo-file-system and expo-sharing expect a file:// URI
-  let shared = uri.startsWith('file://') ? uri : `file://${uri}`;
+  let shared = uri;
   try {
     const target = new File(Paths.cache, name);
     if (target.exists) target.delete();
@@ -72,7 +71,14 @@ export async function sharePlanPdf(title: string, range: string, days: ShareDay[
   await shareFile(uri, `plan-${days[0].date}.pdf`, 'application/pdf', 'com.adobe.pdf', title);
 }
 
-/** Shares a captured picture of the plan as `plan-<first day>.png`. */
-export async function sharePlanImage(uri: string, title: string, firstDay: string): Promise<void> {
-  await shareFile(uri, `plan-${firstDay}.png`, 'image/png', 'public.png', title);
+/**
+ * Saves a captured picture of the plan (base64 PNG) as `plan-<first day>.png` and shares it. Written straight
+ * into the cache directory: on iPhones the capture's own temp file was not readable for expo-sharing.
+ */
+export async function sharePlanImage(base64: string, title: string, firstDay: string): Promise<void> {
+  const file = new File(Paths.cache, `plan-${firstDay}.png`);
+  if (file.exists) file.delete();
+  file.create();
+  file.write(base64, { encoding: 'base64' });
+  await shareAsync(file.uri, { mimeType: 'image/png', UTI: 'public.png', dialogTitle: title });
 }

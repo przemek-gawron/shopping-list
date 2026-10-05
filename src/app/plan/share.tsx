@@ -74,7 +74,7 @@ export default function SharePlanScreen() {
   };
 
   const shareImage = () =>
-    run(async () => sharePlanImage(await captureRef(preview, { format: 'png', quality: 1, result: 'tmpfile' }), title, days[0].date));
+    run(async () => sharePlanImage(await captureRef(preview, { format: 'png', quality: 1, result: 'base64' }), title, days[0].date));
   const sharePdf = () => run(() => sharePlanPdf(title, range, days));
 
   const arrow = (icon: 'chevron.left' | 'chevron.right', step: number, label: string) => (
