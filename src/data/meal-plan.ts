@@ -110,8 +110,25 @@ function parseIngredient(line: string): RawIngredient {
   return { raw: text.split(/\s*[-–:]\s*/)[0], quantity: 1, unit: 'szt' };
 }
 
-const looksLikeIngredient = (line: string) =>
-  line.length < 70 && (QUANTITY_FIRST.test(line.trim()) || QUANTITY_LAST.test(line.trim()));
+const hasQuantity = (line: string) => QUANTITY_FIRST.test(line.trim()) || QUANTITY_LAST.test(line.trim());
+
+/**
+ * "Dynia Hokkaido/ piżmowa-300g (można zamienić na cukinię lub inne warzywo)": a long remark in brackets after an
+ * ingredient that already has its amount. The remark goes to the method so the line is not mistaken for method
+ * text because of its length. Brackets holding the amount ("Chleb (2 kromki)") stay.
+ */
+function splitRemark(line: string): { line: string; remark: string | null } {
+  // shorter lines keep their brackets: the dictionary knows names like "gorącego bulionu (lub wrzątku)"
+  if (line.length < 70) return { line, remark: null };
+  const match = line.match(/^(.*?\S)\s*\(([^()]+)\)\s*$/);
+  if (!match || !hasQuantity(match[1])) return { line, remark: null };
+  return { line: match[1], remark: match[2].trim() };
+}
+
+const looksLikeIngredient = (line: string) => {
+  const text = splitRemark(line).line;
+  return text.length < 70 && hasQuantity(text);
+};
 
 const tidyTitle = (line: string) => {
   const text = line.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\ufeff]/g, '').replace(/\s+/g, ' ').trim().replace(/[.:]+$/, '').trim();
@@ -189,11 +206,14 @@ function parseSections(text: string): RawRecipe[] {
     }
     // sub-headings inside an ingredient list ("Surówka z marchewki:"), alternatives and stray headings
     if (/:$/.test(line) || /^lub$/i.test(line) || /^\(/.test(line) || (line.length > 12 && line === line.toUpperCase())) continue;
-    if (line.length >= 70) {
+    const { line: ingredientLine, remark } = splitRemark(line);
+    if (ingredientLine.length >= 70) {
       current.method.push(line.replace(/\s+/g, ' '));
       continue;
     }
-    current.ingredients.push(parseIngredient(line));
+    const ingredient = parseIngredient(ingredientLine);
+    current.ingredients.push(ingredient);
+    if (remark) current.method.push(`${ingredient.raw.trim()}: ${remark}`);
   }
   return recipes;
 }

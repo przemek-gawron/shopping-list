@@ -62,6 +62,8 @@ export const MEAL_PLAN_PRODUCTS: Record<string, [name: string, department: strin
   "dorsz atlantycki, surowy": ["Dorsz", "meat"],
   "dorsz, świeży": ["Dorsz", "meat"],
   "dynia": ["Dynia", "produce"],
+  "dynia hokkaido": ["Dynia", "produce"],
+  "dynia hokkaido/ piżmowa": ["Dynia", "produce"],
   "dynia piżmowa": ["Dynia", "produce"],
   "dynia, pestki": ["Pestki dyni", "dry"],
   "dynia, pestki, łuskane": ["Pestki dyni", "dry"],
