@@ -34,6 +34,7 @@ export default function RecipeScreen() {
   const [choosing, setChoosing] = useState<string | null>(null);
   const recipe = useStore((s) => s.recipes.find((r) => r.id === id));
   const group = useStore((s) => s.groups.find((g) => g.id === recipe?.groupId));
+  const allMenus = useStore((s) => s.menus);
   const products = useStore((s) => s.products);
   const removeRecipe = useStore((s) => s.removeRecipe);
   const setRating = useStore((s) => s.setRating);
@@ -48,6 +49,8 @@ export default function RecipeScreen() {
   if (!recipe) return <Stack.Screen options={{ title: '' }} />;
   // swaps to a product deleted since are ignored, as on the shopping list
   const swaps = entry ? appliedSwaps(entry, recipe, products) : [];
+  // the imported meal plans the recipe comes from; none for recipes added by hand
+  const menus = allMenus.filter((m) => recipe.menuIds?.includes(m.id)).map((m) => m.name);
 
   return (
     <Page>
@@ -70,6 +73,7 @@ export default function RecipeScreen() {
         <ThemedText type="title">{recipe.title}</ThemedText>
         <Stars value={recipe.rating} onChange={(rating) => setRating(recipe.id, rating)} size={28} />
         <ThemedText type="small">{group ? `${group.emoji} ${group.name}` : t('no_group')}</ThemedText>
+        {menus.length > 0 && <ThemedText type="small">📋 {t('recipe_menus', { names: menus.join(', ') })}</ThemedText>}
       </View>
       {recipe.description ? <ThemedText>{recipe.description}</ThemedText> : null}
 

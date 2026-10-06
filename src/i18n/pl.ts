@@ -150,6 +150,7 @@ export default {
   menus_empty_title: 'Brak jadłospisów',
   menus_empty_subtitle: 'Zaimportuj plan z pliku .doc w Ustawieniach.',
   menu_own: 'Własne',
+  recipe_menus: 'Z jadłospisu: {{names}}',
   menu_delete: 'Usuń jadłospis',
   menu_delete_message: 'Usunąć „{{name}}"? Przepisy zostaną.',
   list_edit: 'Edytuj pozycję',

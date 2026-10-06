@@ -152,6 +152,7 @@ const en: Record<keyof typeof pl, string> = {
   menus_hint: 'A meal plan is created when you import a plan from a file. The first one is expanded by default.',
   menus_empty_title: 'No meal plans',
   menus_empty_subtitle: 'Import a plan from a .doc file in Settings.',
+  recipe_menus: 'From meal plan: {{names}}',
   menu_own: 'Own',
   menu_delete: 'Remove meal plan',
   menu_delete_message: 'Remove "{{name}}"? Its recipes stay.',
