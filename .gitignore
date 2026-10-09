@@ -42,3 +42,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# e2e test output
+e2e/output/
