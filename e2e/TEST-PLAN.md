@@ -75,7 +75,12 @@ Jeden błąd = jeden commit = jeden push. Zmiany niezwiązane z błędem (np. do
 
 - Bundle id / package: `com.przemekgawron.dishdeck`, scheme `dishdeck://`.
 - Dev build, nie Expo Go – `react-native-view-shot` i `expo-print` potrzebują natywnego kodu.
-- Jeden Metro (port 8081) obsługuje obie platformy.
+- Jeden Metro (port 8081) obsługuje obie platformy. Dev build zawsze ładuje JS z `localhost:8081` (ustawienia
+  `--metro-port` i `--port` przy buildzie tego nie zmieniają). Jeśli port 8081 zajmuje Metro innego
+  projektu, aplikacja pokaże cudzy bundle – zwolnij port (zapytaj użytkownika) i uruchom
+  `CI=1 npx expo start --dev-client --port 8081`. Android: `adb reverse tcp:8081 tcp:8081`.
+- Android: jeśli Gradle nie znajduje SDK, utwórz `android/local.properties` z
+  `sdk.dir=$HOME/Library/Android/sdk` (katalog `android/` jest generowany i ignorowany).
 
 ---
 
