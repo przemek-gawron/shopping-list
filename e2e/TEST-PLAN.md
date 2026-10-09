@@ -95,7 +95,9 @@ Jeden błąd = jeden commit = jeden push. Zmiany niezwiązane z błędem (np. do
    - `recipes-2.json` – drugi poprawny plik (import wielu plików naraz).
    - `broken.json` – niepoprawny JSON; `wrong-format.json` – poprawny JSON bez pola `format`.
    - `photo.jpg` – dowolne zdjęcie do przepisu.
-   - Plan `.doc` – poproś użytkownika o plik; trzymaj poza repo (np. `~/Downloads`).
+   - Plany `.doc`: 6 plików I–VI jednej osoby z `~/Downloads/planyywieniowe/`, wskazanych przez
+     użytkownika (pozostałe pliki w folderze nie są częścią testów). Nie kopiuj ich do repo; ustaw
+     `PLANS=(...)` z tymi 6 ścieżkami i wgraj je w kroku 5.
 4. Buildy i Metro:
    ```bash
    npx expo run:ios --device "iPhone 16e"
@@ -107,6 +109,7 @@ Jeden błąd = jeden commit = jeden push. Zmiany niezwiązane z błędem (np. do
    ```bash
    # Android: pliki do Download, zdjęcie do galerii
    adb push e2e/fixtures/. /sdcard/Download/
+   for f in "${PLANS[@]}"; do adb push "$f" /sdcard/Download/; done
    adb push e2e/fixtures/photo.jpg /sdcard/Pictures/photo.jpg
    adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Pictures/photo.jpg
    ```
@@ -115,6 +118,7 @@ Jeden błąd = jeden commit = jeden push. Zmiany niezwiązane z błędem (np. do
    xcrun simctl addmedia booted e2e/fixtures/photo.jpg
    DIR=$(xcrun simctl get_app_container booted com.apple.DocumentsApp groups | awk '/FileProvider.LocalStorage/{print $2}')
    mkdir -p "$DIR/File Provider Storage" && cp e2e/fixtures/*.json "$DIR/File Provider Storage/"
+   cp "${PLANS[@]}" "$DIR/File Provider Storage/"
    ```
 6. Katalogi na dowody: `mkdir -p e2e/output/{ios,android}/{screenshots,videos,logs}`.
 7. Otwórz sesje:
@@ -287,7 +291,7 @@ zakończ selektorowym `wait` na ekranie docelowym i `session save-script`. Odtwa
 | SET-07 | Import tego samego pliku drugi raz | Tylko „zaktualizowano”, brak duplikatów |
 | SET-08 | Import kilku plików naraz (2 poprawne + `broken.json`) | Jeden alert z „Wczytane pliki: 2 z 3” i nazwą złego pliku |
 | SET-09 | Import tylko złych plików (`broken.json`, `wrong-format.json`) | „Nie udało się odczytać przepisów z tego pliku” |
-| SET-10 | Import planu `.doc` | Powstaje jadłospis nazwany jak plik; przepisy mają „Z jadłospisu: …” |
+| SET-10 | Import planów `.doc`: jeden plik, potem wszystkie 6 naraz | Powstaje jadłospis nazwany jak plik; przepisy mają „Z jadłospisu: …” |
 | SET-11 | Anulowanie wyboru pliku | Brak alertu i zmian |
 | SET-12 | Wczytaj przykłady drugi raz | „Przykładowe przepisy są już wczytane”, brak duplikatów |
 | SET-13 | Wyczyść wszystko → Anuluj, potem → Wyczyść | Anuluj nic nie zmienia; Wyczyść usuwa wszystko, alert potwierdzenia |
