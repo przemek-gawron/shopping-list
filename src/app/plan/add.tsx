@@ -119,7 +119,7 @@ export default function PlanAddScreen() {
         <>
           <View style={styles.section}>
             <ThemedText type="label">{t('date')}</ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
               {days.map((d) => (
                 <Chip
                   key={d}

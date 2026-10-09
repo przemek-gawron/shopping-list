@@ -155,7 +155,7 @@ export default function RecipeFormScreen() {
 
       <View style={styles.section}>
         <ThemedText type="label">{t('group')}</ThemedText>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={styles.chips}>
           <Chip label={t('no_group')} selected={group === null} onPress={() => setGroup(null)} />
           {groups.map((g) => (
             <Chip key={g.id} label={`${g.emoji} ${g.name}`} selected={group === g.id} onPress={() => setGroup(g.id)} />
@@ -214,7 +214,7 @@ export default function RecipeFormScreen() {
                 ))}
               </View>
             )}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
               {UNITS.map((u) => (
                 <Chip key={u} label={t(`unit_${u}`)} selected={row.unit === u} onPress={() => patchRow(row.key, { unit: u })} />
               ))}
