@@ -1,0 +1,41 @@
+{
+  "format": "shopping-list-recipes",
+  "menus": ["Test menu"],
+  "groups": [
+    { "name": "Testowe śniadania", "emoji": "🥞" },
+    { "name": "Testowe obiady", "emoji": "🍲" }
+  ],
+  "recipes": [
+    {
+      "title": "Owsianka z bananem",
+      "group": "Testowe śniadania",
+      "description": "Wersja z pliku testowego.",
+      "menus": ["Test menu"],
+      "ingredients": [
+        { "name": "Płatki owsiane", "quantity": 60, "unit": "g", "department": "dry" },
+        { "name": "Mleko", "quantity": 250, "unit": "ml", "department": "dairy" },
+        { "name": "Banan", "quantity": 1, "unit": "szt", "department": "produce" }
+      ]
+    },
+    {
+      "title": "Testowa zupa krem z dyni",
+      "group": "Testowe obiady",
+      "menus": ["Test menu"],
+      "ingredients": [
+        { "name": "Dynia hokkaido", "quantity": 0.8, "unit": "kg", "department": "produce" },
+        { "name": "Mleko kokosowe", "quantity": 200, "unit": "ml", "department": "dry" },
+        { "name": "Egzotyczna przyprawa testowa", "quantity": 1, "unit": "lyzeczka", "department": "nieznany" }
+      ]
+    },
+    {
+      "title": "Testowe placki bez grupy",
+      "group": null,
+      "menus": [],
+      "ingredients": [
+        { "name": "Mąka pszenna", "quantity": 200, "unit": "g", "department": "dry" },
+        { "name": "Jajka", "quantity": 2, "unit": "szt", "department": "dairy" },
+        { "name": "Mleko", "quantity": 0.3, "unit": "l", "department": "dairy" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": "shopping-list-recipes",
+  "menus": [],
+  "groups": [{ "name": "Testowe kolacje", "emoji": "🌙" }],
+  "recipes": [
+    {
+      "title": "Testowa sałatka z fetą",
+      "group": "Testowe kolacje",
+      "menus": [],
+      "ingredients": [
+        { "name": "Feta", "quantity": 100, "unit": "g", "department": "dairy" },
+        { "name": "Pomidor", "quantity": 2, "unit": "szt", "department": "produce" },
+        { "name": "Oliwa z oliwek", "quantity": 1, "unit": "lyzka", "department": "dry" }
+      ]
+    }
+  ]
+}
