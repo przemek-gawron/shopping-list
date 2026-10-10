@@ -1,6 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
+    "version": "2.1.0",
     "copyright": "2026 Przemysław Gawron",
     "categories": [
       "FOOD_AND_DRINK",
