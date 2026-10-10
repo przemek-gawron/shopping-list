@@ -19,6 +19,8 @@ type Props = {
   onVisibleStart: (date: string) => void;
   /** Days with something planned get a dot. */
   hasMeals: (date: string) => boolean;
+  /** Days with meals picked for the shopping list get a bigger dot in the accent colour. */
+  hasPicked?: (date: string) => boolean;
   /** Scrolls so this day is first in view, each time `key` changes (week arrows, "today"). */
   jump: { date: string; key: number };
 };
@@ -27,7 +29,7 @@ type Props = {
  * Days of the plan as a strip that scrolls freely sideways, a week in view and snapping to whole days.
  * The week arrows scroll to a Monday; a selected day out of view scrolls its week into view.
  */
-export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, jump }: Props) {
+export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, hasPicked, jump }: Props) {
   const theme = useTheme();
   const locale = useLocale();
   const list = useRef<FlatList<string>>(null);
@@ -74,7 +76,7 @@ export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, jump }
           horizontal
           data={days}
           keyExtractor={(d) => d}
-          extraData={[selected, hasMeals]}
+          extraData={[selected, hasMeals, hasPicked]}
           showsHorizontalScrollIndicator={false}
           initialScrollIndex={initialIndex}
           getItemLayout={(_, index) => ({ length: step, offset: step * index, index })}
@@ -87,6 +89,7 @@ export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, jump }
           renderItem={({ item: date }) => {
             const isSelected = date === selected;
             const isToday = date === today();
+            const picked = hasPicked?.(date) ?? false;
             return (
               <Pressable
                 onPress={() => onSelect(date)}
@@ -105,7 +108,11 @@ export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, jump }
                   {fromISO(date).getDate()}
                 </ThemedText>
                 <View
-                  style={[styles.dot, { backgroundColor: hasMeals(date) ? (isSelected ? theme.onPrimary : theme.tint) : 'transparent' }]}
+                  style={[
+                    styles.dot,
+                    picked && styles.pickedDot,
+                    { backgroundColor: picked ? theme.accent : hasMeals(date) ? (isSelected ? theme.onPrimary : theme.tint) : 'transparent' },
+                  ]}
                 />
               </Pressable>
             );
@@ -120,4 +127,6 @@ const styles = StyleSheet.create({
   day: { alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
   dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
   dot: { width: 5, height: 5, borderRadius: 3 },
+  // same footprint as the plain dot plus margin, so the day does not grow
+  pickedDot: { width: 7, height: 7, borderRadius: 4, marginVertical: -1 },
 });

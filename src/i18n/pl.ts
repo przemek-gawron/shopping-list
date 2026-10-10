@@ -93,6 +93,7 @@ export default {
   plan_pick_day: 'Ten dzień',
   plan_pick_week: 'Ten tydzień',
   plan_pick_from_today: 'Od dziś',
+  plan_pick_other_weeks: 'W tym z innych tygodni: {{count}}',
   plan_pick_none: 'Odznacz',
   plan_clear_title: 'Wyczyść plan',
   plan_clear_day: 'Ten dzień',

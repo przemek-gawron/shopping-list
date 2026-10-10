@@ -70,8 +70,18 @@ export default function PlanScreen() {
   const dayEntries = (date: string) => shown.filter((e) => e.date === date);
   const weekEntries = shown.filter((e) => e.date >= days[0] && e.date <= days[6]);
 
-  const select = (ids: string[]) => setPicked(ids);
   const idsFor = (predicate: (date: string) => boolean) => shown.filter((e) => predicate(e.date)).map((e) => e.id);
+  const allPicked = (ids: string[]) => ids.length > 0 && ids.every((id) => picked.includes(id));
+  /** Adds the meals of a range to the selection; when all of them are picked already, unpicks just that range. */
+  const pickRange = (ids: string[]) =>
+    setPicked((current) =>
+      allPicked(ids) ? current.filter((id) => !ids.includes(id)) : [...current, ...ids.filter((id) => !current.includes(id))],
+    );
+  const dayIds = idsFor((d) => d === selectedDate);
+  const weekIds = idsFor((d) => d >= days[0] && d <= days[6]);
+  const fromTodayIds = idsFor((d) => d >= today());
+  const pickedElsewhere = shown.filter((e) => picked.includes(e.id) && (e.date < days[0] || e.date > days[6])).length;
+  const pickedDates = useMemo(() => new Set(shown.filter((e) => picked.includes(e.id)).map((e) => e.date)), [shown, picked]);
 
   const toggle = (id: string) =>
     setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
@@ -140,6 +150,7 @@ export default function PlanScreen() {
         onSelect={setSelectedDate}
         onVisibleStart={setVisibleStart}
         hasMeals={(date) => dayEntries(date).length > 0}
+        hasPicked={(date) => pickedDates.has(date)}
         jump={jump}
       />
 
@@ -232,11 +243,12 @@ export default function PlanScreen() {
         <View style={styles.generate}>
           <ThemedText type="label">{t('plan_pick_title')}</ThemedText>
           <View style={styles.chips}>
-            <Chip label={t('plan_pick_day')} onPress={() => select(idsFor((d) => d === selectedDate))} />
-            <Chip label={t('plan_pick_week')} onPress={() => select(idsFor((d) => d >= days[0] && d <= days[6]))} />
-            <Chip label={t('plan_pick_from_today')} onPress={() => select(idsFor((d) => d >= today()))} />
-            <Chip label={t('plan_pick_none')} onPress={() => select([])} />
+            <Chip label={t('plan_pick_day')} selected={allPicked(dayIds)} onPress={() => pickRange(dayIds)} />
+            <Chip label={t('plan_pick_week')} selected={allPicked(weekIds)} onPress={() => pickRange(weekIds)} />
+            <Chip label={t('plan_pick_from_today')} selected={allPicked(fromTodayIds)} onPress={() => pickRange(fromTodayIds)} />
+            <Chip label={t('plan_pick_none')} onPress={() => setPicked([])} />
           </View>
+          {pickedElsewhere > 0 && <ThemedText type="small">{t('plan_pick_other_weeks', { count: pickedElsewhere })}</ThemedText>}
           <Button
             label={pickedShown.length > 0 ? t('plan_generate_count', { count: pickedShown.length }) : t('plan_generate')}
             onPress={generate}

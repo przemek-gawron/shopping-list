@@ -96,6 +96,7 @@ const en: Record<keyof typeof pl, string> = {
   plan_pick_day: 'This day',
   plan_pick_week: 'This week',
   plan_pick_from_today: 'From today',
+  plan_pick_other_weeks: 'Including {{count}} from other weeks',
   plan_pick_none: 'Deselect',
   plan_clear_title: 'Clear plan',
   plan_clear_day: 'This day',
