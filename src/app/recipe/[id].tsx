@@ -1,6 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -15,6 +15,7 @@ import { recipeEmoji } from '@/data/labels';
 import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
 import { substituteOptions } from '@/data/substitutes';
+import { useTheme } from '@/hooks/use-theme';
 import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
 
@@ -39,6 +40,8 @@ export default function RecipeScreen() {
   const removeRecipe = useStore((s) => s.removeRecipe);
   const setRating = useStore((s) => s.setRating);
   const updatePlanEntry = useStore((s) => s.updatePlanEntry);
+  const setShopped = useStore((s) => s.setShopped);
+  const theme = useTheme();
   // opened from the plan the multiplier is the planned meal's and changing it updates the plan;
   // otherwise it only scales the amounts shown here
   const [previewServings, setPreviewServings] = useState(1);
@@ -77,6 +80,20 @@ export default function RecipeScreen() {
       </View>
       {recipe.description ? <ThemedText>{recipe.description}</ThemedText> : null}
 
+      {entry && (
+        <View style={styles.shopped}>
+          <View style={styles.shoppedText}>
+            <ThemedText style={styles.shoppedLabel}>🛒 {t('shopped_toggle')}</ThemedText>
+            <ThemedText type="small">{t('shopped_hint')}</ThemedText>
+          </View>
+          <Switch
+            value={!!entry.shopped}
+            onValueChange={(value) => setShopped(entry.id, value)}
+            trackColor={{ true: theme.tint }}
+            accessibilityLabel={t('shopped_toggle')}
+          />
+        </View>
+      )}
       <View style={styles.servings}>
         <ThemedText type="label">{t('ingredients')}</ThemedText>
         <ServingsStepper value={servings} onChange={setServings} onValuePress={() => setShowMultipliers(!showMultipliers)} />
@@ -170,4 +187,7 @@ const styles = StyleSheet.create({
   action: { fontWeight: '700', fontSize: 14 },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   ingredientName: { flex: 1 },
+  shopped: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  shoppedText: { flex: 1, gap: 2 },
+  shoppedLabel: { fontWeight: '600' },
 });

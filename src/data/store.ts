@@ -83,6 +83,8 @@ interface Actions {
   /** Several meals at once (random plan); each replaces what its day and meal had. */
   setPlanEntries: (entries: Omit<PlanEntry, 'id'>[]) => void;
   updatePlanEntry: (id: string, servings: number) => void;
+  /** Marks a planned meal as already shopped for, which keeps it off the shopping list. */
+  setShopped: (id: string, shopped: boolean) => void;
   removePlanEntry: (id: string) => void;
   /** Removes every planned meal from `from` to `to` (YYYY-MM-DD, inclusive), hidden meal slots included. */
   clearPlan: (from: string, to: string) => void;
@@ -227,6 +229,8 @@ export const useStore = create<Store>()(
             ...entries.map((e) => ({ ...e, id: generateId() })),
           ]),
         updatePlanEntry: (id, servings) => changePlan((plan) => plan.map((e) => (e.id === id ? { ...e, servings } : e))),
+        setShopped: (id, shopped) =>
+          changePlan((plan) => plan.map((e) => (e.id === id ? { ...e, shopped: shopped || undefined } : e))),
         removePlanEntry: (id) => changePlan((plan) => plan.filter((e) => e.id !== id)),
         clearPlan: (from, to) => changePlan((plan) => plan.filter((e) => e.date < from || e.date > to)),
         undoPlan: () =>
@@ -278,7 +282,7 @@ export const useStore = create<Store>()(
 
         generateList: (entryIds) => {
           const { plan, recipes, products } = get();
-          const chosen = plan.filter((e) => entryIds.includes(e.id));
+          const chosen = plan.filter((e) => entryIds.includes(e.id) && !e.shopped);
           const items = buildShoppingList(chosen, recipes, products)
             .map((item) => ({ ...item, id: generateId() }))
             .sort((a, b) => a.name.localeCompare(b.name));

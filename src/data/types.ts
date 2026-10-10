@@ -69,6 +69,8 @@ export interface PlanEntry {
   servings: number;
   /** Ingredients replaced for this meal only; the recipe itself is unchanged. */
   swaps?: Swap[];
+  /** "Already shopped for": the meal is left out of the shopping list. Dropped when the meal gets another recipe. */
+  shopped?: boolean;
 }
 
 /** One ingredient of a planned meal replaced by a substitute (amounts are per serving). */
