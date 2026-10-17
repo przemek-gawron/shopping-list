@@ -133,7 +133,17 @@ export default function RecipeFormScreen() {
 
   return (
     <Page>
-      <Stack.Screen options={{ title: editing ? t('recipe_edit') : t('recipe_new') }} />
+      <Stack.Screen
+        options={{
+          title: editing ? t('recipe_edit') : t('recipe_new'),
+          // saving without scrolling down past a long ingredient list
+          headerRight: () => (
+            <ThemedText color="tint" accessibilityRole="button" style={styles.headerAction} onPress={save}>
+              {t('save')}
+            </ThemedText>
+          ),
+        }}
+      />
 
       <View style={styles.photoBlock}>
         <RecipePhoto photo={photo} uri={pickedUri ?? undefined} emoji={groupEmoji} height={180} />
@@ -231,6 +241,7 @@ export default function RecipeFormScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerAction: { fontWeight: '700', fontSize: 16, paddingHorizontal: 6 },
   photoBlock: { gap: Spacing.two },
   photoButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   section: { gap: Spacing.two },
