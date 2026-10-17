@@ -65,7 +65,10 @@ export interface PlanEntry {
   /** YYYY-MM-DD */
   date: string;
   slotId: string;
-  recipeId: string;
+  /** None for a meal typed in without a recipe (`note`); such a meal never goes on the shopping list. */
+  recipeId?: string;
+  /** Name of a meal from outside the app, e.g. "Pizza at Marco's". */
+  note?: string;
   servings: number;
   /** Ingredients replaced for this meal only; the recipe itself is unchanged. */
   swaps?: Swap[];

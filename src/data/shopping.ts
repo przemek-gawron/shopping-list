@@ -50,7 +50,7 @@ export function buildShoppingList(
   const totals = new Map<string, Total>();
 
   for (const entry of entries) {
-    const recipe = recipeById.get(entry.recipeId);
+    const recipe = entry.recipeId ? recipeById.get(entry.recipeId) : undefined;
     if (!recipe) continue;
     for (const ingredient of recipe.ingredients) {
       // a substitute chosen for this meal replaces the recipe's ingredient, unless its product is gone

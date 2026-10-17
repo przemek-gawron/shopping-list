@@ -114,6 +114,9 @@ const en: Record<keyof typeof pl, string> = {
   plan_no_recipes: 'Add some recipes in the Recipes tab first.',
   plan_add_confirm: 'Add to plan',
   plan_replaces: 'This meal is already planned. Replaces: {{name}}.',
+  plan_note_hint: "Not among your recipes? Type a name and add the meal without a recipe – it won't go on the shopping list.",
+  plan_note_add: 'Add "{{name}}" without a recipe',
+  plan_note: 'No recipe',
 
   list_title: 'Shopping list',
   list_add: 'Add item',

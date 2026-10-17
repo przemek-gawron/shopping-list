@@ -111,6 +111,9 @@ export default {
   plan_no_recipes: 'Najpierw dodaj przepisy w zakładce Przepisy.',
   plan_add_confirm: 'Dodaj do planu',
   plan_replaces: 'Ten posiłek jest już zaplanowany. Zastąpi: {{name}}.',
+  plan_note_hint: 'Nie ma go w przepisach? Wpisz nazwę i dodaj posiłek bez przepisu – nie trafi na listę zakupów.',
+  plan_note_add: 'Dodaj „{{name}}” bez przepisu',
+  plan_note: 'Bez przepisu',
 
   list_title: 'Lista zakupów',
   list_add: 'Dodaj pozycję',

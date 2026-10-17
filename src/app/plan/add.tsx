@@ -34,6 +34,8 @@ export default function PlanAddScreen() {
 
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
   const [recipeId, setRecipeId] = useState<string | null>(params.recipeId ?? null);
+  // a meal typed in without a recipe
+  const [note, setNote] = useState<string | null>(null);
   const [date, setDate] = useState(params.date ?? today());
   const [slotId, setSlotId] = useState(params.slotId ?? slots[0]?.id ?? '');
   const [servings, setServings] = useState(1);
@@ -59,11 +61,12 @@ export default function PlanAddScreen() {
   const chosen = recipes.find((r) => r.id === recipeId);
   // a slot holds one recipe, so saving onto a taken slot replaces it
   const occupied = plan.find((e) => e.date === date && e.slotId === slotId);
-  const replaced = occupied && recipes.find((r) => r.id === occupied.recipeId);
+  const replaced = occupied && (occupied.note ?? recipes.find((r) => r.id === occupied.recipeId)?.title);
 
   const save = () => {
-    if (!chosen) return;
-    setPlanEntry({ date, slotId, recipeId: chosen.id, servings });
+    if (note) setPlanEntry({ date, slotId, note, servings: 1 });
+    else if (chosen) setPlanEntry({ date, slotId, recipeId: chosen.id, servings });
+    else return;
     router.back();
   };
 
@@ -73,12 +76,15 @@ export default function PlanAddScreen() {
 
       <View style={styles.section}>
         <ThemedText type="label">{t('recipe')}</ThemedText>
-        {chosen ? (
-          <Card style={styles.chosen} onPress={() => setRecipeId(null)}>
-            <ThemedText style={styles.chosenName} numberOfLines={2}>
-              {chosen.title}
-            </ThemedText>
-            <ThemedText color="tint" style={styles.change} onPress={() => setRecipeId(null)}>
+        {chosen || note ? (
+          <Card style={styles.chosen} onPress={() => (note ? setNote(null) : setRecipeId(null))}>
+            <View style={styles.chosenName}>
+              <ThemedText style={styles.chosenTitle} numberOfLines={2}>
+                {note ?? chosen?.title}
+              </ThemedText>
+              {note && <ThemedText type="caption">✏️ {t('plan_note')}</ThemedText>}
+            </View>
+            <ThemedText color="tint" style={styles.change} onPress={() => (note ? setNote(null) : setRecipeId(null))}>
               {t('change')}
             </ThemedText>
           </Card>
@@ -91,6 +97,15 @@ export default function PlanAddScreen() {
               placeholderTextColor={theme.icon}
               style={[styles.search, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
             />
+            {query.trim() ? (
+              <Card onPress={() => setNote(query.trim())} style={styles.chosen}>
+                <ThemedText color="tint" style={styles.chosenTitle}>
+                  ✏️ {t('plan_note_add', { name: query.trim() })}
+                </ThemedText>
+              </Card>
+            ) : (
+              <ThemedText type="small">{t('plan_note_hint')}</ThemedText>
+            )}
             {groups.length > 0 && (
               <View style={styles.wrap}>
                 <Chip label={t('all')} selected={groupFilter === null} onPress={() => setGroupFilter(null)} />
@@ -106,7 +121,7 @@ export default function PlanAddScreen() {
               flat={!!query.trim()}
               renderRecipe={(r) => (
                 <Card onPress={() => setRecipeId(r.id)} style={styles.chosen}>
-                  <ThemedText style={styles.chosenName}>{r.title}</ThemedText>
+                  <ThemedText style={[styles.chosenName, styles.chosenTitle]}>{r.title}</ThemedText>
                   {r.rating ? <Stars value={r.rating} size={13} /> : null}
                 </Card>
               )}
@@ -115,7 +130,7 @@ export default function PlanAddScreen() {
         )}
       </View>
 
-      {chosen && (
+      {(chosen || note) && (
         <>
           <View style={styles.section}>
             <ThemedText type="label">{t('date')}</ThemedText>
@@ -138,11 +153,14 @@ export default function PlanAddScreen() {
               ))}
             </View>
           </View>
-          <View style={[styles.section, styles.servings]}>
-            <ThemedText type="label">{t('servings')}</ThemedText>
-            <ServingsStepper value={servings} onChange={setServings} onValuePress={() => setShowMultipliers(!showMultipliers)} />
-          </View>
-          {showMultipliers && (
+          {/* a meal without a recipe has nothing to multiply */}
+          {!note && (
+            <View style={[styles.section, styles.servings]}>
+              <ThemedText type="label">{t('servings')}</ThemedText>
+              <ServingsStepper value={servings} onChange={setServings} onValuePress={() => setShowMultipliers(!showMultipliers)} />
+            </View>
+          )}
+          {!note && showMultipliers && (
             <ServingsChips
               value={servings}
               onChange={(v) => {
@@ -151,7 +169,7 @@ export default function PlanAddScreen() {
               }}
             />
           )}
-          {replaced && <ThemedText type="small">{t('plan_replaces', { name: replaced.title })}</ThemedText>}
+          {replaced && <ThemedText type="small">{t('plan_replaces', { name: replaced })}</ThemedText>}
           <Button label={t('plan_add_confirm')} onPress={save} />
         </>
       )}
@@ -166,6 +184,7 @@ const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   search: { minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
   chosen: { flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.three },
-  chosenName: { flex: 1, fontWeight: '700' },
+  chosenName: { flex: 1 },
+  chosenTitle: { fontWeight: '700' },
   change: { fontWeight: '700' },
 });
