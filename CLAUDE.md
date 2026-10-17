@@ -40,6 +40,8 @@ Routes (`src/app`): `(tabs)` = `index` (recipes), `plan`, `list`, `settings` wit
 ## Conventions
 
 - A meal slot holds one recipe per day (`setPlanEntry` replaces). Meals can be renamed and reordered in Settings.
+- A plan entry may have a `note` instead of a `recipeId` (a meal from outside the app, added from the search in `plan/add`); it has no servings, is never picked for the list and is shared by name.
+- A recipe needs a title and at least one ingredient.
 - Plan entries of meal slots hidden by lowering meals-per-day stay stored but are not shown or used for the list.
 - Importing a .doc meal plan (`data/doc-text.ts`, `data/meal-plan.ts`) creates a `Menu`; recipes keep `menuIds`. With "group by meal plan" on, recipe lists use `components/menu-sections.tsx`.
 - Settings import accepts several files at once (sorted by name, bad files skipped, one summary alert).
