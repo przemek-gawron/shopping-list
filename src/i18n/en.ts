@@ -46,6 +46,7 @@ const en: Record<keyof typeof pl, string> = {
   recipe_title: 'Name',
   recipe_title_placeholder: 'e.g. Spaghetti bolognese',
   recipe_title_required: 'Enter a recipe name.',
+  recipe_ingredients_required: 'Add at least one ingredient.',
   recipe_description: 'Description / notes',
   recipe_description_placeholder: 'Method, tips…',
   ingredient_name: 'Ingredient',

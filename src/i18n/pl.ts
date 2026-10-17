@@ -43,6 +43,7 @@ export default {
   recipe_title: 'Nazwa',
   recipe_title_placeholder: 'np. Spaghetti bolognese',
   recipe_title_required: 'Podaj nazwę przepisu.',
+  recipe_ingredients_required: 'Dodaj co najmniej jeden składnik.',
   recipe_description: 'Opis / notatki',
   recipe_description_placeholder: 'Sposób przygotowania, uwagi…',
   ingredient_name: 'Składnik',

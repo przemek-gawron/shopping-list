@@ -92,6 +92,7 @@ export default function RecipeFormScreen() {
   const save = () => {
     const trimmed = title.trim();
     if (!trimmed) return Alert.alert(t('recipe_title_required'));
+    if (!rows.some((r) => r.name.trim())) return Alert.alert(t('recipe_ingredients_required'));
 
     // products created by earlier rows of this save, so the same new name is not added twice
     const created = new Map<string, string>();
