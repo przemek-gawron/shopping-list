@@ -90,14 +90,14 @@ export default function PlanScreen() {
   const toggle = (id: string) =>
     setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
-  /** Draws a different recipe from the meal's group for the selected day, keeping its multiplier. */
+  /** Draws a different recipe from the meal's group for the selected day; replaces the meal's first dish, keeping its multiplier. */
   const drawMeal = (slot: MealSlot, index: number) => {
     const group = groupForSlot(slot, slotName(slot, index), groups);
-    const current = dayEntries(selectedDate).find((e) => e.slotId === slot.id);
-    const recipeIds = recipes.filter((r) => group && r.groupId === group.id && r.id !== current?.recipeId).map((r) => r.id);
+    const inMeal = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
+    const recipeIds = recipes.filter((r) => group && r.groupId === group.id && !inMeal.some((e) => e.recipeId === r.id)).map((r) => r.id);
     if (recipeIds.length === 0) return Alert.alert(t('random_no_recipes', { meals: slotName(slot, index) }));
     const [drawn] = randomPlan({ dates: [selectedDate], slots: [{ id: slot.id, recipeIds }], plan, replace: true });
-    if (drawn) setPlanEntry(drawn);
+    if (drawn) setPlanEntry(drawn, inMeal[0]?.id);
   };
 
   const generate = () => {
@@ -163,13 +163,10 @@ export default function PlanScreen() {
       </ThemedText>
 
       {slots.map((slot, index) => {
-        const entry = dayEntries(selectedDate).find((e) => e.slotId === slot.id);
-        const recipe = entry && recipes.find((r) => r.id === entry.recipeId);
-        const isPicked = !!entry && pickedShown.includes(entry.id);
-        const swapCount = entry ? appliedSwaps(entry, recipe, products).length : 0;
-        const action = entry ? t('change') : `+ ${t('plan_add_meal')}`;
+        // a meal may have several dishes (soup + main course)
+        const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
         return (
-          // the whole card picks the recipe; the recipe name, checkbox, stepper and ✕ keep their own actions
+          // the whole card adds a dish; the recipe name, checkbox, stepper and ✕ keep their own actions
           <Card key={slot.id} style={styles.slot} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
             <View style={styles.slotHeader}>
               <ThemedText type="label">{slotName(slot, index)}</ThemedText>
@@ -185,74 +182,78 @@ export default function PlanScreen() {
                   hitSlop={8}
                   accessibilityRole="button"
                   onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}
-                  accessibilityLabel={`${entry ? t('change') : t('plan_add_meal')} – ${slotName(slot, index)}`}>
+                  accessibilityLabel={`${t('plan_add_meal')} – ${slotName(slot, index)}`}>
                   <ThemedText color="tint" style={styles.addLink}>
-                    {action}
+                    + {t('plan_add_meal')}
                   </ThemedText>
                 </Pressable>
               </View>
             </View>
-            {entry ? (
-              <>
-                <View style={styles.entry}>
-                  {entry.note ? (
-                    <View style={styles.checkbox} />
-                  ) : entry.shopped ? (
-                    // already shopped for: cannot be picked; the mark is changed on the recipe screen
-                    <View accessible accessibilityLabel={t('plan_shopped')} style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
-                      <ThemedText style={styles.cart}>🛒</ThemedText>
-                    </View>
-                  ) : (
-                    <Pressable
-                      onPress={() => toggle(entry.id)}
-                      hitSlop={8}
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: isPicked }}
-                      accessibilityLabel={t('plan_pick_for_list')}
-                      style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
-                      {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-                    </Pressable>
-                  )}
-                  <Pressable
-                    style={styles.entryTitle}
-                    accessibilityRole="button"
-                    disabled={!recipe}
-                    onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id, entryId: entry.id } })}>
-                    <ThemedText style={styles.entryName} numberOfLines={2}>
-                      {entry.note ?? recipe?.title ?? '?'}
-                    </ThemedText>
-                    {entry.note && <ThemedText type="caption">✏️ {t('plan_note')}</ThemedText>}
-                    {swapCount > 0 && (
-                      <ThemedText type="caption" color="tint">
-                        {t('swap_count', { count: swapCount })}
-                      </ThemedText>
+            {entries.length === 0 && <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>}
+            {entries.map((entry) => {
+              const recipe = recipes.find((r) => r.id === entry.recipeId);
+              const isPicked = pickedShown.includes(entry.id);
+              const swapCount = appliedSwaps(entry, recipe, products).length;
+              return (
+                <View key={entry.id}>
+                  <View style={styles.entry}>
+                    {entry.note ? (
+                      <View style={styles.checkbox} />
+                    ) : entry.shopped ? (
+                      // already shopped for: cannot be picked; the mark is changed on the recipe screen
+                      <View accessible accessibilityLabel={t('plan_shopped')} style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
+                        <ThemedText style={styles.cart}>🛒</ThemedText>
+                      </View>
+                    ) : (
+                      <Pressable
+                        onPress={() => toggle(entry.id)}
+                        hitSlop={8}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: isPicked }}
+                        accessibilityLabel={t('plan_pick_for_list')}
+                        style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
+                        {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
+                      </Pressable>
                     )}
-                    {entry.shopped && <ThemedText type="caption">🛒 {t('plan_shopped')}</ThemedText>}
-                  </Pressable>
-                  {!entry.note && (
-                    <ServingsStepper
+                    <Pressable
+                      style={styles.entryTitle}
+                      accessibilityRole="button"
+                      disabled={!recipe}
+                      onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id, entryId: entry.id } })}>
+                      <ThemedText style={styles.entryName} numberOfLines={2}>
+                        {entry.note ?? recipe?.title ?? '?'}
+                      </ThemedText>
+                      {entry.note && <ThemedText type="caption">✏️ {t('plan_note')}</ThemedText>}
+                      {swapCount > 0 && (
+                        <ThemedText type="caption" color="tint">
+                          {t('swap_count', { count: swapCount })}
+                        </ThemedText>
+                      )}
+                      {entry.shopped && <ThemedText type="caption">🛒 {t('plan_shopped')}</ThemedText>}
+                    </Pressable>
+                    {!entry.note && (
+                      <ServingsStepper
+                        value={entry.servings}
+                        onChange={(v) => updatePlanEntry(entry.id, v)}
+                        onValuePress={() => setEditing(editing === entry.id ? null : entry.id)}
+                      />
+                    )}
+                    <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
+                      <IconSymbol name="xmark" size={18} color={theme.icon} />
+                    </Pressable>
+                  </View>
+                  {editing === entry.id && (
+                    <ServingsChips
                       value={entry.servings}
-                      onChange={(v) => updatePlanEntry(entry.id, v)}
-                      onValuePress={() => setEditing(editing === entry.id ? null : entry.id)}
+                      onChange={(v) => {
+                        updatePlanEntry(entry.id, v);
+                        setEditing(null);
+                      }}
                     />
                   )}
-                  <Pressable hitSlop={8} accessibilityRole="button" onPress={() => removePlanEntry(entry.id)} accessibilityLabel={t('delete')}>
-                    <IconSymbol name="xmark" size={18} color={theme.icon} />
-                  </Pressable>
                 </View>
-                {editing === entry.id && (
-                  <ServingsChips
-                    value={entry.servings}
-                    onChange={(v) => {
-                      updatePlanEntry(entry.id, v);
-                      setEditing(null);
-                    }}
-                  />
-                )}
-              </>
-            ) : (
-              <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>
-            )}
+              );
+            })}
           </Card>
         );
       })}

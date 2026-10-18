@@ -79,7 +79,8 @@ interface Actions {
   setRating: (id: string, rating: number | undefined) => void;
 
   /** Puts a recipe in a day's meal slot; a slot holds one recipe, so it replaces what was there. */
-  setPlanEntry: (entry: Omit<PlanEntry, 'id'>) => void;
+  /** Adds a dish to a meal; the same recipe (or note) in that meal, or the entry `replaceId`, is replaced in place. */
+  setPlanEntry: (entry: Omit<PlanEntry, 'id'>, replaceId?: string) => void;
   /** Several meals at once (random plan); each replaces what its day and meal had. */
   setPlanEntries: (entries: Omit<PlanEntry, 'id'>[]) => void;
   updatePlanEntry: (id: string, servings: number) => void;
@@ -218,11 +219,15 @@ export const useStore = create<Store>()(
           }));
         },
 
-        setPlanEntry: (entry) =>
-          changePlan((plan) => [
-            ...plan.filter((e) => !(e.date === entry.date && e.slotId === entry.slotId)),
-            { ...entry, id: generateId() },
-          ]),
+        setPlanEntry: (entry, replaceId) =>
+          changePlan((plan) => {
+            const same = (e: PlanEntry) =>
+              e.id === replaceId ||
+              (e.date === entry.date && e.slotId === entry.slotId && (entry.recipeId ? e.recipeId === entry.recipeId : e.note === entry.note));
+            const added = { ...entry, id: generateId() };
+            const index = plan.findIndex(same);
+            return index < 0 ? [...plan, added] : [...plan.slice(0, index), added, ...plan.slice(index + 1).filter((e) => !same(e))];
+          }),
         setPlanEntries: (entries) =>
           changePlan((plan) => [
             ...plan.filter((e) => !entries.some((n) => n.date === e.date && n.slotId === e.slotId)),

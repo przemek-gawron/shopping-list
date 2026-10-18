@@ -23,7 +23,9 @@ function planHtml(title: string, range: string, days: ShareDay[]): string {
       <h2>${escape(d.label)}</h2>
       ${d.meals
         .map(
-          (m) => `<div class="meal"><div class="slot">${escape(m.slot)}</div><div class="recipe">${escape(m.recipe)}${
+          (m, i) => `<div class="meal">${
+            m.slot !== d.meals[i - 1]?.slot ? `<div class="slot">${escape(m.slot)}</div>` : ''
+          }<div class="recipe">${escape(m.recipe)}${
             m.servings ? ` <span class="servings">${escape(m.servings)}</span>` : ''
           }</div></div>`,
         )

@@ -53,11 +53,14 @@ export default function SharePlanScreen() {
         date,
         label: capitalize(formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })),
         meals: slots.flatMap((slot, index) => {
-          const entry = plan.find((e) => e.date === date && e.slotId === slot.id);
-          const recipe = entry && recipes.find((r) => r.id === entry.recipeId);
-          if (entry?.note) return [{ slot: slotName(slot, index), recipe: entry.note }];
-          if (!entry || !recipe) return [];
-          return [{ slot: slotName(slot, index), recipe: recipe.title, servings: entry.servings !== 1 ? formatServings(entry.servings) : undefined }];
+          return plan
+            .filter((e) => e.date === date && e.slotId === slot.id)
+            .flatMap((entry) => {
+              if (entry.note) return [{ slot: slotName(slot, index), recipe: entry.note }];
+              const recipe = recipes.find((r) => r.id === entry.recipeId);
+              if (!recipe) return [];
+              return [{ slot: slotName(slot, index), recipe: recipe.title, servings: entry.servings !== 1 ? formatServings(entry.servings) : undefined }];
+            });
         }),
       }))
       .filter((d) => d.meals.length > 0);
@@ -124,9 +127,10 @@ export default function SharePlanScreen() {
           {days.map((d) => (
             <View key={d.date} style={styles.day}>
               <Text style={styles.dayLabel}>{d.label}</Text>
-              {d.meals.map((m) => (
-                <View key={m.slot} style={styles.meal}>
-                  <Text style={styles.slot}>{m.slot}</Text>
+              {d.meals.map((m, i) => (
+                <View key={i} style={styles.meal}>
+                  {/* further dishes of the same meal go under its name */}
+                  {m.slot !== d.meals[i - 1]?.slot && <Text style={styles.slot}>{m.slot}</Text>}
                   <Text style={styles.recipe}>
                     {m.recipe}
                     {m.servings && <Text style={styles.servings}> {m.servings}</Text>}

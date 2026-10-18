@@ -59,9 +59,14 @@ export default function PlanAddScreen() {
   }, [recipes, groups, query, groupFilter]);
 
   const chosen = recipes.find((r) => r.id === recipeId);
-  // a slot holds one recipe, so saving onto a taken slot replaces it
-  const occupied = plan.find((e) => e.date === date && e.slotId === slotId);
-  const replaced = occupied && (occupied.note ?? recipes.find((r) => r.id === occupied.recipeId)?.title);
+  // a meal may have several dishes; the new one is added next to the others
+  const inMeal = plan.filter((e) => e.date === date && e.slotId === slotId);
+  const already = inMeal.some((e) => (note ? e.note === note : e.recipeId === chosen?.id));
+  const others = inMeal
+    .filter((e) => (note ? e.note !== note : e.recipeId !== chosen?.id))
+    .map((e) => e.note ?? recipes.find((r) => r.id === e.recipeId)?.title)
+    .filter(Boolean)
+    .join(', ');
 
   const save = () => {
     if (note) setPlanEntry({ date, slotId, note, servings: 1 });
@@ -169,7 +174,11 @@ export default function PlanAddScreen() {
               }}
             />
           )}
-          {replaced && <ThemedText type="small">{t('plan_replaces', { name: replaced })}</ThemedText>}
+          {already ? (
+            <ThemedText type="small">{t('plan_already_in_meal')}</ThemedText>
+          ) : (
+            others && <ThemedText type="small">{t('plan_adds_to', { names: others })}</ThemedText>
+          )}
           <Button label={t('plan_add_confirm')} onPress={save} />
         </>
       )}
