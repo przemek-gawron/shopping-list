@@ -39,7 +39,7 @@ Routes (`src/app`): `(tabs)` = `index` (recipes), `plan`, `list`, `settings` wit
 
 ## Conventions
 
-- A meal slot holds one recipe per day (`setPlanEntry` replaces). Meals can be renamed and reordered in Settings.
+- A meal slot holds several dishes per day (soup + main course): `setPlanEntry` adds, replacing only the same recipe/note in that meal or the entry passed as `replaceId`. Random plans (`setPlanEntries`) fill a meal with one dish and replace all of its dishes. Meals can be renamed and reordered in Settings.
 - A plan entry may have a `note` instead of a `recipeId` (a meal from outside the app, added from the search in `plan/add`); it has no servings, is never picked for the list and is shared by name.
 - A recipe needs a title and at least one ingredient.
 - Plan entries of meal slots hidden by lowering meals-per-day stay stored but are not shown or used for the list.
