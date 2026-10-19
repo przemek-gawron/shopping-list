@@ -43,6 +43,7 @@ Routes (`src/app`): `(tabs)` = `index` (recipes), `plan`, `list`, `settings` wit
 - A plan entry may have a `note` instead of a `recipeId` (a meal from outside the app, added from the search in `plan/add`); it has no servings, is never picked for the list and is shared by name.
 - An entry with `note` and `ordered` is food ordered in (the "Ordering" mode of `plan/add`, with suggestions from earlier orders); it shows 🛵 in the plan and share, and random plans never replace its meal.
 - `plan/stats` (chart button in the Plan header) counts past meals (day × visible slot, up to today) as from a recipe / ordered in / without a recipe; pure logic in `data/stats.ts`, chart drawn with plain Views in the `chart*` theme colours. Clearing the plan removes those days from the statistics.
+- Deleting a recipe removes only its future plan entries; entries up to today keep `recipeId` plus the recipe's `title` (shown as "Recipe deleted", not shoppable) so the statistics do not change.
 - A recipe needs a title and at least one ingredient.
 - Plan entries of meal slots hidden by lowering meals-per-day stay stored but are not shown or used for the list.
 - Importing a .doc meal plan (`data/doc-text.ts`, `data/meal-plan.ts`) creates a `Menu`; recipes keep `menuIds`. With "group by meal plan" on, recipe lists use `components/menu-sections.tsx`.
