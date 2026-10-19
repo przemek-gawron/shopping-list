@@ -90,14 +90,17 @@ export default function PlanScreen() {
   const toggle = (id: string) =>
     setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
-  /** Draws a different recipe from the meal's group for the selected day; replaces the meal's first dish, keeping its multiplier. */
+  /**
+   * Draws a different recipe from the meal's group for the selected day; replaces the meal's first dish, keeping its multiplier.
+   * Food ordered in is never replaced: with only that in the meal the drawn recipe goes next to it.
+   */
   const drawMeal = (slot: MealSlot, index: number) => {
     const group = groupForSlot(slot, slotName(slot, index), groups);
     const inMeal = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
     const recipeIds = recipes.filter((r) => group && r.groupId === group.id && !inMeal.some((e) => e.recipeId === r.id)).map((r) => r.id);
     if (recipeIds.length === 0) return Alert.alert(t('random_no_recipes', { meals: slotName(slot, index) }));
-    const [drawn] = randomPlan({ dates: [selectedDate], slots: [{ id: slot.id, recipeIds }], plan, replace: true });
-    if (drawn) setPlanEntry(drawn, inMeal[0]?.id);
+    const [drawn] = randomPlan({ dates: [selectedDate], slots: [{ id: slot.id, recipeIds }], plan: plan.filter((e) => !e.ordered), replace: true });
+    if (drawn) setPlanEntry(drawn, inMeal.find((e) => !e.ordered)?.id);
   };
 
   const generate = () => {
