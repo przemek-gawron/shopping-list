@@ -83,7 +83,7 @@ export default function PlanAddScreen() {
   const name = ordering ? order.trim() || null : note;
   // a meal may have several dishes; the new one is added next to the others
   const inMeal = plan.filter((e) => e.date === date && e.slotId === slotId);
-  const already = inMeal.some((e) => (name ? e.note === name : e.recipeId === chosen?.id));
+  const already = inMeal.find((e) => (name ? e.note === name : e.recipeId === chosen?.id));
   const others = inMeal
     .filter((e) => (name ? e.note !== name : e.recipeId !== chosen?.id))
     .map((e) => e.note ?? recipes.find((r) => r.id === e.recipeId)?.title)
@@ -231,7 +231,14 @@ export default function PlanAddScreen() {
             />
           )}
           {already ? (
-            <ThemedText type="small">{t('plan_already_in_meal')}</ThemedText>
+            <ThemedText type="small">
+              {/* a meal without a recipe has no servings; saving may turn an ordered one into a typed-in one or back */}
+              {!name
+                ? t('plan_already_in_meal')
+                : !already.ordered === !ordering
+                  ? t('plan_note_already_in_meal')
+                  : t('plan_note_kind_change', { name, kind: t(ordering ? 'plan_ordered' : 'plan_note'), was: t(already.ordered ? 'plan_ordered_was' : 'plan_note_was') })}
+            </ThemedText>
           ) : (
             others && <ThemedText type="small">{t('plan_adds_to', { names: others })}</ThemedText>
           )}
