@@ -71,9 +71,9 @@ export default function PlanScreen() {
   const dayEntries = (date: string) => shown.filter((e) => e.date === date);
   const weekEntries = shown.filter((e) => e.date >= days[0] && e.date <= days[6]);
 
-  // meals without a recipe have nothing to buy
+  // meals without a recipe (or whose recipe was deleted) have nothing to buy
   const idsFor = (predicate: (date: string) => boolean) =>
-    shown.filter((e) => e.recipeId && !e.shopped && predicate(e.date)).map((e) => e.id);
+    shown.filter((e) => recipes.some((r) => r.id === e.recipeId) && !e.shopped && predicate(e.date)).map((e) => e.id);
   const allPicked = (ids: string[]) => ids.length > 0 && ids.every((id) => picked.includes(id));
   /** Adds the meals of a range to the selection; when all of them are picked already, unpicks just that range. */
   const pickRange = (ids: string[]) =>
@@ -216,6 +216,9 @@ export default function PlanScreen() {
                         style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
                         <ThemedText style={styles.cart}>{entry.ordered ? '🛵' : '✏️'}</ThemedText>
                       </View>
+                    ) : !recipe ? (
+                      // the recipe was deleted: the past meal stays for the statistics, with nothing to buy
+                      <View accessible accessibilityLabel={t('plan_recipe_deleted')} style={[styles.checkbox, { borderColor: theme.borderSubtle }]} />
                     ) : entry.shopped ? (
                       // already shopped for: cannot be picked; the mark is changed on the recipe screen
                       <View accessible accessibilityLabel={t('plan_shopped')} style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
@@ -238,8 +241,9 @@ export default function PlanScreen() {
                       disabled={!recipe}
                       onPress={() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id, entryId: entry.id } })}>
                       <ThemedText style={styles.entryName} numberOfLines={2}>
-                        {entry.note ?? recipe?.title ?? '?'}
+                        {entry.note ?? recipe?.title ?? entry.title ?? '?'}
                       </ThemedText>
+                      {!entry.note && !recipe && <ThemedText type="caption">{t('plan_recipe_deleted')}</ThemedText>}
                       {entry.note && (
                         <ThemedText type="caption">{entry.ordered ? `🛵 ${t('plan_ordered')}` : `✏️ ${t('plan_note')}`}</ThemedText>
                       )}
@@ -250,7 +254,7 @@ export default function PlanScreen() {
                       )}
                       {entry.shopped && <ThemedText type="caption">🛒 {t('plan_shopped')}</ThemedText>}
                     </Pressable>
-                    {!entry.note && (
+                    {recipe && (
                       <ServingsStepper
                         value={entry.servings}
                         onChange={(v) => updatePlanEntry(entry.id, v)}

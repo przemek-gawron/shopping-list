@@ -40,7 +40,7 @@ const en: Record<keyof typeof pl, string> = {
   groups_manage: 'Groups…',
   add_to_plan: 'Add to plan',
   delete_recipe: 'Delete recipe',
-  delete_recipe_message: 'Delete "{{name}}"? It will also disappear from the plan.',
+  delete_recipe_message: 'Delete "{{name}}"? It leaves the plan from tomorrow; today’s and earlier meals stay in the statistics.',
   recipe_edit: 'Edit recipe',
   recipe_new: 'New recipe',
   recipe_title: 'Name',
@@ -128,6 +128,7 @@ const en: Record<keyof typeof pl, string> = {
   plan_order_hint: 'Ordered food does not go on the shopping list.',
   plan_order_suggestions: 'Pizza|Burgers|Sushi|Kebab|Chinese',
   plan_ordered: 'Ordering in',
+  plan_recipe_deleted: 'Recipe deleted',
 
   stats_title: 'Statistics',
   stats_range_7: '7 days',

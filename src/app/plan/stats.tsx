@@ -191,7 +191,16 @@ export default function PlanStatsScreen() {
               <ThemedText type="label">{t('stats_top_recipes')}</ThemedText>
               {stats.topRecipes.map((r) => {
                 const recipe = recipes.find((x) => x.id === r.recipeId);
-                if (!recipe) return null;
+                // a deleted recipe still counts, under its old title, but has nothing to open
+                if (!recipe)
+                  return r.title ? (
+                    <View key={r.recipeId} style={styles.row}>
+                      <ThemedText style={styles.flex} numberOfLines={1}>
+                        {r.title}
+                      </ThemedText>
+                      <ThemedText type="small">{r.count}×</ThemedText>
+                    </View>
+                  ) : null;
                 return (
                   <Pressable
                     key={r.recipeId}

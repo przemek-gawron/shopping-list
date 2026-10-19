@@ -71,6 +71,8 @@ export interface PlanEntry {
   note?: string;
   /** The `note` meal is ordered in (takeaway, delivery): marked in the plan and kept by random plans. */
   ordered?: boolean;
+  /** Title of the recipe after it was deleted; past meals keep it (and `recipeId`) so the statistics do not change. */
+  title?: string;
   servings: number;
   /** Ingredients replaced for this meal only; the recipe itself is unchanged. */
   swaps?: Swap[];

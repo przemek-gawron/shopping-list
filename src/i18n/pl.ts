@@ -37,7 +37,7 @@ export default {
   groups_manage: 'Grupy…',
   add_to_plan: 'Dodaj do planu',
   delete_recipe: 'Usuń przepis',
-  delete_recipe_message: 'Usunąć „{{name}}"? Zniknie też z planu.',
+  delete_recipe_message: 'Usunąć „{{name}}"? Zniknie z planu od jutra; dzisiejsze i wcześniejsze posiłki zostaną w statystykach.',
   recipe_edit: 'Edytuj przepis',
   recipe_new: 'Nowy przepis',
   recipe_title: 'Nazwa',
@@ -126,6 +126,7 @@ export default {
   // defaults next to names ordered before, separated by |
   plan_order_suggestions: 'Pizza|Burgery|Sushi|Kebab|Chińskie',
   plan_ordered: 'Zamawiam',
+  plan_recipe_deleted: 'Przepis usunięty',
 
   stats_title: 'Statystyki',
   stats_range_7: '7 dni',

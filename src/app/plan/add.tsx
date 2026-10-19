@@ -86,7 +86,7 @@ export default function PlanAddScreen() {
   const already = inMeal.find((e) => (name ? e.note === name : e.recipeId === chosen?.id));
   const others = inMeal
     .filter((e) => (name ? e.note !== name : e.recipeId !== chosen?.id))
-    .map((e) => e.note ?? recipes.find((r) => r.id === e.recipeId)?.title)
+    .map((e) => e.note ?? recipes.find((r) => r.id === e.recipeId)?.title ?? e.title)
     .filter(Boolean)
     .join(', ');
 

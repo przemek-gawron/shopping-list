@@ -27,7 +27,8 @@ export interface PlanStats {
   /** The same counts for the period of the same length just before; none for "all" or without data. */
   previous?: Counts;
   topOrdered: { name: string; count: number }[];
-  topRecipes: { recipeId: string; count: number }[];
+  /** `title` is set for recipes deleted since: their past meals keep it. */
+  topRecipes: { recipeId: string; title?: string; count: number }[];
 }
 
 const emptyCounts = (): Counts => ({ recipe: 0, ordered: 0, note: 0 });
@@ -120,10 +121,11 @@ export function planStats(plan: PlanEntry[], slotIds: string[], range: StatsRang
     ordered.map((name) => name.toLowerCase()),
     5,
   ).map(([key, count]) => ({ name: display.get(key) ?? key, count }));
+  const dishes = list.flatMap((m) => m.dishes.filter((e) => e.recipeId));
   const topRecipes = top(
-    list.flatMap((m) => m.dishes.flatMap((e) => (e.recipeId ? [e.recipeId] : []))),
+    dishes.map((e) => e.recipeId as string),
     5,
-  ).map(([recipeId, count]) => ({ recipeId, count }));
+  ).map(([recipeId, count]) => ({ recipeId, title: dishes.find((e) => e.recipeId === recipeId && e.title)?.title, count }));
 
   return {
     from,

@@ -19,6 +19,7 @@ import type {
   Swap,
   Unit,
 } from '@/data/types';
+import { today } from '@/utils/dates';
 import { generateId } from '@/utils/id-generator';
 import { deletePhoto } from '@/utils/photos';
 
@@ -213,9 +214,12 @@ export const useStore = create<Store>()(
         removeRecipe: (id) => {
           const recipe = get().recipes.find((r) => r.id === id);
           if (recipe?.photo) deletePhoto(recipe.photo);
+          // meals up to today stay, under the recipe's title, so the statistics do not change; future ones go
           set((s) => ({
             recipes: s.recipes.filter((r) => r.id !== id),
-            plan: s.plan.filter((e) => e.recipeId !== id),
+            plan: s.plan.flatMap((e) =>
+              e.recipeId !== id ? [e] : e.date <= today() ? [{ ...e, title: recipe?.title ?? e.title, shopped: undefined }] : [],
+            ),
           }));
         },
 
