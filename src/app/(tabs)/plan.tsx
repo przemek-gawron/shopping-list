@@ -223,7 +223,9 @@ export default function PlanScreen() {
                       <ThemedText style={styles.entryName} numberOfLines={2}>
                         {entry.note ?? recipe?.title ?? '?'}
                       </ThemedText>
-                      {entry.note && <ThemedText type="caption">✏️ {t('plan_note')}</ThemedText>}
+                      {entry.note && (
+                        <ThemedText type="caption">{entry.ordered ? `🛵 ${t('plan_ordered')}` : `✏️ ${t('plan_note')}`}</ThemedText>
+                      )}
                       {swapCount > 0 && (
                         <ThemedText type="caption" color="tint">
                           {t('swap_count', { count: swapCount })}

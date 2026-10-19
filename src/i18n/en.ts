@@ -118,6 +118,12 @@ const en: Record<keyof typeof pl, string> = {
   plan_note_hint: "Not among your recipes? Type a name and add the meal without a recipe – it won't go on the shopping list.",
   plan_note_add: 'Add "{{name}}" without a recipe',
   plan_note: 'No recipe',
+  plan_mode_order: 'Ordering',
+  plan_order_label: 'What are you ordering?',
+  plan_order_placeholder: 'e.g. pizza',
+  plan_order_hint: 'Ordered food does not go on the shopping list.',
+  plan_order_suggestions: 'Pizza|Burgers|Sushi|Kebab|Chinese',
+  plan_ordered: 'Ordering in',
 
   list_title: 'Shopping list',
   list_add: 'Add item',

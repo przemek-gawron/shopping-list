@@ -56,7 +56,7 @@ export default function SharePlanScreen() {
           return plan
             .filter((e) => e.date === date && e.slotId === slot.id)
             .flatMap((entry) => {
-              if (entry.note) return [{ slot: slotName(slot, index), recipe: entry.note }];
+              if (entry.note) return [{ slot: slotName(slot, index), recipe: entry.ordered ? `🛵 ${entry.note}` : entry.note }];
               const recipe = recipes.find((r) => r.id === entry.recipeId);
               if (!recipe) return [];
               return [{ slot: slotName(slot, index), recipe: recipe.title, servings: entry.servings !== 1 ? formatServings(entry.servings) : undefined }];

@@ -15,6 +15,7 @@ interface Options {
 /**
  * Picks random recipes for empty (or, with `replace`, all) meals. A meal never gets the recipe it
  * has the day before or after, and a recipe is not used twice on the same day, unless there is nothing else.
+ * A meal with ordered-in food is always kept.
  */
 export function randomPlan({ dates, slots, plan, replace, random = Math.random }: Options): Omit<PlanEntry, 'id'>[] {
   const entry = (date: string, slotId: string) => plan.find((e) => e.date === date && e.slotId === slotId);
@@ -28,6 +29,10 @@ export function randomPlan({ dates, slots, plan, replace, random = Math.random }
     const used = new Set(plan.filter((e) => e.date === date && !filled.has(e.slotId)).map((e) => e.recipeId));
     for (const slot of slots) {
       const existing = entry(date, slot.id);
+      if (plan.some((e) => e.date === date && e.slotId === slot.id && e.ordered)) {
+        previous.set(slot.id, undefined);
+        continue;
+      }
       if (existing && !replace) {
         previous.set(slot.id, existing.recipeId);
         used.add(existing.recipeId);

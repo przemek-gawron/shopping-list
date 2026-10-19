@@ -115,6 +115,13 @@ export default {
   plan_note_hint: 'Nie ma go w przepisach? Wpisz nazwę i dodaj posiłek bez przepisu – nie trafi na listę zakupów.',
   plan_note_add: 'Dodaj „{{name}}” bez przepisu',
   plan_note: 'Bez przepisu',
+  plan_mode_order: 'Zamawiam',
+  plan_order_label: 'Co zamawiasz?',
+  plan_order_placeholder: 'np. pizza',
+  plan_order_hint: 'Zamawiane jedzenie nie trafi na listę zakupów.',
+  // defaults next to names ordered before, separated by |
+  plan_order_suggestions: 'Pizza|Burgery|Sushi|Kebab|Chińskie',
+  plan_ordered: 'Zamawiam',
 
   list_title: 'Lista zakupów',
   list_add: 'Dodaj pozycję',

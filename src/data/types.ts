@@ -69,6 +69,8 @@ export interface PlanEntry {
   recipeId?: string;
   /** Name of a meal from outside the app, e.g. "Pizza at Marco's". */
   note?: string;
+  /** The `note` meal is ordered in (takeaway, delivery): marked in the plan and kept by random plans. */
+  ordered?: boolean;
   servings: number;
   /** Ingredients replaced for this meal only; the recipe itself is unchanged. */
   swaps?: Swap[];
