@@ -209,7 +209,13 @@ export default function PlanScreen() {
                 <View key={entry.id}>
                   <View style={styles.entry}>
                     {entry.note ? (
-                      <View style={styles.checkbox} />
+                      // a meal without a recipe has nothing to buy: a mark instead of a checkbox
+                      <View
+                        accessible
+                        accessibilityLabel={entry.ordered ? t('plan_ordered') : t('plan_note')}
+                        style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
+                        <ThemedText style={styles.cart}>{entry.ordered ? '🛵' : '✏️'}</ThemedText>
+                      </View>
                     ) : entry.shopped ? (
                       // already shopped for: cannot be picked; the mark is changed on the recipe screen
                       <View accessible accessibilityLabel={t('plan_shopped')} style={[styles.checkbox, { borderColor: theme.borderSubtle }]}>
