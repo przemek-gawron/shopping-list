@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
-import { AppState, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
+import { AppState, Platform, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +13,8 @@ import { useLocale, useT } from '@/i18n';
 /** Id of the last update the app ran, to tell a fresh over-the-air update apart. */
 const LAST_UPDATE_KEY = 'shopping-list:last-update';
 const INSTALLED_VISIBLE_MS = 5000;
+/** Height of the bottom tab bar above the safe-area inset; the notice sits just over it. */
+const TAB_BAR = Platform.OS === 'ios' ? 50 : 80;
 
 type Toast = { kind: 'installed'; at: Date | null } | { kind: 'ready' };
 
@@ -72,14 +74,15 @@ export function UpdateToast() {
 
   return (
     <Animated.View
-      entering={FadeInUp.duration(250)}
-      exiting={FadeOutUp.duration(200)}
+      entering={FadeInDown.duration(250)}
+      exiting={FadeOutDown.duration(200)}
       pointerEvents="box-none"
-      style={[styles.wrap, { top: insets.top + 8 }]}>
+      // at the bottom it covers neither the screen title nor the back button
+      style={[styles.wrap, { bottom: insets.bottom + TAB_BAR + 8 }]}>
       <Pressable
         onPress={dismiss}
         accessibilityRole="alert"
-        style={[styles.toast, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+        style={[styles.toast, { backgroundColor: theme.toastBackground, borderColor: theme.border }]}>
         <View style={styles.flex}>
           <ThemedText type="small" color="text" style={styles.title}>
             {toast.kind === 'ready' ? t('update_ready') : t('update_installed')}

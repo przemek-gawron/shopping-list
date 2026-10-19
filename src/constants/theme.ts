@@ -27,6 +27,8 @@ export const Colors = {
     borderSubtle: 'rgba(11, 79, 74, 0.08)',
     /** Cards, inputs, sheets */
     cardBackground: 'rgba(255, 255, 255, 0.78)',
+    /** Solid fill of notices floating over content (cards are see-through) */
+    toastBackground: '#FFFFFF',
     /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
     surfaceCard: '#DCE7E4',
     cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
@@ -51,6 +53,7 @@ export const Colors = {
     border: 'rgba(52, 211, 166, 0.18)',
     borderSubtle: 'rgba(255, 255, 255, 0.08)',
     cardBackground: 'rgba(255, 255, 255, 0.05)',
+    toastBackground: '#17312C',
     surfaceCard: 'rgba(255, 255, 255, 0.08)',
     cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
     tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
