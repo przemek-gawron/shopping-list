@@ -124,6 +124,14 @@ export default function PlanScreen() {
           {canUndo && <UndoButton onPress={undo} accessibilityLabel={t('plan_undo')} />}
           <Pressable
             hitSlop={8}
+            onPress={() => router.push('/plan/stats')}
+            accessibilityRole="button"
+            accessibilityLabel={t('stats_title')}
+            style={({ pressed }) => pressed && { opacity: 0.7 }}>
+            <IconSymbol name="chart.bar.fill" size={22} color={theme.tint} />
+          </Pressable>
+          <Pressable
+            hitSlop={8}
             onPress={() => router.push({ pathname: '/plan/share', params: { date: selectedDate } })}
             accessibilityRole="button"
             accessibilityLabel={t('share_plan')}

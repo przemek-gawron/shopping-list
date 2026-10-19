@@ -32,6 +32,10 @@ export const Colors = {
     cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
     /** Shadow under primary actions */
     tintShadow: '0 8px 22px rgba(11, 79, 74, 0.35)',
+    /** Plan statistics: meals from a recipe, ordered in, without a recipe (checked for colour-blind separation) */
+    chartRecipe: '#0F8A6F',
+    chartOrdered: '#C46A1C',
+    chartNote: '#8B6FD6',
   },
   dark: {
     text: '#E8F5F1',
@@ -50,6 +54,9 @@ export const Colors = {
     surfaceCard: 'rgba(255, 255, 255, 0.08)',
     cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
     tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
+    chartRecipe: '#22A47E',
+    chartOrdered: '#BF7A22',
+    chartNote: '#8A72D9',
   },
 };
 
