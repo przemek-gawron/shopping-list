@@ -14,7 +14,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Aplikacja potrzebuje dostępu do zdjęć, aby dodać zdjęcie do przepisu.",
         "NSCameraUsageDescription": "Aplikacja potrzebuje aparatu, aby zrobić zdjęcie do przepisu."
-      }
+      },
+      "associatedDomains": ["applinks:przemek-gawron.github.io"]
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +25,15 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.przemekgawron.dishdeck"
+      "package": "com.przemekgawron.dishdeck",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "przemek-gawron.github.io", "pathPrefix": "/dishdeck/p" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "output": "static",

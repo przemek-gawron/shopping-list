@@ -46,7 +46,7 @@ export function parseRecipeFile(json: string): RecipeFile | null {
 }
 
 /** Keeps only well-formed groups, recipes and ingredients. */
-function toRecipeFile(data: unknown): RecipeFile | null {
+export function toRecipeFile(data: unknown): RecipeFile | null {
   const file = data as { menus?: unknown; groups?: unknown; recipes?: unknown };
   const names = (value: unknown) => (Array.isArray(value) ? value.map(text).filter(Boolean) : []);
   if (!Array.isArray(file?.recipes)) return null;

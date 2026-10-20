@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { Button } from '@/components/button';
@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useSlotName } from '@/data/labels';
+import { encodePlanLink } from '@/data/plan-link';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
@@ -22,7 +23,7 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
 /** The shared picture and PDF are always light, whatever theme the sender uses. */
 const light = Colors.light;
 
-/** Preview of the plan for a chosen range of days, shared as a picture or a PDF. */
+/** Preview of the plan for a chosen range of days, shared as a picture, a PDF or a link that imports it. */
 export default function SharePlanScreen() {
   const params = useLocalSearchParams<{ date?: string }>();
   const t = useT();
@@ -81,6 +82,12 @@ export default function SharePlanScreen() {
   const shareImage = () =>
     run(async () => sharePlanImage(await captureRef(preview, { format: 'png', quality: 1, result: 'base64' }), title, days[0].date));
   const sharePdf = () => run(() => sharePlanPdf(title, range, days));
+  // the receiver opens it in the app and gets these days with their recipes
+  const shareLink = () =>
+    run(async () => {
+      const link = encodePlanLink(useStore.getState(), start, end);
+      await Share.share({ message: t('share_link_message', { range, link }) });
+    });
 
   const arrow = (icon: 'chevron.left' | 'chevron.right', step: number, label: string) => (
     <Pressable hitSlop={10} accessibilityRole="button" accessibilityLabel={label} onPress={() => setStart(addDays(start, step))}>
@@ -116,6 +123,9 @@ export default function SharePlanScreen() {
           </View>
           <View style={styles.flex}>
             <Button label={t('share_pdf')} onPress={() => void sharePdf()} disabled={busy} variant="secondary" />
+          </View>
+          <View style={styles.flex}>
+            <Button label={t('share_link')} onPress={() => void shareLink()} disabled={busy} variant="secondary" />
           </View>
         </View>
       )}
