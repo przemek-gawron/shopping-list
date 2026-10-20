@@ -12,12 +12,12 @@ import { Page, useScrollIntoView } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing } from '@/constants/theme';
-import { UNITS } from '@/constants/units';
+import { UNITS, formatQuantity } from '@/constants/units';
 import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
 import type { Product, Unit } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
-import { useT } from '@/i18n';
+import { useLocale, useT } from '@/i18n';
 import { generateId } from '@/utils/id-generator';
 import { savePhoto } from '@/utils/photos';
 
@@ -33,6 +33,7 @@ const emptyRow = (): Row => ({ key: generateId(), name: '', quantity: '', unit: 
 export default function RecipeFormScreen() {
   const { id, groupId } = useLocalSearchParams<{ id?: string; groupId?: string }>();
   const t = useT();
+  const locale = useLocale();
   const theme = useTheme();
   const recipes = useStore((s) => s.recipes);
   const groups = useStore((s) => s.groups);
@@ -54,7 +55,7 @@ export default function RecipeFormScreen() {
       ? editing.ingredients.map((ing) => ({
           key: ing.id,
           name: products.find((p) => p.id === ing.productId)?.name ?? '',
-          quantity: String(ing.quantity),
+          quantity: formatQuantity(ing.quantity, locale),
           unit: ing.unit,
         }))
       : [emptyRow()],

@@ -13,11 +13,12 @@ import { Spacing } from '@/constants/theme';
 import { UNITS, formatQuantity } from '@/constants/units';
 import { useStore } from '@/data/store';
 import type { DepartmentId, Unit } from '@/data/types';
-import { useT } from '@/i18n';
+import { useLocale, useT } from '@/i18n';
 
 /** Adds a one-off item to the shopping list, or edits an existing one (`id`), e.g. to change its amount. */
 export default function ListAddScreen() {
   const t = useT();
+  const locale = useLocale();
   const products = useStore((s) => s.products);
   const addListItem = useStore((s) => s.addListItem);
   const updateListItem = useStore((s) => s.updateListItem);
@@ -25,7 +26,7 @@ export default function ListAddScreen() {
   const editing = useStore((s) => s.list.find((i) => i.id === id));
 
   const [name, setName] = useState(editing?.name ?? '');
-  const [quantity, setQuantity] = useState(editing ? formatQuantity(editing.quantity) : '1');
+  const [quantity, setQuantity] = useState(editing ? formatQuantity(editing.quantity, locale) : '1');
   const [unit, setUnit] = useState<Unit>(editing?.unit ?? 'szt');
   const [department, setDepartment] = useState<DepartmentId>(editing?.departmentId ?? 'other');
 

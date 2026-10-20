@@ -47,9 +47,8 @@ export function convertFromBase(value: number, baseUnit: Unit): { quantity: numb
   return { quantity: value, unit: baseUnit };
 }
 
-export function formatQuantity(quantity: number): string {
-  if (Number.isInteger(quantity)) {
-    return quantity.toString();
-  }
-  return quantity.toFixed(2).replace(/\.?0+$/, '');
+/** An amount for an input field: "0,8" in Polish, "0.8" in English, at most two decimals. */
+export function formatQuantity(quantity: number, locale: 'pl' | 'en' = 'en'): string {
+  const text = Number.isInteger(quantity) ? quantity.toString() : quantity.toFixed(2).replace(/\.?0+$/, '');
+  return locale === 'pl' ? text.replace('.', ',') : text;
 }
