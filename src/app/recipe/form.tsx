@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { usePreventRemove } from 'expo-router/react-navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
@@ -19,6 +20,7 @@ import type { Product, Unit } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
 import { generateId } from '@/utils/id-generator';
+import { confirm } from '@/utils/confirm';
 import { savePhoto } from '@/utils/photos';
 
 interface Row {
@@ -64,6 +66,19 @@ export default function RecipeFormScreen() {
   // a row added with the button gets the keyboard right away; "next" on a name moves to its amount
   const [addedRow, setAddedRow] = useState<string | null>(null);
   const quantityInputs = useRef(new Map<string, TextInput>());
+
+  // leaving with unsaved changes (Cancel, back, swiping the sheet down) asks first; saving does not
+  const navigation = useNavigation();
+  const saved = useRef(false);
+  const formState = () =>
+    JSON.stringify([title, description, group, photo, pickedUri, rows.map((r) => [r.name, r.quantity, r.unit])]);
+  const [initialState] = useState(formState);
+  usePreventRemove(formState() !== initialState, ({ data }) => {
+    if (saved.current) return navigation.dispatch(data.action);
+    confirm(t('form_discard_title'), t('form_discard_message'), t('form_discard'), t('form_keep_editing'), () =>
+      navigation.dispatch(data.action),
+    );
+  });
 
   const patchRow = (key: string, patch: Partial<Row>) =>
     setRows((current) => current.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -131,6 +146,7 @@ export default function RecipeFormScreen() {
     };
     if (editing) updateRecipe({ ...editing, ...data });
     else addRecipe(data);
+    saved.current = true;
     router.back();
   };
 

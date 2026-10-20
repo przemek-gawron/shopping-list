@@ -181,6 +181,10 @@ export default {
   list_sources_total: 'Razem na liście: {{amount}}',
   list_source_swap: 'Zamiennik wybrany do tego posiłku',
   keyboard_done: 'Gotowe',
+  form_discard_title: 'Odrzucić zmiany?',
+  form_discard_message: 'Wprowadzone zmiany nie zostaną zapisane.',
+  form_discard: 'Odrzuć',
+  form_keep_editing: 'Edytuj dalej',
   list_quantity_invalid: 'Podaj poprawną ilość.',
 
   settings_title: 'Ustawienia',

@@ -183,6 +183,10 @@ const en: Record<keyof typeof pl, string> = {
   list_sources_total: 'Total on the list: {{amount}}',
   list_source_swap: 'Substitute chosen for this meal',
   keyboard_done: 'Done',
+  form_discard_title: 'Discard changes?',
+  form_discard_message: 'Your changes will not be saved.',
+  form_discard: 'Discard',
+  form_keep_editing: 'Keep editing',
   list_quantity_invalid: 'Enter a valid quantity.',
 
   settings_title: 'Settings',
