@@ -95,7 +95,7 @@ export default function ListScreen() {
             accessibilityRole="button"
             accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sourceTitles(item, recipes)}`}
             onPress={() => router.push({ pathname: '/list/sources', params: { id: item.id } })}>
-            <ThemedText type="caption" color="tint" numberOfLines={1}>
+            <ThemedText type="caption" color={item.checked ? 'textSecondary' : 'tint'} numberOfLines={1}>
               {sourceTitles(item, recipes)}
             </ThemedText>
           </Pressable>
