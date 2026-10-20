@@ -1,5 +1,5 @@
 import { convertFromBase, convertToBase } from '@/constants/units';
-import type { ListItem, PlanEntry, Product, Recipe, Unit } from '@/data/types';
+import type { ListItem, ListSource, PlanEntry, Product, Recipe, Unit } from '@/data/types';
 
 /**
  * The swaps of a planned meal that still apply: the recipe has the replaced ingredient and the
@@ -26,7 +26,7 @@ const MEASURE: Partial<Record<Unit, { family: 'g' | 'ml' | 'lyzka' | 'lyzeczka';
   lyzeczka: { family: 'lyzeczka', ml: 5 },
 };
 
-type Total = { product: Product; baseUnit: Unit; value: number; byFamily: Map<string, number> };
+type Total = { product: Product; baseUnit: Unit; value: number; byFamily: Map<string, number>; sources: ListSource[] };
 
 /** A measured total in the unit that most of it came in: 20 ml + 15 g + 1 tbsp -> 50 ml. */
 function measuredAmount(total: Total): { quantity: number; unit: Unit } {
@@ -39,6 +39,7 @@ function measuredAmount(total: Total): { quantity: number; unit: Unit } {
 /**
  * Adds up the ingredients of the chosen plan entries into one line per product (matched by name,
  * ignoring case): 200 g + 0.3 kg = 500 g, 20 ml + 15 g of oil = 35 ml; pieces get a line of their own.
+ * Each line keeps the meals it comes from, so the list can show which recipes need it.
  */
 export function buildShoppingList(
   entries: PlanEntry[],
@@ -64,8 +65,18 @@ export function buildShoppingList(
       const key = measure ? `${name}:measured` : `${name}:${convertToBase(amount, used.unit).baseUnit}`;
       // measured amounts are kept in ml-equivalents; pieces in their own base unit
       const value = measure ? amount * measure.ml : convertToBase(amount, used.unit).value;
-      const total = totals.get(key) ?? { product, baseUnit: measure ? 'ml' : used.unit, value: 0, byFamily: new Map() };
+      const total: Total = totals.get(key) ?? { product, baseUnit: measure ? 'ml' : used.unit, value: 0, byFamily: new Map(), sources: [] };
       total.value += value;
+      total.sources.push({
+        entryId: entry.id,
+        recipeId: recipe.id,
+        title: recipe.title,
+        date: entry.date,
+        slotId: entry.slotId,
+        quantity: Math.round(amount * 100) / 100,
+        unit: used.unit,
+        ...(swap && { swap: true }),
+      });
       if (measure) total.byFamily.set(measure.family, (total.byFamily.get(measure.family) ?? 0) + value);
       totals.set(key, total);
     }
@@ -79,6 +90,7 @@ export function buildShoppingList(
       unit,
       checked: false,
       departmentId: total.product.departmentId,
+      sources: total.sources.sort((a, b) => a.date.localeCompare(b.date)),
     };
   });
 }

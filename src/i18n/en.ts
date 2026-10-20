@@ -179,6 +179,9 @@ const en: Record<keyof typeof pl, string> = {
   list_clear: 'Clear list',
   list_clear_message: 'Remove all items from the list?',
   list_checked: 'Bought',
+  list_sources_open: 'Show recipes – {{name}}',
+  list_sources_total: 'Total on the list: {{amount}}',
+  list_source_swap: 'Substitute chosen for this meal',
   list_quantity_invalid: 'Enter a valid quantity.',
 
   settings_title: 'Settings',

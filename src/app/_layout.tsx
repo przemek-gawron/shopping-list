@@ -110,6 +110,7 @@ export default function RootLayout() {
           <Stack.Screen name="plan/import" options={modal} />
           <Stack.Screen name="plan/stats" options={{ title: t('stats_title') }} />
           <Stack.Screen name="list/add" options={modal} />
+          <Stack.Screen name="list/sources" options={{ title: '' }} />
           <Stack.Screen name="meals" options={{ title: t('meals_title') }} />
           <Stack.Screen name="menus" options={{ title: t('menus_title') }} />
           <Stack.Screen name="substitutes" options={{ title: t('substitutes_title') }} />

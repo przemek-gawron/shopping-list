@@ -15,16 +15,27 @@ import { UndoButton } from '@/components/undo-button';
 import { DEPARTMENTS } from '@/constants/departments';
 import { Spacing, tintFill } from '@/constants/theme';
 import { useStore } from '@/data/store';
-import type { ListItem } from '@/data/types';
+import type { ListItem, Recipe } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
+
+/** "Pancakes ×2, Omelette": the recipes of an item's meals, each once, under their current titles. */
+function sourceTitles(item: ListItem, recipes: Recipe[]) {
+  const counts = new Map<string, number>();
+  for (const source of item.sources ?? []) {
+    const title = recipes.find((r) => r.id === source.recipeId)?.title ?? source.title;
+    counts.set(title, (counts.get(title) ?? 0) + 1);
+  }
+  return [...counts].map(([title, count]) => (count > 1 ? `${title} ×${count}` : title)).join(', ');
+}
 
 export default function ListScreen() {
   const theme = useTheme();
   const t = useT();
   const formatAmount = useFormatAmount();
   const list = useStore((s) => s.list);
+  const recipes = useStore((s) => s.recipes);
   const toggle = useStore((s) => s.toggleListItem);
   const remove = useStore((s) => s.removeListItem);
   const clearChecked = useStore((s) => s.clearChecked);
@@ -62,19 +73,34 @@ export default function ListScreen() {
         style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: item.checked ? theme.tint : 'transparent' }]}>
         {item.checked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
       </Pressable>
-      {/* tapping the name or amount opens the item for editing */}
-      <Pressable
-        style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
-        accessibilityRole="button"
-        accessibilityLabel={`${t('list_edit')} – ${item.name}`}
-        onPress={() => router.push({ pathname: '/list/add', params: { id: item.id } })}>
-        <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
-          {item.name}
-        </ThemedText>
-        <ThemedText type="small" style={item.checked && styles.doneText}>
-          {formatAmount(item.quantity, item.unit)}
-        </ThemedText>
-      </Pressable>
+      <View style={styles.itemText}>
+        {/* tapping the name or amount opens the item for editing */}
+        <Pressable
+          style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('list_edit')} – ${item.name}`}
+          onPress={() => router.push({ pathname: '/list/add', params: { id: item.id } })}>
+          <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
+            {item.name}
+          </ThemedText>
+          <ThemedText type="small" style={item.checked && styles.doneText}>
+            {formatAmount(item.quantity, item.unit)}
+          </ThemedText>
+        </Pressable>
+        {/* the recipes that need the item; tapping them shows the meals and amounts */}
+        {item.sources && item.sources.length > 0 && (
+          <Pressable
+            style={({ pressed }) => pressed && styles.pressed}
+            hitSlop={{ top: 4, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sourceTitles(item, recipes)}`}
+            onPress={() => router.push({ pathname: '/list/sources', params: { id: item.id } })}>
+            <ThemedText type="caption" color="tint" numberOfLines={1}>
+              {sourceTitles(item, recipes)}
+            </ThemedText>
+          </Pressable>
+        )}
+      </View>
       <Pressable hitSlop={8} accessibilityRole="button" onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
         <IconSymbol name="xmark" size={18} color={theme.icon} />
       </Pressable>
@@ -165,6 +191,7 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 4 },
   itemBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   pressed: { opacity: 0.6 },
+  itemText: { flex: 1, gap: 2 },
   itemName: { flex: 1, fontWeight: '600' },
   doneText: { textDecorationLine: 'line-through' },
   checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },

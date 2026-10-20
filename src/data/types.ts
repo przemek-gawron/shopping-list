@@ -103,4 +103,21 @@ export interface ListItem {
   unit: Unit;
   checked: boolean;
   departmentId: DepartmentId;
+  /** The planned meals the item was generated from; none for items added by hand. */
+  sources?: ListSource[];
+}
+
+/** One planned meal that needs a list item, with the amount it adds (servings included). */
+export interface ListSource {
+  /** The plan entry; it may be gone since (plan cleared, meal replaced). */
+  entryId: string;
+  recipeId: string;
+  /** Recipe title when the list was generated, shown even if the recipe is deleted since. */
+  title: string;
+  date: string;
+  slotId: string;
+  quantity: number;
+  unit: Unit;
+  /** The item is a substitute chosen for this meal, not the recipe's own ingredient. */
+  swap?: boolean;
 }
