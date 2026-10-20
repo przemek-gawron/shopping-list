@@ -1,20 +1,20 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Field } from '@/components/field';
 import { RecipePhoto } from '@/components/recipe-photo';
-import { Page } from '@/components/screen';
+import { Page, useScrollIntoView } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing } from '@/constants/theme';
 import { UNITS } from '@/constants/units';
 import { recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
-import type { Unit } from '@/data/types';
+import type { Product, Unit } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
 import { generateId } from '@/utils/id-generator';
@@ -59,6 +59,9 @@ export default function RecipeFormScreen() {
       : [emptyRow()],
   );
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  // a row added with the button gets the keyboard right away; "next" on a name moves to its amount
+  const [addedRow, setAddedRow] = useState<string | null>(null);
+  const quantityInputs = useRef(new Map<string, TextInput>());
 
   const patchRow = (key: string, patch: Partial<Row>) =>
     setRows((current) => current.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -191,11 +194,19 @@ export default function RecipeFormScreen() {
                 value={row.name}
                 onChangeText={(name) => patchRow(row.key, { name })}
                 onFocus={() => setFocusedRow(row.key)}
+                autoFocus={row.key === addedRow}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => quantityInputs.current.get(row.key)?.focus()}
                 placeholder={t('ingredient_name')}
                 placeholderTextColor={theme.icon}
                 style={[styles.name, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
               />
               <TextInput
+                ref={(input) => {
+                  if (input) quantityInputs.current.set(row.key, input);
+                  else quantityInputs.current.delete(row.key);
+                }}
                 value={row.quantity}
                 onChangeText={(quantity) => patchRow(row.key, { quantity })}
                 keyboardType="decimal-pad"
@@ -212,18 +223,13 @@ export default function RecipeFormScreen() {
               </Pressable>
             </View>
             {focusedRow === row.key && suggestions.length > 0 && (
-              <View style={styles.chips}>
-                {suggestions.map((p) => (
-                  <Chip
-                    key={p.id}
-                    label={p.name}
-                    onPress={() => {
-                      patchRow(row.key, { name: p.name, unit: p.defaultUnit });
-                      setFocusedRow(null);
-                    }}
-                  />
-                ))}
-              </View>
+              <Suggestions
+                products={suggestions}
+                onPick={(p) => {
+                  patchRow(row.key, { name: p.name, unit: p.defaultUnit });
+                  setFocusedRow(null);
+                }}
+              />
             )}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
               {UNITS.map((u) => (
@@ -232,11 +238,38 @@ export default function RecipeFormScreen() {
             </ScrollView>
           </View>
         ))}
-        <Button label={t('ingredient_add')} variant="secondary" onPress={() => setRows((current) => [...current, emptyRow()])} />
+        <Button
+          label={t('ingredient_add')}
+          variant="secondary"
+          onPress={() => {
+            const row = emptyRow();
+            setAddedRow(row.key);
+            setRows((current) => [...current, row]);
+          }}
+        />
       </View>
 
       <Button label={t('save')} onPress={save} />
     </Page>
+  );
+}
+
+/** Products matching an ingredient name; they appear under the field, so they are scrolled above the keyboard. */
+function Suggestions({ products, onPick }: { products: Product[]; onPick: (product: Product) => void }) {
+  const ref = useRef<View>(null);
+  const scrollIntoView = useScrollIntoView();
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => scrollIntoView(ref));
+    return () => cancelAnimationFrame(frame);
+  }, [scrollIntoView]);
+
+  return (
+    <View ref={ref} style={styles.chips}>
+      {products.map((p) => (
+        <Chip key={p.id} label={p.name} onPress={() => onPick(p)} />
+      ))}
+    </View>
   );
 }
 
