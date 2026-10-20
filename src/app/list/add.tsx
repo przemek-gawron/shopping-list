@@ -5,6 +5,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Field } from '@/components/field';
+import { KEYBOARD_DONE } from '@/components/keyboard-done';
 import { Page } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { DEPARTMENTS } from '@/constants/departments';
@@ -74,7 +75,10 @@ export default function ListAddScreen() {
           ))}
         </View>
       )}
-      <Field label={t('quantity')} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" selectTextOnFocus />
+      <Field label={t('quantity')} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad"
+        inputAccessoryViewID={KEYBOARD_DONE}
+        selectTextOnFocus
+      />
       <View style={styles.section}>
         <ThemedText type="label">{t('unit')}</ThemedText>
         <View style={styles.wrap}>

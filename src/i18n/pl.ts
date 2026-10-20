@@ -180,6 +180,7 @@ export default {
   list_sources_open: 'Pokaż przepisy – {{name}}',
   list_sources_total: 'Razem na liście: {{amount}}',
   list_source_swap: 'Zamiennik wybrany do tego posiłku',
+  keyboard_done: 'Gotowe',
   list_quantity_invalid: 'Podaj poprawną ilość.',
 
   settings_title: 'Ustawienia',

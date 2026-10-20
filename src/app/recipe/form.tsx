@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Field } from '@/components/field';
+import { KEYBOARD_DONE } from '@/components/keyboard-done';
 import { RecipePhoto } from '@/components/recipe-photo';
 import { Page, useScrollIntoView } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
@@ -210,6 +211,7 @@ export default function RecipeFormScreen() {
                 value={row.quantity}
                 onChangeText={(quantity) => patchRow(row.key, { quantity })}
                 keyboardType="decimal-pad"
+                inputAccessoryViewID={KEYBOARD_DONE}
                 placeholder="1"
                 placeholderTextColor={theme.icon}
                 style={[styles.quantity, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
