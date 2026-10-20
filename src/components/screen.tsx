@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { createContext, useCallback, useContext, useRef, type ReactNode, type RefObject } from 'react';
+import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, screenFill, Spacing, WideContentWidth } from '@/constants/theme';
+import { useKeyboardInset } from '@/hooks/use-keyboard-inset';
 import { useTabBarInset } from '@/hooks/use-tab-bar-inset';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -23,6 +24,7 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
   const maxWidth = { maxWidth: wide ? WideContentWidth : MaxContentWidth };
   const theme = useTheme();
   const bottom = useTabBarInset() + Spacing.four;
+  const { ref: pageRef, inset: keyboardInset } = useKeyboardInset();
 
   const header = (
     <View style={styles.header}>
@@ -35,9 +37,10 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
 
   return (
     <View style={[styles.root, screenFill(theme)]}>
-      <SafeAreaView edges={['top']} style={styles.root}>
+      <SafeAreaView edges={['top']} style={styles.root} ref={pageRef}>
         {scroll ? (
           <ScrollView
+            style={{ marginBottom: keyboardInset }}
             contentContainerStyle={[styles.content, maxWidth, { paddingBottom: bottom }]}
             automaticallyAdjustKeyboardInsets
             keyboardDismissMode="interactive"
@@ -46,7 +49,7 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
             {children}
           </ScrollView>
         ) : (
-          <View style={[styles.root, styles.wide, maxWidth]}>
+          <View style={[styles.root, styles.wide, maxWidth, { marginBottom: keyboardInset }]}>
             <View style={styles.headerPad}>{header}</View>
             {children}
           </View>
@@ -56,20 +59,55 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
   );
 }
 
+type ScrollIntoView = (target: RefObject<View | null>) => void;
+const ScrollIntoViewContext = createContext<ScrollIntoView>(() => {});
+
+/**
+ * Scrolls the enclosing Page so that `target` is above the keyboard, e.g. suggestions that appear
+ * under the focused field (the scroll view itself only keeps the field visible).
+ */
+export function useScrollIntoView() {
+  return useContext(ScrollIntoViewContext);
+}
+
+/** Space left under a view scrolled into sight. */
+const SCROLL_MARGIN = Spacing.three;
+
 /** Body of a pushed / modal screen (the navigator draws the title). */
 export function Page({ children, bottomPad = Spacing.five }: { children: ReactNode; bottomPad?: number }) {
   const theme = useTheme();
+  const { ref: pageRef, inset: keyboardInset } = useKeyboardInset();
+  const scrollRef = useRef<ScrollView>(null);
+  const offset = useRef(0);
+
+  const scrollIntoView = useCallback<ScrollIntoView>((target) => {
+    const scroll = scrollRef.current;
+    if (!scroll || !target.current) return;
+    pageRef.current?.measureInWindow((_px, pageY, _pw, pageHeight) =>
+      target.current?.measureInWindow((_x, y, _width, height) => {
+        const visibleBottom = Math.min(pageY + pageHeight, Keyboard.metrics()?.screenY ?? Infinity);
+        const overflow = y + height + SCROLL_MARGIN - visibleBottom;
+        if (overflow > 0) scroll.scrollTo({ y: offset.current + overflow, animated: true });
+      }),
+    );
+  }, [pageRef]);
+
   return (
-    <ScrollView
-      style={screenFill(theme)}
-      contentInsetAdjustmentBehavior="automatic"
-      // keeps the focused field above the keyboard on iOS; Android resizes the window itself
-      automaticallyAdjustKeyboardInsets
-      keyboardDismissMode="interactive"
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
-      {children}
-    </ScrollView>
+    <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
+      <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => (offset.current = e.nativeEvent.contentOffset.y)}
+        scrollEventThrottle={16}
+        style={{ marginBottom: keyboardInset }}
+        contentInsetAdjustmentBehavior="automatic"
+        // keeps the focused field above the keyboard: iOS adjusts the insets, Android gets a shorter view
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
+        <ScrollIntoViewContext value={scrollIntoView}>{children}</ScrollIntoViewContext>
+      </ScrollView>
+    </View>
   );
 }
 
