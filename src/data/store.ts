@@ -3,10 +3,12 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { RecipeFile } from '@/data/import';
+import type { PlanPayload } from '@/data/plan-link';
 import { buildSamples } from '@/data/sample-data';
 import { DEFAULT_SUBSTITUTES } from '@/constants/substitutes';
 import { buildShoppingList } from '@/data/shopping';
 import type {
+  DepartmentId,
   Group,
   Language,
   ListItem,
@@ -24,6 +26,8 @@ import { generateId } from '@/utils/id-generator';
 import { deletePhoto } from '@/utils/photos';
 
 export const MAX_MEALS = 8;
+
+const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 const DEFAULT_SLOTS: MealSlot[] = [
   { id: 'slot-breakfast', key: 'breakfast' },
@@ -123,6 +127,8 @@ interface Actions {
   loadSamples: (language: 'pl' | 'en') => number;
   /** Adds recipes from a file; a recipe with the same title is overwritten (its photo and rating are kept). */
   importRecipes: (file: RecipeFile) => { added: number; updated: number };
+  /** Puts a plan sent from another phone on its days, replacing what they had; adds its recipes that are missing (by title). */
+  importPlan: (payload: PlanPayload) => { added: number };
   /** Wipes everything except the language setting. */
   clearAll: () => void;
 }
@@ -149,6 +155,76 @@ export const useStore = create<Store>()(
       /** Changes the plan and remembers the previous one for undo. */
       const changePlan = (change: (plan: PlanEntry[]) => PlanEntry[]) =>
         set((s) => ({ plan: change(s.plan), planHistory: [...s.planHistory, s.plan].slice(-HISTORY_LIMIT) }));
+
+      /**
+       * Merges the recipes of a file into copies of the data, by title; products and groups by name.
+       * `keep` leaves recipes that already exist as they are, else they are overwritten (photo and rating stay).
+       * Nothing is saved; `ids` are the recipes' ids in the file's order.
+       */
+      const mergeRecipes = (file: RecipeFile, keep: boolean) => {
+        const groups = [...get().groups];
+        const products = [...get().products];
+        const recipes = [...get().recipes];
+        let menus = [...get().menus];
+        // newest first; a plan imported again keeps its place
+        const menuId = (name: string) => {
+          let menu = menus.find((m) => same(m.name, name));
+          if (!menu) {
+            menu = { id: generateId(), name };
+            menus = [menu, ...menus];
+          }
+          return menu.id;
+        };
+        file.menus.forEach(menuId);
+        let added = 0;
+        let updated = 0;
+
+        const groupId = (name: string | null) => {
+          if (!name) return null;
+          let group = groups.find((g) => same(g.name, name));
+          if (!group) {
+            const emoji = file.groups.find((g) => same(g.name, name))?.emoji ?? '🍽️';
+            group = { id: generateId(), name, emoji };
+            groups.push(group);
+          }
+          return group.id;
+        };
+        const product = (name: string, unit: Unit, departmentId: DepartmentId) => {
+          let found = products.find((p) => same(p.name, name));
+          if (!found) {
+            found = { id: generateId(), name, defaultUnit: unit, departmentId };
+            products.push(found);
+          }
+          return found.id;
+        };
+
+        const ids = file.recipes.map((incoming) => {
+          const index = recipes.findIndex((r) => same(r.title, incoming.title));
+          if (index >= 0 && keep) return recipes[index].id;
+          const data = {
+            title: incoming.title,
+            description: incoming.description,
+            groupId: groupId(incoming.group),
+            ingredients: incoming.ingredients.map((ing) => ({
+              id: generateId(),
+              productId: product(ing.name, ing.unit, ing.department),
+              quantity: ing.quantity,
+              unit: ing.unit,
+            })),
+          };
+          const menuIds = [...new Set([...((index >= 0 && recipes[index].menuIds) || []), ...incoming.menus.map(menuId)])];
+          if (index >= 0) {
+            recipes[index] = { ...recipes[index], ...data, menuIds };
+            updated++;
+            return recipes[index].id;
+          }
+          const id = generateId();
+          recipes.push({ ...data, menuIds, id });
+          added++;
+          return id;
+        });
+        return { groups, products, recipes, menus, ids, product, added, updated };
+      };
 
       return {
         ...initialData(),
@@ -340,62 +416,57 @@ export const useStore = create<Store>()(
         },
 
         importRecipes: (file) => {
-          const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-          const groups = [...get().groups];
-          const products = [...get().products];
-          const recipes = [...get().recipes];
-          let menus = [...get().menus];
-          // newest first; a plan imported again keeps its place
-          const menuId = (name: string) => {
-            let menu = menus.find((m) => same(m.name, name));
-            if (!menu) {
-              menu = { id: generateId(), name };
-              menus = [menu, ...menus];
-            }
-            return menu.id;
-          };
-          file.menus.forEach(menuId);
-          let added = 0;
-          let updated = 0;
-
-          const groupId = (name: string | null) => {
-            if (!name) return null;
-            let group = groups.find((g) => same(g.name, name));
-            if (!group) {
-              const emoji = file.groups.find((g) => same(g.name, name))?.emoji ?? '🍽️';
-              group = { id: generateId(), name, emoji };
-              groups.push(group);
-            }
-            return group.id;
-          };
-
-          for (const incoming of file.recipes) {
-            const ingredients = incoming.ingredients.map((ing) => {
-              let product = products.find((p) => same(p.name, ing.name));
-              if (!product) {
-                product = { id: generateId(), name: ing.name, defaultUnit: ing.unit, departmentId: ing.department };
-                products.push(product);
-              }
-              return { id: generateId(), productId: product.id, quantity: ing.quantity, unit: ing.unit };
-            });
-            const data = {
-              title: incoming.title,
-              description: incoming.description,
-              groupId: groupId(incoming.group),
-              ingredients,
-            };
-            const index = recipes.findIndex((r) => same(r.title, incoming.title));
-            const menuIds = [...new Set([...((index >= 0 && recipes[index].menuIds) || []), ...incoming.menus.map(menuId)])];
-            if (index >= 0) {
-              recipes[index] = { ...recipes[index], ...data, menuIds };
-              updated++;
-            } else {
-              recipes.push({ ...data, menuIds, id: generateId() });
-              added++;
-            }
-          }
+          const { groups, products, recipes, menus, added, updated } = mergeRecipes(file, false);
           set({ groups, products, recipes, menus });
           return { added, updated };
+        },
+        importPlan: (payload) => {
+          const merged = mergeRecipes(payload.recipes, true);
+          const slots = [...get().slots];
+          const slotIds: string[] = [];
+          const free = (slot: MealSlot | undefined) => slot && !slotIds.includes(slot.id);
+          // the same default meal or the same name first, then the same position, any free meal, or a new one
+          payload.slots.forEach((incoming, i) => {
+            const slot = slots.find(
+              (s) => free(s) && ((incoming.key && s.key === incoming.key) || (incoming.name && s.name && same(s.name, incoming.name))),
+            );
+            if (slot) slotIds[i] = slot.id;
+          });
+          payload.slots.forEach((incoming, i) => {
+            if (slotIds[i]) return;
+            let slot = free(slots[i]) ? slots[i] : slots.find(free);
+            if (!slot) {
+              slot = { id: generateId(), key: incoming.key, name: incoming.name };
+              slots.push(slot);
+            }
+            slotIds[i] = slot.id;
+          });
+          // meals the plan uses are shown even if fewer meals a day were set
+          const lastUsed = Math.max(-1, ...payload.entries.map((e) => slots.findIndex((s) => s.id === slotIds[e.slot])));
+          const mealCount = Math.min(MAX_MEALS, Math.max(get().mealCount, lastUsed + 1));
+
+          const entries = payload.entries.map((e): PlanEntry => {
+            const base = { id: generateId(), date: e.date, slotId: slotIds[e.slot], servings: e.servings };
+            if (e.recipe === undefined) return { ...base, note: e.note, ordered: e.ordered };
+            const swaps = e.swaps?.map((w): Swap => {
+              const from = merged.product(w.from, w.unit, 'other');
+              const departmentId = merged.products.find((p) => p.id === from)?.departmentId ?? 'other';
+              return { fromProductId: from, productId: merged.product(w.product, w.unit, departmentId), quantity: w.quantity, unit: w.unit };
+            });
+            return { ...base, recipeId: merged.ids[e.recipe], swaps };
+          });
+          const { groups, products, recipes, menus } = merged;
+          set((s) => ({
+            groups,
+            products,
+            recipes,
+            menus,
+            slots,
+            mealCount,
+            plan: [...s.plan.filter((e) => e.date < payload.start || e.date > payload.end), ...entries],
+            planHistory: [...s.planHistory, s.plan].slice(-HISTORY_LIMIT),
+          }));
+          return { added: merged.added };
         },
 
         clearAll: () => {

@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
@@ -67,6 +67,13 @@ export default function PlanScreen() {
     setSelectedDate(select);
     setJump((j) => ({ date: monday, key: j.key + 1 }));
   };
+  // a plan imported from a link opens on its first day
+  const { date: openDate } = useLocalSearchParams<{ date?: string }>();
+  const [openedDate, setOpenedDate] = useState<string>();
+  if (openDate && openDate !== openedDate) {
+    setOpenedDate(openDate);
+    goToWeek(startOfWeek(openDate), openDate);
+  }
   const weekLabel = range(days[0], days[6]);
   const dayEntries = (date: string) => shown.filter((e) => e.date === date);
   const weekEntries = shown.filter((e) => e.date >= days[0] && e.date <= days[6]);

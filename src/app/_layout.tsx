@@ -107,6 +107,7 @@ export default function RootLayout() {
           <Stack.Screen name="plan/add" options={modal} />
           <Stack.Screen name="plan/random" options={modal} />
           <Stack.Screen name="plan/share" options={modal} />
+          <Stack.Screen name="plan/import" options={modal} />
           <Stack.Screen name="plan/stats" options={{ title: t('stats_title') }} />
           <Stack.Screen name="list/add" options={modal} />
           <Stack.Screen name="meals" options={{ title: t('meals_title') }} />
