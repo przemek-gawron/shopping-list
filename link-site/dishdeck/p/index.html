@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Dishdeck – plan posiłków</title>
+    <style>
+      :root { color-scheme: light dark; --tint: #047857; }
+      body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: Canvas; color: CanvasText; }
+      main { max-width: 420px; margin: 0 auto; padding: 48px 16px; text-align: center; }
+      h1 { font-size: 24px; margin: 0 0 8px; }
+      p { opacity: 0.75; line-height: 1.5; }
+      a.button { display: block; margin: 12px 0; padding: 14px; border-radius: 12px; background: var(--tint); color: #fff; font-weight: 600; text-decoration: none; }
+      a.secondary { background: transparent; color: var(--tint); border: 1px solid var(--tint); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Plan posiłków z Dishdeck</h1>
+      <p>Ktoś wysłał Ci plan posiłków. Otwórz go w aplikacji Dishdeck, a jeśli jej nie masz – zainstaluj ją i kliknij link jeszcze raz.</p>
+      <p lang="en">Someone sent you a meal plan. Open it in the Dishdeck app, or install the app and tap the link again.</p>
+      <a id="open" class="button" href="dishdeck://">Otwórz w aplikacji · Open in the app</a>
+      <a class="button secondary" href="https://play.google.com/store/apps/details?id=com.przemekgawron.dishdeck">Google Play</a>
+      <!-- TODO: App Store link once the iOS app is published -->
+    </main>
+    <script>
+      // the plan stays in the fragment: it never reaches this server, only the app
+      document.getElementById('open').href = 'dishdeck://p' + location.hash;
+    </script>
+  </body>
+</html>
