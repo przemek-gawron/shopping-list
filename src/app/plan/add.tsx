@@ -102,7 +102,18 @@ export default function PlanAddScreen() {
 
   return (
     <Page>
-      <Stack.Screen options={{ title: t('plan_add_title') }} />
+      <Stack.Screen
+        options={{
+          title: t('plan_add_title'),
+          // adding without closing the keyboard and scrolling down to the button
+          headerRight: () =>
+            (ordering ? name : chosen || note) ? (
+              <ThemedText color="tint" accessibilityRole="button" style={styles.headerAction} onPress={save}>
+                {t('add')}
+              </ThemedText>
+            ) : null,
+        }}
+      />
 
       {!params.recipeId && (
         <Segmented
@@ -250,6 +261,7 @@ export default function PlanAddScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerAction: { fontWeight: '700', fontSize: 16, paddingHorizontal: 6 },
   section: { gap: Spacing.two },
   servings: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   chips: { gap: Spacing.two },
