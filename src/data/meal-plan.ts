@@ -51,6 +51,20 @@ const SECTIONS: { pattern: RegExp; group: string; emoji: string }[] = [
   { pattern: /^PRZYKŁADOWE KOLACJE/, group: 'Kolacje', emoji: '🥗' },
   { pattern: /^Podwieczorki\s*$/i, group: 'Podwieczorki', emoji: '🍰' },
   { pattern: /^Dodatkowo w dniach/, group: 'Po treningu', emoji: '🥞' },
+  // newer plans start all recipes with this heading, breakfasts first
+  { pattern: /^PRZYKŁADOWE POSIŁKI/, group: 'Śniadania', emoji: '🍳' },
+];
+/**
+ * Meal names heading the sections of newer plans: "II ŚNIADANIE", "CZĘŚĆ III: OBIAD (~810 kcal)". The calorie
+ * split before the recipes lists the same names, so they count only once a section has started.
+ */
+const mealHeader = (name: string) => new RegExp(`^(?:CZĘŚĆ [IVX]+:\\s*)?${name}\\s*(?:\\(~?\\s*\\d+\\s*kcal\\s*\\))?$`);
+const MEAL_HEADERS: { pattern: RegExp; group: string }[] = [
+  { pattern: mealHeader('I ŚNIADANIE'), group: 'Śniadania' },
+  { pattern: mealHeader('II ŚNIADANIE'), group: 'Drugie śniadania' },
+  { pattern: mealHeader('OBIAD'), group: 'Obiady' },
+  { pattern: mealHeader('PODWIECZOREK'), group: 'Podwieczorki' },
+  { pattern: mealHeader('KOLACJA'), group: 'Kolacje' },
 ];
 const END = /^Uwagi końcowe/;
 /**
@@ -61,6 +75,10 @@ const FRUIT_LIST = /^Jako „piąty posiłek”/;
 const FRUIT_LINE = /^(.+?)\s*[:\-–]\s*(\d+)\s*g\b/i;
 const FRUIT_NOTE = 'Owoce na podwieczorek z jadłospisu: w całości, jako koktajl, sałatka owocowa lub sorbet.';
 const KCAL = /^\(?\s*(\d+)\s*kcal\s*\)?\s*$/i;
+/** Newer plans give the calories in the title line: "1. Omlet owsiany z twarogiem (675 kcal)". */
+const TITLE_KCAL = /^(?:\d+\.\s*)?(.+?)\s*\(\s*~?\s*(\d+)\s*kcal\s*\)$/i;
+/** Newer plans put the method after the ingredients, in one line. */
+const PREPARATION = /^przygotowanie\s*:\s*(\S.*)$/i;
 const METHOD_HEADER = /^sposób\s+(przygotowania|wykonania)\s*:?\s*$/i;
 /** "Składniki:", "Składniki na dwie porcje:" */
 const INGREDIENTS_HEADER = /^składniki\b.{0,30}$/i;
@@ -87,6 +105,8 @@ const QUANTITY_FIRST = new RegExp(`^${NUMBER}\\s*${UNIT}\\.?(?:\\s+|(?=[A-ZĄĆ�
 const QUANTITY_LAST = new RegExp(`^(.+?)\\s*[-–:]\\s*${NUMBER}\\s*${UNIT}\\b`, 'i');
 /** "Czosnek 2 ząbki", "Musztarda 0,5 łyżeczki" */
 const QUANTITY_TRAILING = new RegExp(`^(${LETTER}.*?)\\s+${NUMBER}\\s*${UNIT}$`, 'i');
+/** "Oliwa z oliwek-5": grams without the unit */
+const GRAMS_LAST = new RegExp(`^(${LETTER}.*?)\\s*[-–]\\s*${NUMBER}$`);
 
 function toUnit(word: string): Unit {
   return UNIT_WORDS.find(([pattern]) => pattern.test(word))?.[1] ?? 'szt';
@@ -100,6 +120,8 @@ function parseIngredient(line: string): RawIngredient {
   if (match) return { raw: match[1], quantity: Number(match[2].replace(',', '.')), unit: toUnit(match[3]) };
   match = text.match(QUANTITY_TRAILING);
   if (match) return { raw: match[1], quantity: Number(match[2].replace(',', '.')), unit: toUnit(match[3]) };
+  match = text.match(GRAMS_LAST);
+  if (match) return { raw: match[1], quantity: Number(match[2].replace(',', '.')), unit: 'g' };
   // "4 suszone pomidory", "1/2 cytryny", "120 banan": a bare number is pieces, or grams when it is large
   match = text.match(BARE_NUMBER);
   if (match) {
@@ -154,7 +176,8 @@ function parseSections(text: string): RawRecipe[] {
     const line = lines[i].trim();
     if (!line) continue;
     if (END.test(line)) break;
-    const section = SECTIONS.find((s) => s.pattern.test(line));
+    const header: (typeof MEAL_HEADERS)[number] | undefined = group ? MEAL_HEADERS.find((h) => h.pattern.test(line)) : undefined;
+    const section: (typeof SECTIONS)[number] | undefined = header ? SECTIONS.find((s) => s.group === header.group) : SECTIONS.find((s) => s.pattern.test(line));
     if (section) {
       group = section;
       current = null;
@@ -164,6 +187,14 @@ function parseSections(text: string): RawRecipe[] {
     if (FRUIT_LIST.test(line)) {
       inFruits = true;
       current = null;
+      continue;
+    }
+    const titled = line.match(TITLE_KCAL);
+    if (titled) {
+      inFruits = false;
+      // the ingredients follow right away, sometimes without a "Składniki:" line; the method comes last
+      current = { title: tidyTitle(titled[1]), group: group.group, kcal: Number(titled[2]), method: [], ingredients: [], inIngredients: true };
+      recipes.push(current);
       continue;
     }
     if (kcalAhead(i)) {
@@ -195,6 +226,11 @@ function parseSections(text: string): RawRecipe[] {
       continue;
     }
     if (METHOD_HEADER.test(line)) continue;
+    const preparation = line.match(PREPARATION);
+    if (preparation) {
+      current.method.push(preparation[1].replace(/\s+/g, ' '));
+      continue;
+    }
     if (INGREDIENTS_HEADER.test(line)) {
       current.inIngredients = true;
       continue;
@@ -227,12 +263,15 @@ export function parseMealPlan(text: string, dictionary: ProductDictionary): Meal
   const recipes = parseSections(text).map((recipe): MealPlanRecipe => {
     const merged = new Map<string, MealPlanRecipe['ingredients'][number]>();
     for (const ing of recipe.ingredients) {
-      const key = ing.raw.toLowerCase().replace(/\s+/g, ' ').trim();
+      const full = ing.raw.replace(/\s+/g, ' ').trim();
+      // "jajka wiejskie (100 g)", "kaszy pęczak (suchej)": unless the dictionary knows it whole, drop the remark
+      const raw = full.toLowerCase() in dictionary ? full : full.replace(/\s*\([^()]*\)$/, '') || full;
+      const key = raw.toLowerCase();
       if (!key) continue;
       const entry = dictionary[key];
       if (entry === null) continue;
       if (entry === undefined) unknown.add(key);
-      const [name, department] = entry ?? [ing.raw.trim(), 'other'];
+      const [name, department] = entry ?? [raw, 'other'];
       if (SPICES.has(name)) {
         merged.set(name, { name, quantity: 1, unit: 'szt', department });
         continue;
@@ -245,6 +284,9 @@ export function parseMealPlan(text: string, dictionary: ProductDictionary): Meal
     const description = [recipe.kcal ? `${recipe.kcal} kcal` : null, recipe.method.join('\n')].filter(Boolean).join('\n\n');
     return { title: recipe.title, group: recipe.group, description, ingredients: [...merged.values()] };
   });
-  const groups = SECTIONS.filter((s) => recipes.some((r) => r.group === s.group)).map((s) => ({ name: s.group, emoji: s.emoji }));
+  // a group may have several headings
+  const groups = [...new Map(SECTIONS.map((s) => [s.group, { name: s.group, emoji: s.emoji }])).values()].filter((g) =>
+    recipes.some((r) => r.group === g.name),
+  );
   return { groups, recipes, unknown: [...unknown].sort() };
 }
