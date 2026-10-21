@@ -6,6 +6,7 @@ import Animated, { LayoutAnimationConfig, useAnimatedStyle, withTiming } from 'r
 
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
+import { Checkbox } from '@/components/checkbox';
 import { Chip } from '@/components/chip';
 import { Columns } from '@/components/columns';
 import { EmptyState } from '@/components/empty-state';
@@ -74,15 +75,7 @@ export default function ListScreen() {
     <Animated.View key={item.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
       <SwipeToDelete radius={Radius.control} onDelete={() => remove(item.id)}>
         <View style={styles.item}>
-          <Pressable
-            onPress={unlessSwiping(() => toggle(item.id))}
-            hitSlop={8}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: item.checked }}
-            accessibilityLabel={item.name}
-            style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: item.checked ? theme.tint : 'transparent' }]}>
-            {item.checked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-          </Pressable>
+          <Checkbox checked={item.checked} onPress={unlessSwiping(() => toggle(item.id))} accessibilityLabel={item.name} />
           <View style={styles.itemText}>
             {/* tapping the name or amount opens the item for editing */}
             <Pressable
@@ -207,5 +200,4 @@ const styles = StyleSheet.create({
   itemText: { flex: 1, gap: 2 },
   itemName: { flex: 1, fontWeight: '600' },
   doneText: { textDecorationLine: 'line-through' },
-  checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 });
