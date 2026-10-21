@@ -34,9 +34,8 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
         {children}
       </Animated.View>
     );
-  return (
+  const card = (
     <AnimatedPressable
-      {...animations}
       onPress={unlessSwiping(onPress)}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}
@@ -45,6 +44,9 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
       {children}
     </AnimatedPressable>
   );
+  // a layout animation would override the press shrink's transform, so it goes on a wrapper
+  if (!layout && !entering && !exiting) return card;
+  return <Animated.View {...animations}>{card}</Animated.View>;
 }
 
 const styles = StyleSheet.create({
