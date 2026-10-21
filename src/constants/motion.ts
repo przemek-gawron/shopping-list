@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 /**
@@ -13,5 +14,8 @@ export const Motion = {
 export const rowEnter = FadeIn.duration(Motion.normal);
 /** A row leaving a list (deleted, checked off, moved to another section). */
 export const rowExit = FadeOut.duration(Motion.fast);
-/** Siblings sliding into the space a row left or made. */
-export const rowLayout = LinearTransition.duration(Motion.normal);
+/**
+ * Siblings sliding into the space a row left or made. iOS only: on Android the transition stops a few
+ * pixels short and leaves a gap where a row was deleted, so rows there take their place at once.
+ */
+export const rowLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motion.normal) : undefined;
