@@ -10,6 +10,10 @@ import { useT } from '@/i18n';
 import { thresholdTick } from '@/utils/haptics';
 
 const ACTION_WIDTH = 84;
+/** Space between the row's edge and its action button. */
+const ACTION_GAP = 8;
+/** How far the row moves to show an action: the button plus the gap. */
+const OPEN_WIDTH = ACTION_WIDTH + ACTION_GAP;
 /** The row moves this many times slower than the finger. */
 const FRICTION = 1.4;
 /** Rows lower than this show only the icon on their swipe actions; the label would be cut. */
@@ -20,9 +24,9 @@ const COMPACT_HEIGHT = 44;
  * less than a bit past the open button, so a plain swipe to uncover it does not delete.
  */
 const FULL_SWIPE = 0.3;
-const fullSwipe = (width: number) => Math.max(ACTION_WIDTH + 24, width * FULL_SWIPE);
+const fullSwipe = (width: number) => Math.max(OPEN_WIDTH + 24, width * FULL_SWIPE);
 /** A swipe right released with the row moved past this completes it: most of the way across the green strip. */
-const COMPLETE_AT = ACTION_WIDTH * 0.75;
+const COMPLETE_AT = ACTION_GAP + ACTION_WIDTH * 0.75;
 /** Presses right after a swipe ends belong to that swipe. */
 const SETTLE_MS = 350;
 
@@ -123,7 +127,7 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
             moving();
             // the green strip never stays open: completing is up to the tracker
             if (direction === SwipeDirection.RIGHT) return requestAnimationFrame(close);
-            restOffset.set(-ACTION_WIDTH);
+            restOffset.set(-OPEN_WIDTH);
           }}
           onSwipeableOpen={() => track(false)}
           onSwipeableWillClose={() => {
@@ -189,21 +193,23 @@ type ActionProps = { drag: SharedValue<number>; radius: number; compact: boolean
 function DeleteAction({ drag, radius, onPress, compact }: ActionProps & { onPress: () => void }) {
   const theme = useTheme();
   const t = useT();
-  // the button follows the row's edge, and stretches over the gap when the row is pulled further
+  // the button follows the row's edge a gap behind it, and stretches when the row is pulled further
   const style = useAnimatedStyle(() => ({
-    width: Math.max(ACTION_WIDTH, -drag.value),
-    transform: [{ translateX: Math.max(0, drag.value + ACTION_WIDTH) }],
+    width: Math.max(OPEN_WIDTH, -drag.value),
+    transform: [{ translateX: Math.max(0, drag.value + OPEN_WIDTH) }],
   }));
   return (
-    <Animated.View style={[styles.action, { backgroundColor: theme.destructive, borderRadius: radius }, style]}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={t('delete')}
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
-        <IconSymbol name="trash" size={20} color={theme.onPrimary} />
-        {!compact && <Text style={[styles.label, { color: theme.onPrimary }]}>{t('delete')}</Text>}
-      </Pressable>
+    <Animated.View style={[styles.slot, styles.deleteSlot, style]}>
+      <View style={[styles.action, { backgroundColor: theme.destructive, borderRadius: radius }]}>
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={t('delete')}
+          style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+          <IconSymbol name="trash" size={20} color={theme.onPrimary} />
+          {!compact && <Text style={[styles.label, { color: theme.onPrimary }]}>{t('delete')}</Text>}
+        </Pressable>
+      </View>
     </Animated.View>
   );
 }
@@ -212,18 +218,20 @@ function DeleteAction({ drag, radius, onPress, compact }: ActionProps & { onPres
 function CompleteAction({ drag, radius, label, compact }: ActionProps & { label: string }) {
   const theme = useTheme();
   const style = useAnimatedStyle(() => ({
-    width: Math.max(ACTION_WIDTH, drag.value),
-    transform: [{ translateX: Math.min(0, drag.value - ACTION_WIDTH) }],
+    width: Math.max(OPEN_WIDTH, drag.value),
+    transform: [{ translateX: Math.min(0, drag.value - OPEN_WIDTH) }],
   }));
   return (
-    <Animated.View style={[styles.action, styles.complete, { backgroundColor: theme.tint, borderRadius: radius }, style]}>
-      <View style={styles.button}>
-        <IconSymbol name="checkmark" size={20} color={theme.onPrimary} />
-        {!compact && (
-          <Text style={[styles.label, { color: theme.onPrimary }]} numberOfLines={1}>
-            {label}
-          </Text>
-        )}
+    <Animated.View style={[styles.slot, styles.completeSlot, style]}>
+      <View style={[styles.action, styles.complete, { backgroundColor: theme.tint, borderRadius: radius }]}>
+        <View style={styles.button}>
+          <IconSymbol name="checkmark" size={20} color={theme.onPrimary} />
+          {!compact && (
+            <Text style={[styles.label, { color: theme.onPrimary }]} numberOfLines={1}>
+              {label}
+            </Text>
+          )}
+        </View>
       </View>
     </Animated.View>
   );
@@ -231,8 +239,12 @@ function CompleteAction({ drag, radius, label, compact }: ActionProps & { label:
 
 const styles = StyleSheet.create({
   fill: { flexGrow: 1 },
+  /** Holds the button and the gap beside it; only the button is coloured. */
+  slot: { height: '100%' },
+  deleteSlot: { paddingLeft: ACTION_GAP },
+  completeSlot: { paddingRight: ACTION_GAP },
   complete: { alignItems: 'flex-end' },
-  action: { height: '100%', alignItems: 'flex-start', justifyContent: 'center' },
+  action: { flex: 1, alignItems: 'flex-start', justifyContent: 'center' },
   button: { width: ACTION_WIDTH, height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2 },
   pressed: { opacity: 0.7 },
   label: { fontSize: 13, fontWeight: '700' },
