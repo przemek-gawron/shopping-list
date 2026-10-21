@@ -1,11 +1,13 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { Motion } from '@/constants/motion';
 import { Spacing } from '@/constants/theme';
 
 export function EmptyState({ emoji, title, subtitle }: { emoji: string; title: string; subtitle?: string }) {
   return (
-    <View style={styles.root}>
+    <Animated.View entering={FadeIn.duration(Motion.normal * 2)} style={styles.root}>
       <ThemedText style={styles.emoji}>{emoji}</ThemedText>
       <ThemedText type="heading" style={styles.center}>
         {title}
@@ -15,7 +17,7 @@ export function EmptyState({ emoji, title, subtitle }: { emoji: string; title: s
           {subtitle}
         </ThemedText>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 

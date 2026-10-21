@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { LayoutAnimationConfig } from 'react-native-reanimated';
+import Animated, { FadeInLeft, FadeInRight, LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import { Checkbox } from '@/components/checkbox';
 import { Chip } from '@/components/chip';
 import { Screen } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
@@ -13,7 +14,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { UndoButton } from '@/components/undo-button';
 import { WeekStrip } from '@/components/week-strip';
-import { rowEnter, rowExit, rowLayout } from '@/constants/motion';
+import { Motion, rowEnter, rowExit, rowLayout } from '@/constants/motion';
 import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { groupForSlot, useSlotName } from '@/data/labels';
 import { randomPlan } from '@/data/random-plan';
@@ -46,7 +47,13 @@ export default function PlanScreen() {
   const canUndo = useStore((s) => s.planHistory.length > 0);
 
   const slots = useMemo(() => allSlots.slice(0, mealCount), [allSlots, mealCount]);
-  const [selectedDate, setSelectedDate] = useState(today());
+  const [selectedDate, setSelected] = useState(today());
+  /** 1 when the last day picked is later than the one before, -1 when earlier: the meals slide in from that side. */
+  const [direction, setDirection] = useState(1);
+  const setSelectedDate = (date: string) => {
+    setDirection(date >= selectedDate ? 1 : -1);
+    setSelected(date);
+  };
   const [picked, setPicked] = useState<string[]>([]);
   /** Plan entry whose multiplier choices are open. */
   const [editing, setEditing] = useState<string | null>(null);
@@ -183,14 +190,14 @@ export default function PlanScreen() {
         {formatDate(selectedDate, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
       </ThemedText>
 
-      {/* switching days swaps the meals at once; changes within a day animate */}
-      <LayoutAnimationConfig key={selectedDate} skipEntering skipExiting>
+      {/* switching days slides the new day's meals in; the old ones go at once */}
+      <LayoutAnimationConfig key={selectedDate} skipExiting>
         {slots.map((slot, index) => {
           // a meal may have several dishes (soup + main course)
           const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
           return (
             // the whole card adds a dish; the recipe name, checkbox, stepper and ✕ keep their own actions
-            <Card key={slot.id} style={styles.slot} layout={rowLayout} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
+            <Card key={slot.id} style={styles.slot} layout={rowLayout} entering={(direction > 0 ? FadeInRight : FadeInLeft).duration(Motion.normal)} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
               <View style={styles.slotHeader}>
                 <ThemedText type="label">{slotName(slot, index)}</ThemedText>
                 <View style={styles.slotActions}>
@@ -238,15 +245,7 @@ export default function PlanScreen() {
                             <ThemedText style={styles.cart}>🛒</ThemedText>
                           </View>
                         ) : (
-                          <Pressable
-                            onPress={unlessSwiping(() => toggle(entry.id))}
-                            hitSlop={8}
-                            accessibilityRole="checkbox"
-                            accessibilityState={{ checked: isPicked }}
-                            accessibilityLabel={t('plan_pick_for_list')}
-                            style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: isPicked ? theme.tint : 'transparent' }]}>
-                            {isPicked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-                          </Pressable>
+                          <Checkbox checked={isPicked} onPress={unlessSwiping(() => toggle(entry.id))} accessibilityLabel={t('plan_pick_for_list')} />
                         )}
                         <Pressable
                           style={styles.entryTitle}

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
@@ -13,7 +13,7 @@ import { Screen } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { SwipeToDelete } from '@/components/swipe-to-delete';
 import { ThemedText } from '@/components/themed-text';
-import { rowExit, rowLayout } from '@/constants/motion';
+import { rowEnter, rowExit, rowLayout } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { byGroupThenTitle, recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
@@ -91,36 +91,39 @@ export default function RecipesScreen() {
       ) : visible.length === 0 ? (
         <EmptyState emoji="🔎" title={t('recipes_none_found')} />
       ) : (
-        <MenuSections
-          recipes={visible}
-          flat={!!query.trim()}
-          renderRecipe={(r) => {
-            const group = groupOf(r.groupId);
-            return (
-              <Animated.View exiting={rowExit} layout={rowLayout} style={styles.cell}>
-                <SwipeToDelete
-                  radius={Radius.card}
-                  style={styles.cell}
-                  onDelete={() =>
-                    confirm(t('delete_recipe'), t('delete_recipe_message', { name: r.title }), t('delete'), t('cancel'), () => removeRecipe(r.id))
-                  }>
-                  <Card onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: r.id } })} style={styles.row}>
-                    <RecipePhoto photo={r.photo} emoji={recipeEmoji(r, group)} size={64} />
-                    <View style={styles.rowText}>
-                      <ThemedText type="default" style={styles.rowTitle} numberOfLines={2}>
-                        {r.title}
-                      </ThemedText>
-                      {r.rating ? <Stars value={r.rating} size={13} /> : null}
-                      <ThemedText type="small" numberOfLines={1}>
-                        {group ? `${group.emoji} ${group.name}` : t('no_group')} · {t('ingredients_count', { count: r.ingredients.length })}
-                      </ThemedText>
-                    </View>
-                  </Card>
-                </SwipeToDelete>
-              </Animated.View>
-            );
-          }}
-        />
+        // cards already there when the tab opens stay still; a new filter or search fades its results in
+        <LayoutAnimationConfig skipEntering>
+          <MenuSections
+            recipes={visible}
+            flat={!!query.trim()}
+            renderRecipe={(r) => {
+              const group = groupOf(r.groupId);
+              return (
+                <Animated.View entering={rowEnter} exiting={rowExit} layout={rowLayout} style={styles.cell}>
+                  <SwipeToDelete
+                    radius={Radius.card}
+                    style={styles.cell}
+                    onDelete={() =>
+                      confirm(t('delete_recipe'), t('delete_recipe_message', { name: r.title }), t('delete'), t('cancel'), () => removeRecipe(r.id))
+                    }>
+                    <Card onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: r.id } })} style={styles.row}>
+                      <RecipePhoto photo={r.photo} emoji={recipeEmoji(r, group)} size={64} />
+                      <View style={styles.rowText}>
+                        <ThemedText type="default" style={styles.rowTitle} numberOfLines={2}>
+                          {r.title}
+                        </ThemedText>
+                        {r.rating ? <Stars value={r.rating} size={13} /> : null}
+                        <ThemedText type="small" numberOfLines={1}>
+                          {group ? `${group.emoji} ${group.name}` : t('no_group')} · {t('ingredients_count', { count: r.ingredients.length })}
+                        </ThemedText>
+                      </View>
+                    </Card>
+                  </SwipeToDelete>
+                </Animated.View>
+              );
+            }}
+          />
+        </LayoutAnimationConfig>
       )}
     </Screen>
   );
