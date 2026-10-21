@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInLeft, FadeInRight, LayoutAnimationConfig } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInLeft, FadeInRight, LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -214,7 +214,12 @@ export default function PlanScreen() {
                   </Pressable>
                 </View>
               </View>
-              {entries.length === 0 && <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>}
+              {/* after the last dish has faded out, so the two never overlap */}
+              {entries.length === 0 && (
+                <Animated.View entering={FadeIn.duration(Motion.fast).delay(Motion.fast)}>
+                  <ThemedText type="small">{t('plan_slot_empty')}</ThemedText>
+                </Animated.View>
+              )}
               {entries.map((entry) => {
                 const recipe = recipes.find((r) => r.id === entry.recipeId);
                 const isPicked = pickedShown.includes(entry.id);
