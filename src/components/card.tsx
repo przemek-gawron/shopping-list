@@ -1,9 +1,10 @@
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { unlessSwiping } from '@/components/swipe-to-delete';
 import { Radius } from '@/constants/theme';
+import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -24,8 +25,7 @@ type Props = {
 /** Rounded surface; pressable when `onPress` is given. */
 export function Card({ children, onPress, style, accessible, layout, entering, exiting }: Props) {
   const theme = useTheme();
-  // pressed state by hand: an animated component takes a style, not a style function
-  const [pressed, setPressed] = useState(false);
+  const press = usePressScale(0.98);
   const base = [styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderSubtle, boxShadow: theme.cardShadow }, style];
   const animations = { layout, entering, exiting };
   if (!onPress)
@@ -38,10 +38,10 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
     <AnimatedPressable
       {...animations}
       onPress={unlessSwiping(onPress)}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
       accessible={accessible}
-      style={[base, pressed && styles.pressed]}>
+      style={[base, press.style]}>
       {children}
     </AnimatedPressable>
   );
@@ -49,5 +49,4 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
 
 const styles = StyleSheet.create({
   card: { borderRadius: Radius.card, borderWidth: 1, padding: 14 },
-  pressed: { opacity: 0.7 },
 });

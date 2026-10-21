@@ -1,7 +1,11 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Radius, tintFill } from '@/constants/theme';
+import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   label: string;
@@ -12,24 +16,28 @@ type Props = {
 
 export function Button({ label, onPress, variant = 'primary', disabled }: Props) {
   const theme = useTheme();
+  const press = usePressScale();
   const background = variant === 'destructive' ? 'transparent' : theme.surfaceCard;
   const color =
     variant === 'primary' ? theme.onPrimary : variant === 'destructive' ? theme.destructive : theme.text;
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
       disabled={disabled}
       accessibilityRole="button"
-      style={({ pressed }) => [
+      style={[
         styles.button,
         variant === 'primary'
           ? [tintFill(theme), { borderColor: 'transparent' }]
           : { backgroundColor: background, borderColor: variant === 'destructive' ? theme.destructive : background },
-        (pressed || disabled) && styles.dim,
+        disabled && styles.dim,
+        press.style,
       ]}>
       <Text style={[styles.label, { color }]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
