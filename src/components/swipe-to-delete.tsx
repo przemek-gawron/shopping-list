@@ -8,6 +8,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
 
 const ACTION_WIDTH = 84;
+/** Rows lower than this show only the icon on their swipe actions; the label would be cut. */
+const COMPACT_HEIGHT = 56;
 /** A swipe released past this share of the row deletes at once instead of leaving the button showing. */
 const FULL_SWIPE = 0.5;
 /** Presses right after a swipe ends belong to that swipe. */
@@ -65,7 +67,9 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
   const t = useT();
   const swipeable = useRef<SwipeableMethods>(null);
   const translation = useRef<SharedValue<number>>(null);
-  const [width, setWidth] = useState(0);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const width = size.width;
+  const compact = size.height > 0 && size.height < COMPACT_HEIGHT;
   const [id] = useState(() => Symbol('row'));
   const close = () => swipeable.current?.close();
   // a row deleted or left behind while open must not keep blocking presses, even when its
@@ -108,13 +112,13 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
       onSwipeableWillClose={moving}
       onSwipeableClose={() => forgetRow(id)}
       leftThreshold={ACTION_WIDTH}
-      renderLeftActions={onComplete && ((_progress, drag) => <CompleteAction drag={drag} radius={radius} label={completeLabel ?? ''} />)}
+      renderLeftActions={onComplete && ((_progress, drag) => <CompleteAction drag={drag} radius={radius} label={completeLabel ?? ''} compact={compact} />)}
       renderRightActions={(_progress, drag) => {
         translation.current = drag;
-        return <DeleteAction drag={drag} radius={radius} onPress={remove} />;
+        return <DeleteAction drag={drag} radius={radius} onPress={remove} compact={compact} />;
       }}>
       <View
-        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        onLayout={(e) => setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
         accessible={false}
         accessibilityActions={[
           { name: 'delete', label: t('delete') },
@@ -130,7 +134,9 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
   );
 }
 
-function DeleteAction({ drag, radius, onPress }: { drag: SharedValue<number>; radius: number; onPress: () => void }) {
+type ActionProps = { drag: SharedValue<number>; radius: number; compact: boolean };
+
+function DeleteAction({ drag, radius, onPress, compact }: ActionProps & { onPress: () => void }) {
   const theme = useTheme();
   const t = useT();
   // the button follows the row's edge, and stretches over the gap when the row is pulled further
@@ -140,16 +146,20 @@ function DeleteAction({ drag, radius, onPress }: { drag: SharedValue<number>; ra
   }));
   return (
     <Animated.View style={[styles.action, { backgroundColor: theme.destructive, borderRadius: radius }, style]}>
-      <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={t('delete')}
+        style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
         <IconSymbol name="trash" size={20} color={theme.onPrimary} />
-        <Text style={[styles.label, { color: theme.onPrimary }]}>{t('delete')}</Text>
+        {!compact && <Text style={[styles.label, { color: theme.onPrimary }]}>{t('delete')}</Text>}
       </Pressable>
     </Animated.View>
   );
 }
 
 /** Green strip uncovered by a swipe right; the row completes as soon as the finger lifts past it. */
-function CompleteAction({ drag, radius, label }: { drag: SharedValue<number>; radius: number; label: string }) {
+function CompleteAction({ drag, radius, label, compact }: ActionProps & { label: string }) {
   const theme = useTheme();
   const style = useAnimatedStyle(() => ({
     width: Math.max(ACTION_WIDTH, drag.value),
@@ -159,9 +169,11 @@ function CompleteAction({ drag, radius, label }: { drag: SharedValue<number>; ra
     <Animated.View style={[styles.action, styles.complete, { backgroundColor: theme.tint, borderRadius: radius }, style]}>
       <View style={styles.button}>
         <IconSymbol name="checkmark" size={20} color={theme.onPrimary} />
-        <Text style={[styles.label, { color: theme.onPrimary }]} numberOfLines={1}>
-          {label}
-        </Text>
+        {!compact && (
+          <Text style={[styles.label, { color: theme.onPrimary }]} numberOfLines={1}>
+            {label}
+          </Text>
+        )}
       </View>
     </Animated.View>
   );
