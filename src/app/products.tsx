@@ -1,22 +1,27 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
 import { Page } from '@/components/screen';
+import { SwipeToDelete } from '@/components/swipe-to-delete';
 import { ThemedText } from '@/components/themed-text';
 import { DEPARTMENT_EMOJI } from '@/constants/departments';
+import { rowExit, rowLayout } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
+import { confirm } from '@/utils/confirm';
 
 export default function ProductsScreen() {
   const t = useT();
   const theme = useTheme();
   const products = useStore((s) => s.products);
+  const removeProduct = useStore((s) => s.removeProduct);
   const [query, setQuery] = useState('');
 
   const visible = useMemo(() => {
@@ -36,13 +41,21 @@ export default function ProductsScreen() {
       />
       {products.length === 0 && <EmptyState emoji="🥕" title={t('products_empty_title')} subtitle={t('products_empty_subtitle')} />}
       {visible.map((p) => (
-        <Card key={p.id} onPress={() => router.push({ pathname: '/product/form', params: { id: p.id } })} style={styles.row}>
-          <ThemedText style={styles.emoji}>{DEPARTMENT_EMOJI[p.departmentId]}</ThemedText>
-          <View style={styles.text}>
-            <ThemedText style={styles.name}>{p.name}</ThemedText>
-            <ThemedText type="small">{t(`dept_${p.departmentId}`)} · {t(`unit_${p.defaultUnit}`)}</ThemedText>
-          </View>
-        </Card>
+        <Animated.View key={p.id} exiting={rowExit} layout={rowLayout}>
+          <SwipeToDelete
+            radius={Radius.card}
+            onDelete={() =>
+              confirm(t('product_delete'), t('product_delete_message', { name: p.name }), t('delete'), t('cancel'), () => removeProduct(p.id))
+            }>
+            <Card onPress={() => router.push({ pathname: '/product/form', params: { id: p.id } })} style={styles.row}>
+              <ThemedText style={styles.emoji}>{DEPARTMENT_EMOJI[p.departmentId]}</ThemedText>
+              <View style={styles.text}>
+                <ThemedText style={styles.name}>{p.name}</ThemedText>
+                <ThemedText type="small">{t(`dept_${p.departmentId}`)} · {t(`unit_${p.defaultUnit}`)}</ThemedText>
+              </View>
+            </Card>
+          </SwipeToDelete>
+        </Animated.View>
       ))}
       <Button label={t('product_add')} onPress={() => router.push('/product/form')} />
     </Page>
