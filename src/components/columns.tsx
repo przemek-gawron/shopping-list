@@ -1,6 +1,8 @@
 import { Children, useState, type ReactNode } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { rowEnter, rowLayout } from '@/constants/motion';
 import { Spacing } from '@/constants/theme';
 
 const GAP = Spacing.two;
@@ -46,6 +48,9 @@ export function Grid({ children, minItemWidth = 320 }: { children: ReactNode; mi
 /**
  * Splits blocks of different heights (e.g. shopping list departments) into side-by-side columns
  * of about equal length; `weight` estimates each block's height. One column on phones.
+ * Blocks fade in and slide into place; the animation sits on each block's own wrapper, since a block
+ * that animated itself would keep the offset of a wrapper that moved under it. A block that goes away
+ * does so at once (its rows fade out on their own): fading the block out too left its space empty.
  */
 export function Columns({ blocks, minColumnWidth = 340 }: { blocks: { key: string; weight: number; node: ReactNode }[]; minColumnWidth?: number }) {
   const [width, onLayout] = useWidth();
@@ -57,7 +62,11 @@ export function Columns({ blocks, minColumnWidth = 340 }: { blocks: { key: strin
   for (const block of blocks) {
     if (current < count - 1 && columns[current].weight > 0 && columns[current].weight + block.weight / 2 > share) current++;
     columns[current].weight += block.weight;
-    columns[current].nodes.push(<View key={block.key}>{block.node}</View>);
+    columns[current].nodes.push(
+      <Animated.View key={block.key} entering={rowEnter} layout={rowLayout}>
+        {block.node}
+      </Animated.View>,
+    );
   }
   return (
     <View style={styles.row} onLayout={onLayout}>
