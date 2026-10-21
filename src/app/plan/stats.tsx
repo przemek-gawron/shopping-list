@@ -1,6 +1,7 @@
 import { Stack, router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
@@ -31,6 +32,16 @@ function percents(counts: Counts): Counts {
   let left = 100 - total(result);
   for (const { k } of [...exact].sort((a, b) => (b.value % 1) - (a.value % 1))) if (left-- > 0) result[k]++;
   return result;
+}
+
+/** A chart bar that grows up from the axis, a moment after the bar on its left. */
+function GrowBar({ height, index, children }: { height: number; index: number; children: ReactNode }) {
+  const grown = useSharedValue(0);
+  useEffect(() => {
+    grown.set(withDelay(Math.min(index, 30) * 18, withTiming(height, { duration: 520, easing: Easing.out(Easing.cubic) })));
+  }, [grown, height, index]);
+  const style = useAnimatedStyle(() => ({ height: grown.get() }));
+  return <Animated.View style={[styles.bar, style]}>{children}</Animated.View>;
 }
 
 /** How often meals were cooked from the plan, ordered in or eaten without a recipe, over a chosen period. */
@@ -131,7 +142,7 @@ export default function PlanStatsScreen() {
             </View>
             <ThemedText type="caption">{max}</ThemedText>
             <View style={[styles.chart, { borderBottomColor: theme.border }]}>
-              {stats.buckets.map((b) => {
+              {stats.buckets.map((b, index) => {
                 const sum = total(b.counts);
                 const isSelected = b.start === selected;
                 return (
@@ -141,13 +152,13 @@ export default function PlanStatsScreen() {
                     onPress={() => setSelected(isSelected ? null : b.start)}
                     accessibilityRole="button"
                     accessibilityLabel={`${bucketLabel(b, true)}: ${KINDS.map((k) => `${label(k)} ${b.counts[k]}`).join(', ')}`}>
-                    <View style={[styles.bar, { height: (sum / max) * CHART_HEIGHT }]}>
+                    <GrowBar height={(sum / max) * CHART_HEIGHT} index={index}>
                       {KINDS.map((kind) =>
                         b.counts[kind] ? (
                           <View key={kind} style={{ flex: b.counts[kind], backgroundColor: theme[COLOR[kind]] as string }} />
                         ) : null,
                       )}
-                    </View>
+                    </GrowBar>
                   </Pressable>
                 );
               })}
