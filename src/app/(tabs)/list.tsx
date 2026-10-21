@@ -2,6 +2,7 @@ import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { LayoutAnimationConfig, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
@@ -9,11 +10,13 @@ import { Chip } from '@/components/chip';
 import { Columns } from '@/components/columns';
 import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
+import { SwipeToDelete, unlessSwiping } from '@/components/swipe-to-delete';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { UndoButton } from '@/components/undo-button';
 import { DEPARTMENTS } from '@/constants/departments';
-import { Spacing, tintFill } from '@/constants/theme';
+import { Motion, rowEnter, rowExit, rowLayout } from '@/constants/motion';
+import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import type { ListItem, Recipe } from '@/data/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -62,49 +65,58 @@ export default function ListScreen() {
     Alert.alert(t('list_copied'));
   };
 
+  const progress = useAnimatedStyle(() => ({
+    transform: [{ scaleX: withTiming(list.length ? done / list.length : 0, { duration: Motion.normal }) }],
+  }));
+
+  // checking an item moves it to another section: it fades out of one and into the other
   const row = (item: ListItem) => (
-    <View key={item.id} style={styles.item}>
-      <Pressable
-        onPress={() => toggle(item.id)}
-        hitSlop={8}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: item.checked }}
-        accessibilityLabel={item.name}
-        style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: item.checked ? theme.tint : 'transparent' }]}>
-        {item.checked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
-      </Pressable>
-      <View style={styles.itemText}>
-        {/* tapping the name or amount opens the item for editing */}
-        <Pressable
-          style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
-          accessibilityRole="button"
-          accessibilityLabel={`${t('list_edit')} – ${item.name}`}
-          onPress={() => router.push({ pathname: '/list/add', params: { id: item.id } })}>
-          <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
-            {item.name}
-          </ThemedText>
-          <ThemedText type="small" style={item.checked && styles.doneText}>
-            {formatAmount(item.quantity, item.unit)}
-          </ThemedText>
-        </Pressable>
-        {/* the recipes that need the item; tapping them shows the meals and amounts */}
-        {item.sources && item.sources.length > 0 && (
+    <Animated.View key={item.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
+      <SwipeToDelete radius={Radius.control} onDelete={() => remove(item.id)}>
+        <View style={styles.item}>
           <Pressable
-            style={({ pressed }) => pressed && styles.pressed}
-            hitSlop={{ top: 4, bottom: 8 }}
-            accessibilityRole="button"
-            accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sourceTitles(item, recipes)}`}
-            onPress={() => router.push({ pathname: '/list/sources', params: { id: item.id } })}>
-            <ThemedText type="caption" color={item.checked ? 'textSecondary' : 'tint'} numberOfLines={1}>
-              {sourceTitles(item, recipes)}
-            </ThemedText>
+            onPress={unlessSwiping(() => toggle(item.id))}
+            hitSlop={8}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: item.checked }}
+            accessibilityLabel={item.name}
+            style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: item.checked ? theme.tint : 'transparent' }]}>
+            {item.checked && <IconSymbol name="checkmark" size={14} color={theme.onPrimary} />}
           </Pressable>
-        )}
-      </View>
-      <Pressable hitSlop={8} accessibilityRole="button" onPress={() => remove(item.id)} accessibilityLabel={t('delete')}>
-        <IconSymbol name="xmark" size={18} color={theme.icon} />
-      </Pressable>
-    </View>
+          <View style={styles.itemText}>
+            {/* tapping the name or amount opens the item for editing */}
+            <Pressable
+              style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('list_edit')} – ${item.name}`}
+              onPress={unlessSwiping(() => router.push({ pathname: '/list/add', params: { id: item.id } }))}>
+              <ThemedText style={[styles.itemName, item.checked && styles.doneText]} color={item.checked ? 'textSecondary' : 'text'}>
+                {item.name}
+              </ThemedText>
+              <ThemedText type="small" style={item.checked && styles.doneText}>
+                {formatAmount(item.quantity, item.unit)}
+              </ThemedText>
+            </Pressable>
+            {/* the recipes that need the item; tapping them shows the meals and amounts */}
+            {item.sources && item.sources.length > 0 && (
+              <Pressable
+                style={({ pressed }) => pressed && styles.pressed}
+                hitSlop={{ top: 4, bottom: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sourceTitles(item, recipes)}`}
+                onPress={unlessSwiping(() => router.push({ pathname: '/list/sources', params: { id: item.id } }))}>
+                <ThemedText type="caption" color={item.checked ? 'textSecondary' : 'tint'} numberOfLines={1}>
+                  {sourceTitles(item, recipes)}
+                </ThemedText>
+              </Pressable>
+            )}
+          </View>
+          <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => remove(item.id))} accessibilityLabel={t('delete')}>
+            <IconSymbol name="xmark" size={18} color={theme.icon} />
+          </Pressable>
+        </View>
+      </SwipeToDelete>
+    </Animated.View>
   );
 
   return (
@@ -120,7 +132,8 @@ export default function ListScreen() {
       {list.length === 0 ? (
         <EmptyState emoji="🛒" title={t('list_empty_title')} subtitle={t('list_empty_subtitle')} />
       ) : (
-        <>
+        // the rows already on screen when the tab opens stay still; later changes animate
+        <LayoutAnimationConfig skipEntering>
           <Card style={styles.progress}>
             <View style={styles.progressText}>
               <ThemedText type="label">{t('list_progress')}</ThemedText>
@@ -129,7 +142,7 @@ export default function ListScreen() {
               </ThemedText>
             </View>
             <View style={[styles.track, { backgroundColor: theme.surfaceCard }]}>
-              <View style={[styles.fill, { width: `${(done / list.length) * 100}%` }, tintFill(theme), { boxShadow: undefined }]} />
+              <Animated.View style={[styles.fill, tintFill(theme), { boxShadow: undefined }, progress]} />
             </View>
           </Card>
 
@@ -149,7 +162,7 @@ export default function ListScreen() {
                 key: section.id,
                 weight: section.items.length + 1,
                 node: (
-                  <Card style={styles.section}>
+                  <Card style={styles.section} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
                     <ThemedText type="label">
                       {section.emoji} {t(`dept_${section.id}`)}
                     </ThemedText>
@@ -163,7 +176,7 @@ export default function ListScreen() {
                       key: 'checked',
                       weight: checked.length + 1,
                       node: (
-                        <Card style={styles.section}>
+                        <Card style={styles.section} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
                           <ThemedText type="label">✅ {t('list_checked')}</ThemedText>
                           {checked.map(row)}
                         </Card>
@@ -173,7 +186,7 @@ export default function ListScreen() {
                 : []),
             ]}
           />
-        </>
+        </LayoutAnimationConfig>
       )}
     </Screen>
   );
@@ -185,7 +198,7 @@ const styles = StyleSheet.create({
   progressText: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   count: { fontWeight: '700' },
   track: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 3 },
+  fill: { width: '100%', height: '100%', borderRadius: 3, transformOrigin: 'left' },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   section: { gap: Spacing.two },
   item: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 4 },
