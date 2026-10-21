@@ -177,6 +177,8 @@ export default {
   list_clear: 'Wyczyść listę',
   list_clear_message: 'Usunąć wszystkie pozycje z listy?',
   list_checked: 'Kupione',
+  list_uncheck: 'Nie kupione',
+  list_all_done: 'Wszystko kupione!',
   list_sources_open: 'Pokaż przepisy – {{name}}',
   list_sources_total: 'Razem na liście: {{amount}}',
   list_source_swap: 'Zamiennik wybrany do tego posiłku',
