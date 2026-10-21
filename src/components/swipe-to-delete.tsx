@@ -64,9 +64,18 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0 }: Props) 
   const [width, setWidth] = useState(0);
   const [id] = useState(() => Symbol('row'));
   const close = () => swipeable.current?.close();
-  const moving = () => setRow(id, true, close);
-  // a row deleted or left behind while open must not keep blocking presses
-  useEffect(() => () => forgetRow(id), [id]);
+  // a row deleted or left behind while open must not keep blocking presses, even when its
+  // animation reports back after it is gone
+  const mounted = useRef(true);
+  const track = (moving: boolean) => mounted.current && setRow(id, moving, close);
+  const moving = () => track(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      forgetRow(id);
+    };
+  }, [id]);
 
   // a deleted row fades out where it is; one that asks first (an alert) slides back meanwhile
   const remove = () => {
@@ -86,7 +95,7 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0 }: Props) 
         moving();
         if (width > 0 && -(translation.current?.value ?? 0) > width * FULL_SWIPE) remove();
       }}
-      onSwipeableOpen={() => setRow(id, false, close)}
+      onSwipeableOpen={() => track(false)}
       onSwipeableWillClose={moving}
       onSwipeableClose={() => forgetRow(id)}
       renderRightActions={(_progress, drag) => {
