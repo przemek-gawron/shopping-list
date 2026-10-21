@@ -6,6 +6,7 @@ import Animated, { LayoutAnimationConfig, useAnimatedStyle, withTiming } from 'r
 
 import { AddButton } from '@/components/add-button';
 import { Card } from '@/components/card';
+import { Celebration } from '@/components/celebration';
 import { Checkbox } from '@/components/checkbox';
 import { Chip } from '@/components/chip';
 import { Columns } from '@/components/columns';
@@ -57,6 +58,7 @@ export default function ListScreen() {
   );
   const checked = useMemo(() => list.filter((i) => i.checked), [list]);
   const done = checked.length;
+  const complete = list.length > 0 && done === list.length;
 
   const copy = async () => {
     const lines = [...sections.flatMap((s) => s.items), ...checked].map(
@@ -73,7 +75,11 @@ export default function ListScreen() {
   // checking an item moves it to another section: it fades out of one and into the other
   const row = (item: ListItem) => (
     <Animated.View key={item.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
-      <SwipeToDelete radius={Radius.control} onDelete={() => remove(item.id)}>
+      <SwipeToDelete
+        radius={Radius.control}
+        onDelete={() => remove(item.id)}
+        onComplete={() => toggle(item.id)}
+        completeLabel={item.checked ? t('list_uncheck') : t('list_checked')}>
         <View style={styles.item}>
           <Checkbox checked={item.checked} onPress={unlessSwiping(() => toggle(item.id))} accessibilityLabel={item.name} />
           <View style={styles.itemText}>
@@ -128,8 +134,10 @@ export default function ListScreen() {
         // the rows already on screen when the tab opens stay still; later changes animate
         <LayoutAnimationConfig skipEntering>
           <Card style={styles.progress}>
+            {/* everything bought: a burst of emoji and a word of praise */}
+            {complete && <Celebration />}
             <View style={styles.progressText}>
-              <ThemedText type="label">{t('list_progress')}</ThemedText>
+              <ThemedText type="label">{complete ? `🎉 ${t('list_all_done')}` : t('list_progress')}</ThemedText>
               <ThemedText style={styles.count}>
                 {done} / {list.length}
               </ThemedText>

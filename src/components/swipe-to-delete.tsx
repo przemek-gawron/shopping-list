@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import ReanimatedSwipeable, { SwipeDirection, type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -51,13 +51,17 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   /** Rounds the red action to match a card. */
   radius?: number;
+  /** Swiping right runs this at once (e.g. checking an item off); `completeLabel` names it. */
+  onComplete?: () => void;
+  completeLabel?: string;
 };
 
 /**
  * Swipe left to delete: a short swipe uncovers a "Delete" button, a long one deletes straight away.
- * Screen readers get a "Delete" action on the row instead of the gesture.
+ * With `onComplete`, swiping right completes the row. Screen readers get the same actions on the row
+ * instead of the gestures.
  */
-export function SwipeToDelete({ children, onDelete, style, radius = 0 }: Props) {
+export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplete, completeLabel }: Props) {
   const t = useT();
   const swipeable = useRef<SwipeableMethods>(null);
   const translation = useRef<SharedValue<number>>(null);
@@ -91,13 +95,20 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0 }: Props) 
       containerStyle={[{ borderRadius: radius }, style]}
       onSwipeableOpenStartDrag={moving}
       onSwipeableCloseStartDrag={moving}
-      onSwipeableWillOpen={() => {
+      onSwipeableWillOpen={(direction) => {
         moving();
+        if (direction === SwipeDirection.RIGHT) {
+          onComplete?.();
+          requestAnimationFrame(close);
+          return;
+        }
         if (width > 0 && -(translation.current?.value ?? 0) > width * FULL_SWIPE) remove();
       }}
       onSwipeableOpen={() => track(false)}
       onSwipeableWillClose={moving}
       onSwipeableClose={() => forgetRow(id)}
+      leftThreshold={ACTION_WIDTH}
+      renderLeftActions={onComplete && ((_progress, drag) => <CompleteAction drag={drag} radius={radius} label={completeLabel ?? ''} />)}
       renderRightActions={(_progress, drag) => {
         translation.current = drag;
         return <DeleteAction drag={drag} radius={radius} onPress={remove} />;
@@ -105,8 +116,14 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0 }: Props) 
       <View
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
         accessible={false}
-        accessibilityActions={[{ name: 'delete', label: t('delete') }]}
-        onAccessibilityAction={(e) => e.nativeEvent.actionName === 'delete' && onDelete()}>
+        accessibilityActions={[
+          { name: 'delete', label: t('delete') },
+          ...(onComplete ? [{ name: 'complete', label: completeLabel }] : []),
+        ]}
+        onAccessibilityAction={(e) => {
+          if (e.nativeEvent.actionName === 'delete') onDelete();
+          if (e.nativeEvent.actionName === 'complete') onComplete?.();
+        }}>
         {children}
       </View>
     </ReanimatedSwipeable>
@@ -131,7 +148,27 @@ function DeleteAction({ drag, radius, onPress }: { drag: SharedValue<number>; ra
   );
 }
 
+/** Green strip uncovered by a swipe right; the row completes as soon as the finger lifts past it. */
+function CompleteAction({ drag, radius, label }: { drag: SharedValue<number>; radius: number; label: string }) {
+  const theme = useTheme();
+  const style = useAnimatedStyle(() => ({
+    width: Math.max(ACTION_WIDTH, drag.value),
+    transform: [{ translateX: Math.min(0, drag.value - ACTION_WIDTH) }],
+  }));
+  return (
+    <Animated.View style={[styles.action, styles.complete, { backgroundColor: theme.tint, borderRadius: radius }, style]}>
+      <View style={styles.button}>
+        <IconSymbol name="checkmark" size={20} color={theme.onPrimary} />
+        <Text style={[styles.label, { color: theme.onPrimary }]} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
+  complete: { alignItems: 'flex-end' },
   action: { height: '100%', alignItems: 'flex-start', justifyContent: 'center' },
   button: { width: ACTION_WIDTH, height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2 },
   pressed: { opacity: 0.7 },
