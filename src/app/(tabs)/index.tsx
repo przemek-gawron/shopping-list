@@ -99,7 +99,7 @@ export default function RecipesScreen() {
             renderRecipe={(r) => {
               const group = groupOf(r.groupId);
               return (
-                <Animated.View entering={rowEnter} exiting={rowExit} layout={rowLayout} style={styles.cell}>
+                <Animated.View entering={rowEnter.delay(Math.min(visible.indexOf(r), 8) * 35)} exiting={rowExit} layout={rowLayout} style={styles.cell}>
                   <SwipeToDelete
                     radius={Radius.card}
                     style={styles.cell}

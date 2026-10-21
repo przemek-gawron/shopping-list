@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius, tintFill } from '@/constants/theme';
@@ -11,6 +12,7 @@ const GAP = 6;
 /** Days reachable by scrolling, either side of today. */
 const RANGE_DAYS = 2 * 365;
 const VISIBLE = 7;
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   selected: string;
@@ -30,8 +32,6 @@ type Props = {
  * The week arrows scroll to a Monday; a selected day out of view scrolls its week into view.
  */
 export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, hasPicked, jump }: Props) {
-  const theme = useTheme();
-  const locale = useLocale();
   const list = useRef<FlatList<string>>(null);
   const [width, setWidth] = useState(0);
   const first = useMemo(() => addDays(startOfWeek(today()), -RANGE_DAYS), []);
@@ -86,40 +86,63 @@ export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, hasPic
           onScrollEndDrag={(e) => e.nativeEvent.velocity?.x === 0 && settle(e)}
           windowSize={5}
           initialNumToRender={21}
-          renderItem={({ item: date }) => {
-            const isSelected = date === selected;
-            const isToday = date === today();
-            const picked = hasPicked?.(date) ?? false;
-            return (
-              <Pressable
-                onPress={() => onSelect(date)}
-                accessibilityRole="button"
-                accessibilityLabel={formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
-                style={[
-                  styles.day,
-                  { width: dayWidth, marginRight: GAP },
-                  isSelected ? tintFill(theme) : { backgroundColor: theme.cardBackground },
-                  { borderColor: isToday ? theme.tint : isSelected ? 'transparent' : theme.borderSubtle },
-                ]}>
-                <ThemedText type="caption" color={isSelected ? 'onPrimary' : 'textSecondary'}>
-                  {formatDate(date, locale, { weekday: 'short' })}
-                </ThemedText>
-                <ThemedText style={styles.dayNumber} color={isSelected ? 'onPrimary' : 'text'}>
-                  {fromISO(date).getDate()}
-                </ThemedText>
-                <View
-                  style={[
-                    styles.dot,
-                    picked && styles.pickedDot,
-                    { backgroundColor: picked ? theme.accent : hasMeals(date) ? (isSelected ? theme.onPrimary : theme.tint) : 'transparent' },
-                  ]}
-                />
-              </Pressable>
-            );
-          }}
+          renderItem={({ item: date }) => (
+            <Day
+              date={date}
+              width={dayWidth}
+              selected={date === selected}
+              picked={hasPicked?.(date) ?? false}
+              hasMeals={hasMeals(date)}
+              onPress={() => onSelect(date)}
+            />
+          )}
         />
       )}
     </View>
+  );
+}
+
+type DayProps = { date: string; width: number; selected: boolean; picked: boolean; hasMeals: boolean; onPress: () => void };
+
+/** One day of the strip; it gives a little bounce when it becomes the selected day. */
+function Day({ date, width, selected, picked, hasMeals, onPress }: DayProps) {
+  const theme = useTheme();
+  const locale = useLocale();
+  const isToday = date === today();
+  const scale = useSharedValue(1);
+  const wasSelected = useRef(selected);
+  useEffect(() => {
+    if (selected && !wasSelected.current) scale.set(withSequence(withTiming(0.88, { duration: 90 }), withSpring(1, { damping: 9, stiffness: 320 })));
+    wasSelected.current = selected;
+  }, [selected, scale]);
+  const bounce = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={formatDate(date, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
+      style={[
+        styles.day,
+        { width, marginRight: GAP },
+        selected ? tintFill(theme) : { backgroundColor: theme.cardBackground },
+        { borderColor: isToday ? theme.tint : selected ? 'transparent' : theme.borderSubtle },
+        bounce,
+      ]}>
+      <ThemedText type="caption" color={selected ? 'onPrimary' : 'textSecondary'}>
+        {formatDate(date, locale, { weekday: 'short' })}
+      </ThemedText>
+      <ThemedText style={styles.dayNumber} color={selected ? 'onPrimary' : 'text'}>
+        {fromISO(date).getDate()}
+      </ThemedText>
+      <View
+        style={[
+          styles.dot,
+          picked && styles.pickedDot,
+          { backgroundColor: picked ? theme.accent : hasMeals ? (selected ? theme.onPrimary : theme.tint) : 'transparent' },
+        ]}
+      />
+    </AnimatedPressable>
   );
 }
 

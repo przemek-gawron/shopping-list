@@ -6,6 +6,7 @@ import Animated, { FadeInLeft, FadeInRight, LayoutAnimationConfig } from 'react-
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Checkbox } from '@/components/checkbox';
+import { DiceButton } from '@/components/dice-button';
 import { Chip } from '@/components/chip';
 import { Screen } from '@/components/screen';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
@@ -190,24 +191,18 @@ export default function PlanScreen() {
         {formatDate(selectedDate, locale, { weekday: 'long', day: 'numeric', month: 'long' })}
       </ThemedText>
 
-      {/* switching days slides the new day's meals in; the old ones go at once */}
+      {/* switching days slides the new day's meals in one after another; the old ones go at once */}
       <LayoutAnimationConfig key={selectedDate} skipExiting>
         {slots.map((slot, index) => {
           // a meal may have several dishes (soup + main course)
           const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
           return (
             // the whole card adds a dish; the recipe name, checkbox, stepper and ✕ keep their own actions
-            <Card key={slot.id} style={styles.slot} layout={rowLayout} entering={(direction > 0 ? FadeInRight : FadeInLeft).duration(Motion.normal)} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
+            <Card key={slot.id} style={styles.slot} layout={rowLayout} entering={(direction > 0 ? FadeInRight : FadeInLeft).duration(Motion.normal).delay(index * 45)} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
               <View style={styles.slotHeader}>
                 <ThemedText type="label">{slotName(slot, index)}</ThemedText>
                 <View style={styles.slotActions}>
-                  <Pressable
-                    hitSlop={8}
-                    accessibilityRole="button"
-                    onPress={() => drawMeal(slot, index)}
-                    accessibilityLabel={`${t('random_meal')} – ${slotName(slot, index)}`}>
-                    <ThemedText style={styles.dice}>🎲</ThemedText>
-                  </Pressable>
+                  <DiceButton onPress={() => drawMeal(slot, index)} accessibilityLabel={`${t('random_meal')} – ${slotName(slot, index)}`} />
                   <Pressable
                     hitSlop={8}
                     accessibilityRole="button"
@@ -355,7 +350,6 @@ const styles = StyleSheet.create({
   slotHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   addLink: { fontSize: 14, fontWeight: '700' },
   slotActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
-  dice: { fontSize: 16, lineHeight: 20 },
   entry: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 2 },
   entryTitle: { flex: 1 },
   entryName: { fontWeight: '600' },
