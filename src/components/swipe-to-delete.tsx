@@ -1,17 +1,28 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReanimatedSwipeable, { SwipeDirection, type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
+import { thresholdTick } from '@/utils/haptics';
 
 const ACTION_WIDTH = 84;
+/** The row moves this many times slower than the finger. */
+const FRICTION = 1.4;
 /** Rows lower than this show only the icon on their swipe actions; the label would be cut. */
-const COMPACT_HEIGHT = 56;
-/** A swipe released past this share of the row deletes at once instead of leaving the button showing. */
-const FULL_SWIPE = 0.5;
+const COMPACT_HEIGHT = 44;
+/**
+ * A swipe released with the row moved past this share of its width deletes at once instead of leaving the
+ * button showing; with the drag's friction that is a little under half the row under the finger. Never
+ * less than a bit past the open button, so a plain swipe to uncover it does not delete.
+ */
+const FULL_SWIPE = 0.3;
+const fullSwipe = (width: number) => Math.max(ACTION_WIDTH + 24, width * FULL_SWIPE);
+/** A swipe right released with the row moved past this completes it: most of the way across the green strip. */
+const COMPLETE_AT = ACTION_WIDTH * 0.75;
 /** Presses right after a swipe ends belong to that swipe. */
 const SETTLE_MS = 350;
 
@@ -66,9 +77,7 @@ type Props = {
 export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplete, completeLabel }: Props) {
   const t = useT();
   const swipeable = useRef<SwipeableMethods>(null);
-  const translation = useRef<SharedValue<number>>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const width = size.width;
   const compact = size.height > 0 && size.height < COMPACT_HEIGHT;
   const [id] = useState(() => Symbol('row'));
   const close = () => swipeable.current?.close();
@@ -88,50 +97,91 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
   // a deleted row fades out where it is; one that asks first (an alert) slides back meanwhile
   const remove = () => {
     onDelete();
-    requestAnimationFrame(() => swipeable.current?.close());
+    requestAnimationFrame(close);
+  };
+  const complete = () => {
+    onComplete?.();
+    requestAnimationFrame(close);
   };
 
+  const { tracker, fullAt, restOffset } = useArmTracker(!!onComplete, (outcome) => (outcome < 0 ? remove() : complete()));
+
   return (
-    <ReanimatedSwipeable
-      ref={swipeable}
-      friction={1.4}
-      rightThreshold={ACTION_WIDTH / 2}
-      containerStyle={[{ borderRadius: radius }, style]}
-      onSwipeableOpenStartDrag={moving}
-      onSwipeableCloseStartDrag={moving}
-      onSwipeableWillOpen={(direction) => {
-        moving();
-        if (direction === SwipeDirection.RIGHT) {
-          onComplete?.();
-          requestAnimationFrame(close);
-          return;
-        }
-        if (width > 0 && -(translation.current?.value ?? 0) > width * FULL_SWIPE) remove();
-      }}
-      onSwipeableOpen={() => track(false)}
-      onSwipeableWillClose={moving}
-      onSwipeableClose={() => forgetRow(id)}
-      leftThreshold={ACTION_WIDTH}
-      renderLeftActions={onComplete && ((_progress, drag) => <CompleteAction drag={drag} radius={radius} label={completeLabel ?? ''} compact={compact} />)}
-      renderRightActions={(_progress, drag) => {
-        translation.current = drag;
-        return <DeleteAction drag={drag} radius={radius} onPress={remove} compact={compact} />;
-      }}>
-      <View
-        onLayout={(e) => setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
-        accessible={false}
-        accessibilityActions={[
-          { name: 'delete', label: t('delete') },
-          ...(onComplete ? [{ name: 'complete', label: completeLabel }] : []),
-        ]}
-        onAccessibilityAction={(e) => {
-          if (e.nativeEvent.actionName === 'delete') onDelete();
-          if (e.nativeEvent.actionName === 'complete') onComplete?.();
-        }}>
-        {children}
+    <GestureDetector gesture={tracker}>
+      <View style={style}>
+        <ReanimatedSwipeable
+          ref={swipeable}
+          friction={FRICTION}
+          rightThreshold={ACTION_WIDTH / 2}
+          leftThreshold={ACTION_WIDTH}
+          simultaneousWithExternalGesture={tracker}
+          containerStyle={[{ borderRadius: radius }, style && styles.fill]}
+          onSwipeableOpenStartDrag={moving}
+          onSwipeableCloseStartDrag={moving}
+          // the resting offset is set as the row starts moving, so a drag begun before it settles still counts
+          onSwipeableWillOpen={(direction) => {
+            moving();
+            // the green strip never stays open: completing is up to the tracker
+            if (direction === SwipeDirection.RIGHT) return requestAnimationFrame(close);
+            restOffset.set(-ACTION_WIDTH);
+          }}
+          onSwipeableOpen={() => track(false)}
+          onSwipeableWillClose={() => {
+            moving();
+            restOffset.set(0);
+          }}
+          onSwipeableClose={() => forgetRow(id)}
+          renderLeftActions={onComplete && ((_progress, drag) => <CompleteAction drag={drag} radius={radius} label={completeLabel ?? ''} compact={compact} />)}
+          renderRightActions={(_progress, drag) => <DeleteAction drag={drag} radius={radius} onPress={remove} compact={compact} />}>
+          <View
+            onLayout={(e) => {
+              const { width, height } = e.nativeEvent.layout;
+              setSize({ width, height });
+              fullAt.set(fullSwipe(width));
+            }}
+            accessible={false}
+            accessibilityActions={[
+              { name: 'delete', label: t('delete') },
+              ...(onComplete ? [{ name: 'complete', label: completeLabel }] : []),
+            ]}
+            onAccessibilityAction={(e) => {
+              if (e.nativeEvent.actionName === 'delete') onDelete();
+              if (e.nativeEvent.actionName === 'complete') onComplete?.();
+            }}>
+            {children}
+          </View>
+        </ReanimatedSwipeable>
       </View>
-    </ReanimatedSwipeable>
+    </GestureDetector>
   );
+}
+
+/**
+ * Follows the finger next to the swipe itself, on the UI thread: past the full-swipe point (`fullAt`, or to
+ * the right past the green strip) it gives a haptic tick and arms the row, and letting go while armed calls
+ * `onRelease` with -1 (delete) or 1 (complete). Feel and outcome agree, and nothing ticks once the finger is up.
+ */
+function useArmTracker(canComplete: boolean, onRelease: (outcome: -1 | 1) => void) {
+  const fullAt = useSharedValue(Infinity);
+  /** Where the row rests when the drag starts: 0, or the width of the action it was left open on. */
+  const restOffset = useSharedValue(0);
+  /** -1 armed to delete, 1 armed to complete, 0 neither. */
+  const armed = useSharedValue(0);
+  const tracker = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .onUpdate((e) => {
+      const x = e.translationX / FRICTION + restOffset.get();
+      const next = x < -fullAt.get() ? -1 : canComplete && x > COMPLETE_AT ? 1 : 0;
+      if (next === armed.get()) return;
+      armed.set(next);
+      runOnJS(thresholdTick)(next !== 0);
+    })
+    .onEnd(() => {
+      const outcome = armed.get();
+      armed.set(0);
+      if (outcome !== 0) runOnJS(onRelease)(outcome as -1 | 1);
+    });
+  return { tracker, fullAt, restOffset };
 }
 
 type ActionProps = { drag: SharedValue<number>; radius: number; compact: boolean };
@@ -180,6 +230,7 @@ function CompleteAction({ drag, radius, label, compact }: ActionProps & { label:
 }
 
 const styles = StyleSheet.create({
+  fill: { flexGrow: 1 },
   complete: { alignItems: 'flex-end' },
   action: { height: '100%', alignItems: 'flex-start', justifyContent: 'center' },
   button: { width: ACTION_WIDTH, height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2 },
