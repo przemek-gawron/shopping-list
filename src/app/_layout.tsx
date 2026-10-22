@@ -68,9 +68,13 @@ export default function RootLayout() {
 
   if (!hydrated) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
 
-  // iOS modals have no back arrow; without this the only way out is the swipe-down gesture
+  // iOS modals have no back arrow; without this the only way out is the swipe-down gesture.
+  // The header is see-through there, so the form scrolls under it instead of being cut off at its edge
+  // (Page insets the content by the header height).
   const modal = {
     presentation: 'modal',
+    headerTransparent: Platform.OS === 'ios',
+    headerStyle: Platform.OS === 'ios' ? { backgroundColor: 'transparent' } : { backgroundColor: colors.background },
     headerLeft:
       Platform.OS === 'ios'
         ? () => (
