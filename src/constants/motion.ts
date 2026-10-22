@@ -7,6 +7,8 @@ import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
  */
 export const Motion = {
   fast: 160,
+  /** Content revealed on request (a group opened): short enough to never be waited for. */
+  reveal: 200,
   normal: 240,
 };
 
@@ -19,3 +21,7 @@ export const rowExit = FadeOut.duration(Motion.fast);
  * pixels short and leaves a gap where a row was deleted, so rows there take their place at once.
  */
 export const rowLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motion.normal) : undefined;
+
+/** Recipe cards shown by opening a group, a filter or a search, all at once rather than one by one. */
+export const revealEnter = FadeIn.duration(Motion.reveal);
+export const revealLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motion.reveal) : undefined;

@@ -13,7 +13,7 @@ import { Screen } from '@/components/screen';
 import { Stars } from '@/components/stars';
 import { SwipeToDelete } from '@/components/swipe-to-delete';
 import { ThemedText } from '@/components/themed-text';
-import { rowEnter, rowExit, rowLayout } from '@/constants/motion';
+import { revealEnter, revealLayout, rowExit } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { byGroupThenTitle, recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
@@ -99,7 +99,7 @@ export default function RecipesScreen() {
             renderRecipe={(r) => {
               const group = groupOf(r.groupId);
               return (
-                <Animated.View entering={rowEnter.delay(Math.min(visible.indexOf(r), 8) * 35)} exiting={rowExit} layout={rowLayout} style={styles.cell}>
+                <Animated.View entering={revealEnter} exiting={rowExit} layout={revealLayout} style={styles.cell}>
                   <SwipeToDelete
                     radius={Radius.card}
                     style={styles.cell}
