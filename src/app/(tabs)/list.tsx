@@ -17,7 +17,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { UndoButton } from '@/components/undo-button';
 import { DEPARTMENTS } from '@/constants/departments';
-import { Motion, rowEnter, rowExit, rowLayout } from '@/constants/motion';
+import { Motion, quickEnter, quickExit, quickLayout } from '@/constants/motion';
 import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import type { ListItem, Recipe } from '@/data/types';
@@ -26,7 +26,7 @@ import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
 
 /** How long a ticked (or unticked) item shows its new state before it moves to its section. */
-const MOVE_DELAY_MS = 450;
+const MOVE_DELAY_MS = 220;
 /** Moves waiting for MOVE_DELAY_MS, by item id. Outside the component: there is one list screen. */
 const moveTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -112,7 +112,7 @@ export default function ListScreen() {
   const row = (item: ListItem) => {
     const shownChecked = item.checked !== flipping.includes(item.id);
     return (
-      <Animated.View key={item.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
+      <Animated.View key={item.id} entering={quickEnter} exiting={quickExit} layout={quickLayout}>
         <SwipeToDelete
           radius={Radius.control}
           onDelete={() => remove(item.id)}

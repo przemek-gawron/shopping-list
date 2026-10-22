@@ -6,6 +6,8 @@ import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
  * (Reanimated's default), so nothing here needs its own check.
  */
 export const Motion = {
+  /** Feedback on a tap the user may repeat quickly, like ticking items off. */
+  quick: 100,
   fast: 160,
   /** Content revealed on request (a group opened): short enough to never be waited for. */
   reveal: 200,
@@ -25,3 +27,8 @@ export const rowLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motio
 /** Recipe cards shown by opening a group, a filter or a search, all at once rather than one by one. */
 export const revealEnter = FadeIn.duration(Motion.reveal);
 export const revealLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motion.reveal) : undefined;
+
+/** Enter, exit and layout for a shopping list item ticked off: about half as long, as it happens often. */
+export const quickEnter = FadeIn.duration(Motion.quick);
+export const quickExit = FadeOut.duration(Motion.quick);
+export const quickLayout = Platform.OS === 'ios' ? LinearTransition.duration(Motion.quick) : undefined;

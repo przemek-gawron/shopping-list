@@ -2,7 +2,7 @@ import { Children, useState, type ReactNode } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { rowEnter, rowLayout } from '@/constants/motion';
+import { quickEnter, quickLayout } from '@/constants/motion';
 import { Spacing } from '@/constants/theme';
 
 const GAP = Spacing.two;
@@ -63,7 +63,7 @@ export function Columns({ blocks, minColumnWidth = 340 }: { blocks: { key: strin
     if (current < count - 1 && columns[current].weight > 0 && columns[current].weight + block.weight / 2 > share) current++;
     columns[current].weight += block.weight;
     columns[current].nodes.push(
-      <Animated.View key={block.key} entering={rowEnter} layout={rowLayout}>
+      <Animated.View key={block.key} entering={quickEnter} layout={quickLayout}>
         {block.node}
       </Animated.View>,
     );

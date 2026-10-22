@@ -245,7 +245,7 @@ export default function PlanScreen() {
                             <ThemedText style={styles.cart}>🛒</ThemedText>
                           </View>
                         ) : (
-                          <Checkbox pop={false} checked={isPicked} onPress={unlessSwiping(() => toggle(entry.id))} accessibilityLabel={t('plan_pick_for_list')} />
+                          <Checkbox checked={isPicked} onPress={unlessSwiping(() => toggle(entry.id))} accessibilityLabel={t('plan_pick_for_list')} />
                         )}
                         <Pressable
                           style={styles.entryTitle}
