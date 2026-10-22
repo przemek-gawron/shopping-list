@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, type ReactNode, type RefObject } from 'react';
 import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KeyboardDoneBar } from '@/components/keyboard-done';
 import { ThemedText } from '@/components/themed-text';
@@ -20,10 +20,15 @@ type Props = {
   wide?: boolean;
 };
 
-/** Tab screen shell: safe area, large title, content capped at MaxContentWidth (tablets, web). */
+/**
+ * Tab screen shell: large title, content capped at MaxContentWidth (tablets, web). A scrolling screen
+ * starts below the status bar but scrolls under it, title included, so nothing gets cut off at an
+ * edge below the notch.
+ */
 export function Screen({ title, action, children, scroll = true, wide = false }: Props) {
   const maxWidth = { maxWidth: wide ? WideContentWidth : MaxContentWidth };
   const theme = useTheme();
+  const top = useSafeAreaInsets().top;
   const bottom = useTabBarInset() + Spacing.four;
   const { ref: pageRef, inset: keyboardInset } = useKeyboardInset();
 
@@ -37,25 +42,23 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
   );
 
   return (
-    <View style={[styles.root, screenFill(theme)]}>
-      <SafeAreaView edges={['top']} style={styles.root} ref={pageRef}>
-        {scroll ? (
-          <ScrollView
-            style={{ marginBottom: keyboardInset }}
-            contentContainerStyle={[styles.content, maxWidth, { paddingBottom: bottom }]}
-            automaticallyAdjustKeyboardInsets
-            keyboardDismissMode="interactive"
-            keyboardShouldPersistTaps="handled">
-            {header}
-            {children}
-          </ScrollView>
-        ) : (
-          <View style={[styles.root, styles.wide, maxWidth, { marginBottom: keyboardInset }]}>
-            <View style={styles.headerPad}>{header}</View>
-            {children}
-          </View>
-        )}
-      </SafeAreaView>
+    <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
+      {scroll ? (
+        <ScrollView
+          style={{ marginBottom: keyboardInset }}
+          contentContainerStyle={[styles.content, maxWidth, { paddingTop: top + Spacing.three, paddingBottom: bottom }]}
+          automaticallyAdjustKeyboardInsets
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled">
+          {header}
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={[styles.root, styles.wide, maxWidth, { paddingTop: top, marginBottom: keyboardInset }]}>
+          <View style={styles.headerPad}>{header}</View>
+          {children}
+        </View>
+      )}
     </View>
   );
 }
