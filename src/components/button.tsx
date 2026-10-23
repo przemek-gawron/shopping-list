@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { Radius, tintFill } from '@/constants/theme';
+import { Border, font, Radius, tintFill } from '@/constants/theme';
 import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -45,11 +45,11 @@ const styles = StyleSheet.create({
   button: {
     minHeight: 48,
     borderRadius: Radius.control,
-    borderWidth: 1,
+    borderWidth: Border.control,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
-  label: { fontSize: 16, fontWeight: '700' },
+  label: { fontSize: 16, fontWeight: '700', ...font('button') },
   dim: { opacity: 0.6 },
 });

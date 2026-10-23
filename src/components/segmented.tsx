@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Radius } from '@/constants/theme';
+import { font, Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props<T extends string> = {
@@ -33,5 +33,5 @@ export function Segmented<T extends string>({ options, value, onChange }: Props<
 const styles = StyleSheet.create({
   root: { flexDirection: 'row', borderRadius: Radius.control, padding: 3 },
   option: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control - 2 },
-  label: { fontSize: 14, fontWeight: '600' },
+  label: { fontSize: 14, fontWeight: '600', ...font('button') },
 });

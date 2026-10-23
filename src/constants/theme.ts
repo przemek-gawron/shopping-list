@@ -69,6 +69,36 @@ export const Radius = {
   /** Buttons, inputs, segmented control */
   control: 12,
   photo: 14,
+  /** Chips and round buttons (add, undo, stepper) */
+  pill: 999,
+  checkbox: 7,
+};
+
+/** Border widths. */
+export const Border = {
+  card: 1,
+  /** Inputs, chips, secondary buttons */
+  control: 1,
+};
+
+/**
+ * Font families by role; undefined means the system font. Every family used here must be in
+ * `FontAssets`, which the root layout loads before hiding the splash screen.
+ */
+export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {};
+export const FontAssets: Record<string, number> = {};
+
+/** Style for a text role: the family, with the weight reset since custom families carry their own. */
+export function font(role: keyof typeof Fonts) {
+  const family = Fonts[role];
+  return family ? { fontFamily: family, fontWeight: 'normal' as const } : {};
+}
+
+/** Image tiled over every screen background (and cards), e.g. paper grain; null for none. */
+export const Texture: { light: number | null; dark: number | null; opacity: number } = {
+  light: null,
+  dark: null,
+  opacity: 1,
 };
 
 /** Style of a screen's background: the canvas colour with its gradient. */

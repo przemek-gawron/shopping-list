@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, View, type NativeScrollEvent, type Nat
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
-import { Radius, tintFill } from '@/constants/theme';
+import { Border, Radius, tintFill } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/i18n';
 import { addDays, formatDate, fromISO, startOfWeek, today } from '@/utils/dates';
@@ -147,7 +147,7 @@ function Day({ date, width, selected, picked, hasMeals, onPress }: DayProps) {
 }
 
 const styles = StyleSheet.create({
-  day: { alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
+  day: { alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: Border.control, gap: 2 },
   dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
   dot: { width: 5, height: 5, borderRadius: 3 },
   // same footprint as the plain dot plus margin, so the day does not grow

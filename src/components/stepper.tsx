@@ -5,6 +5,7 @@ import Animated, { FadeInDown, FadeInUp, LayoutAnimationConfig } from 'react-nat
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { Motion } from '@/constants/motion';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props = {
@@ -65,6 +66,6 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, 
 
 const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  button: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  button: { width: 34, height: 34, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
   value: { minWidth: 40, textAlign: 'center', fontWeight: '700' },
 });

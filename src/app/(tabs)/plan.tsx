@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   entryTitle: { flex: 1 },
   entryName: { fontWeight: '600' },
   cart: { fontSize: 13, lineHeight: 16, opacity: 0.6 },
-  checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  checkbox: { width: 24, height: 24, borderRadius: Radius.checkbox, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   generate: { gap: Spacing.two, marginTop: Spacing.two },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

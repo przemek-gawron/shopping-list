@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { tintFill } from '@/constants/theme';
+import { Border, font, Radius, tintFill } from '@/constants/theme';
 import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -34,6 +34,6 @@ export function Chip({ label, selected, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  chip: { maxWidth: '100%', borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
-  label: { fontSize: 14, fontWeight: '600' },
+  chip: { maxWidth: '100%', borderWidth: Border.control, borderRadius: Radius.pill, paddingHorizontal: 12, paddingVertical: 7 },
+  label: { fontSize: 14, fontWeight: '600', ...font('button') },
 });
