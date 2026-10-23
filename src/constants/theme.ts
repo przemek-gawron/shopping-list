@@ -79,7 +79,105 @@ export const Radius = {
  * gradient), `rotate` turns it (degrees).
  */
 export type BackdropShape = { style: ViewStyle; rotate?: number };
-export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = { light: [], dark: [] };
+/** Geometric: a large ring, a circle, a rounded square and a half-pill in see-through emerald, mint and gold. */
+export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = {
+  light: [
+    {
+      style: {
+        top: -100,
+        right: -120,
+        width: 320,
+        height: 320,
+        borderRadius: 160,
+        borderWidth: 40,
+        borderColor: 'rgba(15, 138, 111, 0.13)',
+      },
+    },
+    {
+      style: {
+        top: 170,
+        left: -80,
+        width: 180,
+        height: 180,
+        borderRadius: 90,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(52, 211, 166, 0.30) 0%, rgba(11, 79, 74, 0.04) 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: 150,
+        right: -50,
+        width: 190,
+        height: 190,
+        borderRadius: 48,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(201, 154, 46, 0.24) 0%, rgba(201, 154, 46, 0.03) 100%)',
+      },
+      rotate: 18,
+    },
+    {
+      style: {
+        bottom: -90,
+        left: -70,
+        width: 280,
+        height: 180,
+        borderRadius: 140,
+        experimental_backgroundImage:
+          'linear-gradient(90deg, rgba(15, 138, 111, 0.20) 0%, rgba(52, 211, 166, 0.04) 100%)',
+      },
+      rotate: -12,
+    },
+  ],
+  dark: [
+    {
+      style: {
+        top: -100,
+        right: -120,
+        width: 320,
+        height: 320,
+        borderRadius: 160,
+        borderWidth: 40,
+        borderColor: 'rgba(52, 211, 166, 0.08)',
+      },
+    },
+    {
+      style: {
+        top: 170,
+        left: -80,
+        width: 180,
+        height: 180,
+        borderRadius: 90,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(52, 211, 166, 0.22) 0%, rgba(52, 211, 166, 0.02) 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: 150,
+        right: -50,
+        width: 190,
+        height: 190,
+        borderRadius: 48,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(233, 196, 106, 0.16) 0%, rgba(233, 196, 106, 0.02) 100%)',
+      },
+      rotate: 18,
+    },
+    {
+      style: {
+        bottom: -90,
+        left: -70,
+        width: 280,
+        height: 180,
+        borderRadius: 140,
+        experimental_backgroundImage:
+          'linear-gradient(90deg, rgba(139, 111, 214, 0.22) 0%, rgba(52, 211, 166, 0.04) 100%)',
+      },
+      rotate: -12,
+    },
+  ],
+};
 
 /** Style of a screen's background: the canvas colour with its gradient. */
 export function screenFill(theme: ThemeColors) {
