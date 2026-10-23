@@ -1,77 +1,81 @@
+import { BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesque/700Bold';
+import { BricolageGrotesque_800ExtraBold } from '@expo-google-fonts/bricolage-grotesque/800ExtraBold';
+
 /**
  * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
  * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
  * Native draws itself (`experimental_backgroundImage`, `boxShadow`); undefined means none.
  *
- * Midnight Emerald – refined jewel tones: deep emerald with gold, dark mode first with frosted-
- * glass cards over an emerald → amethyst glow.
+ * Fresh Pop – bold and playful: chunky rounded cards on an off-white canvas, Bricolage Grotesque
+ * headlines, a tomato → raspberry gradient for actions with a violet accent, soft lifted shadows
+ * and no hairlines. Dark mode is near-black with the same punchy colours.
  */
 export const Colors = {
   light: {
-    text: '#0E1F1C',
-    textSecondary: '#5C6F6B',
+    text: '#141414',
+    textSecondary: '#6B6B66',
     /** Screen canvas */
-    background: '#EEF3F1',
+    background: '#F4F4EE',
     /** Drawn over `background` behind every screen; should start with the background colour at the top. */
-    backgroundGradient: 'linear-gradient(180deg, #EEF3F1 0%, #E1EBE8 100%)',
+    backgroundGradient: 'linear-gradient(180deg, #F4F4EE 0%, #EEEEE6 100%)',
     /** Brand colour: links, icons, selected states */
-    tint: '#0B6E5A',
+    tint: '#F2453D',
     /** Fill of primary actions (buttons, add button, selected chips and day); falls back to `tint`. */
-    tintGradient: 'linear-gradient(135deg, #0F8A6F 0%, #0B4F4A 100%)',
+    tintGradient: 'linear-gradient(135deg, #FF7A45 0%, #F23D5E 100%)',
     /** Text and icons on `tint` */
     onPrimary: '#FFFFFF',
-    accent: '#C99A2E',
-    destructive: '#C2410C',
-    icon: '#98A8A4',
-    border: 'rgba(11, 79, 74, 0.14)',
-    borderSubtle: 'rgba(11, 79, 74, 0.08)',
+    accent: '#7A5CFA',
+    destructive: '#D92638',
+    icon: '#A3A39D',
+    border: 'rgba(20, 20, 20, 0.10)',
+    borderSubtle: 'rgba(20, 20, 20, 0.03)',
     /** Cards, inputs, sheets */
-    cardBackground: 'rgba(255, 255, 255, 0.78)',
+    cardBackground: '#FFFFFF',
     /** Solid fill of notices floating over content (cards are see-through) */
     toastBackground: '#FFFFFF',
     /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
-    surfaceCard: '#DCE7E4',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
+    surfaceCard: '#ECECE4',
+    cardShadow: '0 1px 0 rgba(20, 20, 20, 0.03), 0 12px 28px rgba(20, 20, 20, 0.07)',
     /** Shadow under primary actions */
-    tintShadow: '0 8px 22px rgba(11, 79, 74, 0.35)',
+    tintShadow: '0 10px 22px rgba(242, 61, 94, 0.32)',
     /** Plan statistics: meals from a recipe, ordered in, without a recipe (checked for colour-blind separation) */
-    chartRecipe: '#0F8A6F',
-    chartOrdered: '#C46A1C',
-    chartNote: '#8B6FD6',
+    chartRecipe: '#1FA971',
+    chartOrdered: '#FF6B35',
+    chartNote: '#7A5CFA',
   },
   dark: {
-    text: '#E8F5F1',
-    textSecondary: '#8FA9A3',
-    background: '#0B1F1C',
-    backgroundGradient: 'linear-gradient(165deg, #0B1F1C 0%, #081412 45%, #150F24 100%)',
-    tint: '#34D3A6',
-    tintGradient: 'linear-gradient(135deg, #3BE0B0 0%, #15A68A 100%)',
-    onPrimary: '#04211B',
-    accent: '#E9C46A',
-    destructive: '#FB7185',
-    icon: '#55706A',
-    border: 'rgba(52, 211, 166, 0.18)',
-    borderSubtle: 'rgba(255, 255, 255, 0.08)',
-    cardBackground: 'rgba(255, 255, 255, 0.05)',
-    toastBackground: '#17312C',
-    surfaceCard: 'rgba(255, 255, 255, 0.08)',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
-    tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
-    chartRecipe: '#22A47E',
-    chartOrdered: '#BF7A22',
-    chartNote: '#8A72D9',
+    text: '#F5F5F0',
+    textSecondary: '#9B9B96',
+    background: '#0F0F10',
+    backgroundGradient: 'linear-gradient(180deg, #0F0F10 0%, #0B0B0C 100%)',
+    tint: '#FF6A4D',
+    tintGradient: 'linear-gradient(135deg, #FF8A5B 0%, #FF4D6D 100%)',
+    onPrimary: '#FFFFFF',
+    accent: '#B9A6FF',
+    destructive: '#FF6B7A',
+    icon: '#5E5E5A',
+    border: 'rgba(255, 255, 255, 0.10)',
+    borderSubtle: 'rgba(255, 255, 255, 0.04)',
+    cardBackground: '#1C1C1E',
+    toastBackground: '#26262A',
+    surfaceCard: '#2A2A2E',
+    cardShadow: '0 12px 28px rgba(0, 0, 0, 0.40)',
+    tintShadow: '0 10px 26px rgba(255, 77, 109, 0.32)',
+    chartRecipe: '#2FC487',
+    chartOrdered: '#FF7A45',
+    chartNote: '#9C86FF',
   },
 };
 
 /** Corner radii. */
 export const Radius = {
-  card: 18,
+  card: 26,
   /** Buttons, inputs, segmented control */
-  control: 12,
-  photo: 14,
+  control: 16,
+  photo: 20,
   /** Chips and round buttons (add, undo, stepper) */
   pill: 999,
-  checkbox: 7,
+  checkbox: 8,
 };
 
 /** Border widths. */
@@ -85,8 +89,13 @@ export const Border = {
  * Font families by role; undefined means the system font. Every family used here must be in
  * `FontAssets`, which the root layout loads before hiding the splash screen.
  */
-export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {};
-export const FontAssets: Record<string, number> = {};
+export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {
+  title: 'BricolageGrotesque_800ExtraBold',
+  heading: 'BricolageGrotesque_700Bold',
+  label: 'BricolageGrotesque_700Bold',
+  button: 'BricolageGrotesque_700Bold',
+};
+export const FontAssets: Record<string, number> = { BricolageGrotesque_700Bold, BricolageGrotesque_800ExtraBold };
 
 /** Style for a text role: the family, with the weight reset since custom families carry their own. */
 export function font(role: keyof typeof Fonts) {
