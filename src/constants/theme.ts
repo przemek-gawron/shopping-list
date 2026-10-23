@@ -1,77 +1,80 @@
+import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces/600SemiBold';
+
 /**
  * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
  * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
  * Native draws itself (`experimental_backgroundImage`, `boxShadow`); undefined means none.
  *
- * Midnight Emerald – refined jewel tones: deep emerald with gold, dark mode first with frosted-
- * glass cards over an emerald → amethyst glow.
+ * Cookbook – warm editorial: cream recipe-card paper, a Fraunces serif for titles, terracotta
+ * accent with olive, flat fills and hairline borders instead of glass and glow. Dark mode is an
+ * espresso-brown evening version of the same page.
  */
 export const Colors = {
   light: {
-    text: '#0E1F1C',
-    textSecondary: '#5C6F6B',
+    text: '#2A211A',
+    textSecondary: '#7A6A5C',
     /** Screen canvas */
-    background: '#EEF3F1',
+    background: '#F7F1E6',
     /** Drawn over `background` behind every screen; should start with the background colour at the top. */
-    backgroundGradient: 'linear-gradient(180deg, #EEF3F1 0%, #E1EBE8 100%)',
+    backgroundGradient: 'linear-gradient(180deg, #F7F1E6 0%, #F0E6D4 100%)',
     /** Brand colour: links, icons, selected states */
-    tint: '#0B6E5A',
+    tint: '#B5502C',
     /** Fill of primary actions (buttons, add button, selected chips and day); falls back to `tint`. */
-    tintGradient: 'linear-gradient(135deg, #0F8A6F 0%, #0B4F4A 100%)',
+    tintGradient: undefined as string | undefined,
     /** Text and icons on `tint` */
     onPrimary: '#FFFFFF',
-    accent: '#C99A2E',
-    destructive: '#C2410C',
-    icon: '#98A8A4',
-    border: 'rgba(11, 79, 74, 0.14)',
-    borderSubtle: 'rgba(11, 79, 74, 0.08)',
+    accent: '#6B7A3A',
+    destructive: '#A8321E',
+    icon: '#B3A493',
+    border: 'rgba(42, 33, 26, 0.16)',
+    borderSubtle: 'rgba(42, 33, 26, 0.08)',
     /** Cards, inputs, sheets */
-    cardBackground: 'rgba(255, 255, 255, 0.78)',
+    cardBackground: '#FFFDF8',
     /** Solid fill of notices floating over content (cards are see-through) */
-    toastBackground: '#FFFFFF',
+    toastBackground: '#FFFDF8',
     /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
-    surfaceCard: '#DCE7E4',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
+    surfaceCard: '#EFE5D3',
+    cardShadow: '0 1px 2px rgba(42, 33, 26, 0.06), 0 6px 18px rgba(42, 33, 26, 0.06)',
     /** Shadow under primary actions */
-    tintShadow: '0 8px 22px rgba(11, 79, 74, 0.35)',
+    tintShadow: '0 4px 12px rgba(181, 80, 44, 0.22)',
     /** Plan statistics: meals from a recipe, ordered in, without a recipe (checked for colour-blind separation) */
-    chartRecipe: '#0F8A6F',
-    chartOrdered: '#C46A1C',
-    chartNote: '#8B6FD6',
+    chartRecipe: '#6B7A3A',
+    chartOrdered: '#B5502C',
+    chartNote: '#7B6BB0',
   },
   dark: {
-    text: '#E8F5F1',
-    textSecondary: '#8FA9A3',
-    background: '#0B1F1C',
-    backgroundGradient: 'linear-gradient(165deg, #0B1F1C 0%, #081412 45%, #150F24 100%)',
-    tint: '#34D3A6',
-    tintGradient: 'linear-gradient(135deg, #3BE0B0 0%, #15A68A 100%)',
-    onPrimary: '#04211B',
-    accent: '#E9C46A',
-    destructive: '#FB7185',
-    icon: '#55706A',
-    border: 'rgba(52, 211, 166, 0.18)',
-    borderSubtle: 'rgba(255, 255, 255, 0.08)',
-    cardBackground: 'rgba(255, 255, 255, 0.05)',
-    toastBackground: '#17312C',
-    surfaceCard: 'rgba(255, 255, 255, 0.08)',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
-    tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
-    chartRecipe: '#22A47E',
-    chartOrdered: '#BF7A22',
-    chartNote: '#8A72D9',
+    text: '#F2E9DC',
+    textSecondary: '#A8998A',
+    background: '#1A1613',
+    backgroundGradient: 'linear-gradient(180deg, #1A1613 0%, #13100D 100%)',
+    tint: '#E3845A',
+    tintGradient: undefined,
+    onPrimary: '#1A1613',
+    accent: '#A9B86A',
+    destructive: '#F08068',
+    icon: '#6A5D51',
+    border: 'rgba(242, 233, 220, 0.16)',
+    borderSubtle: 'rgba(242, 233, 220, 0.07)',
+    cardBackground: '#24201B',
+    toastBackground: '#2B2621',
+    surfaceCard: '#322C26',
+    cardShadow: '0 8px 24px rgba(0, 0, 0, 0.30)',
+    tintShadow: '0 4px 14px rgba(227, 132, 90, 0.22)',
+    chartRecipe: '#93A35A',
+    chartOrdered: '#D9774C',
+    chartNote: '#9C8BD3',
   },
 };
 
 /** Corner radii. */
 export const Radius = {
-  card: 18,
+  card: 14,
   /** Buttons, inputs, segmented control */
-  control: 12,
-  photo: 14,
+  control: 10,
+  photo: 10,
   /** Chips and round buttons (add, undo, stepper) */
   pill: 999,
-  checkbox: 7,
+  checkbox: 6,
 };
 
 /** Border widths. */
@@ -85,8 +88,11 @@ export const Border = {
  * Font families by role; undefined means the system font. Every family used here must be in
  * `FontAssets`, which the root layout loads before hiding the splash screen.
  */
-export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {};
-export const FontAssets: Record<string, number> = {};
+export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {
+  title: 'Fraunces_600SemiBold',
+  heading: 'Fraunces_600SemiBold',
+};
+export const FontAssets: Record<string, number> = { Fraunces_600SemiBold };
 
 /** Style for a text role: the family, with the weight reset since custom families carry their own. */
 export function font(role: keyof typeof Fonts) {
