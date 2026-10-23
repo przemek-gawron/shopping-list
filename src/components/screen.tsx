@@ -3,6 +3,7 @@ import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KeyboardDoneBar } from '@/components/keyboard-done';
+import { BackdropLayer } from '@/components/backdrop';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, screenFill, Spacing, WideContentWidth } from '@/constants/theme';
 import { useKeyboardInset } from '@/hooks/use-keyboard-inset';
@@ -43,6 +44,7 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
 
   return (
     <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
+      <BackdropLayer />
       {scroll ? (
         <ScrollView
           style={{ marginBottom: keyboardInset }}
@@ -98,6 +100,7 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
 
   return (
     <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
+      <BackdropLayer />
       <ScrollView
         ref={scrollRef}
         onScroll={(e) => (offset.current = e.nativeEvent.contentOffset.y)}
