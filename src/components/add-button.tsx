@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { tintFill } from '@/constants/theme';
+import { Radius, tintFill } from '@/constants/theme';
 import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -29,7 +29,7 @@ export function AddButton({ onPress, accessibilityLabel }: Props) {
 }
 
 const styles = StyleSheet.create({
-  button: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  button: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
   horizontal: { position: 'absolute', width: 16, height: 2.5, borderRadius: 1.25 },
   vertical: { position: 'absolute', width: 2.5, height: 16, borderRadius: 1.25 },
 });

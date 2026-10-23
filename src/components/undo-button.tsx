@@ -4,6 +4,7 @@ import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Motion } from '@/constants/motion';
 import { usePressScale } from '@/hooks/use-press-scale';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -30,5 +31,5 @@ export function UndoButton({ onPress, accessibilityLabel }: { onPress: () => voi
 }
 
 const styles = StyleSheet.create({
-  button: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  button: { width: 40, height: 40, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center' },
 });

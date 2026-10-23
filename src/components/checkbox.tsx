@@ -2,6 +2,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -38,5 +39,5 @@ export function Checkbox({ checked, onPress, accessibilityLabel }: Props) {
 }
 
 const styles = StyleSheet.create({
-  box: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  box: { width: 24, height: 24, borderRadius: Radius.checkbox, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 });

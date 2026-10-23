@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isRunningInExpoGo } from 'expo';
+import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -8,7 +9,7 @@ import { Platform, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { UpdateToast } from '@/components/update-toast';
-import { Colors } from '@/constants/theme';
+import { Colors, font, FontAssets } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useT } from '@/i18n';
@@ -39,16 +40,19 @@ export default function RootLayout() {
     (onChange) => useStore.persist.onFinishHydration(onChange),
     () => useStore.persist.hasHydrated(),
   );
+  // a font that fails to load falls back to the system font rather than keeping the splash up
+  const [fontsLoaded, fontError] = useFonts(FontAssets);
+  const ready = hydrated && (fontsLoaded || !!fontError);
 
   useEffect(() => {
     void AsyncStorage.multiRemove(LEGACY_KEYS).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!ready) return;
     const timer = setTimeout(() => SplashScreen.hide(), Math.max(0, SPLASH_MIN_MS - (Date.now() - launchedAt)));
     return () => clearTimeout(timer);
-  }, [hydrated]);
+  }, [ready]);
 
   const navigationTheme = useMemo(() => {
     const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
@@ -66,7 +70,7 @@ export default function RootLayout() {
     };
   }, [scheme, colors]);
 
-  if (!hydrated) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
+  if (!ready) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
 
   // iOS modals have no back arrow; without this the only way out is the swipe-down gesture.
   // The header is see-through there, so the form scrolls under it instead of being cut off at its edge
@@ -97,7 +101,7 @@ export default function RootLayout() {
             headerTitleAlign: 'center',
             headerTintColor: colors.tint,
             headerStyle: { backgroundColor: colors.background },
-            headerTitleStyle: { color: colors.text },
+            headerTitleStyle: { color: colors.text, ...font('heading') },
             headerBackTitle: t('back'),
             contentStyle: { backgroundColor: colors.background },
           }}>

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-nat
 import Animated from 'react-native-reanimated';
 
 import { unlessSwiping } from '@/components/swipe-to-delete';
-import { Radius } from '@/constants/theme';
+import { Border, Radius } from '@/constants/theme';
 import { usePressScale } from '@/hooks/use-press-scale';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -50,5 +50,5 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: Radius.card, borderWidth: 1, padding: 14 },
+  card: { borderRadius: Radius.card, borderWidth: Border.card, padding: 14 },
 });
