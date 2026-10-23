@@ -79,7 +79,145 @@ export const Radius = {
  * gradient), `rotate` turns it (degrees).
  */
 export type BackdropShape = { style: ViewStyle; rotate?: number };
-export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = { light: [], dark: [] };
+/** Organic: gradient leaves and a soft blob, a nod to fresh produce. */
+export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = {
+  light: [
+    {
+      style: {
+        top: -70,
+        right: -60,
+        width: 240,
+        height: 240,
+        borderTopLeftRadius: 240,
+        borderBottomRightRadius: 240,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(15, 138, 111, 0.30) 0%, rgba(52, 211, 166, 0.06) 100%)',
+      },
+      rotate: 15,
+    },
+    {
+      style: {
+        top: 40,
+        right: 140,
+        width: 110,
+        height: 110,
+        borderTopLeftRadius: 110,
+        borderBottomRightRadius: 110,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(52, 211, 166, 0.24) 0%, rgba(52, 211, 166, 0.04) 100%)',
+      },
+      rotate: -25,
+    },
+    {
+      style: {
+        bottom: 110,
+        left: -130,
+        width: 320,
+        height: 280,
+        borderTopLeftRadius: 170,
+        borderTopRightRadius: 120,
+        borderBottomRightRadius: 190,
+        borderBottomLeftRadius: 90,
+        experimental_backgroundImage:
+          'linear-gradient(160deg, rgba(139, 111, 214, 0.16) 0%, rgba(15, 138, 111, 0.10) 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: -50,
+        right: -40,
+        width: 210,
+        height: 210,
+        borderTopLeftRadius: 210,
+        borderBottomRightRadius: 210,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(201, 154, 46, 0.24) 0%, rgba(201, 154, 46, 0.03) 100%)',
+      },
+      rotate: -60,
+    },
+    {
+      style: {
+        top: 340,
+        left: 14,
+        width: 60,
+        height: 60,
+        borderTopLeftRadius: 60,
+        borderBottomRightRadius: 60,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(15, 138, 111, 0.24) 0%, rgba(15, 138, 111, 0.05) 100%)',
+      },
+      rotate: 40,
+    },
+  ],
+  dark: [
+    {
+      style: {
+        top: -70,
+        right: -60,
+        width: 240,
+        height: 240,
+        borderTopLeftRadius: 240,
+        borderBottomRightRadius: 240,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(52, 211, 166, 0.22) 0%, rgba(52, 211, 166, 0.03) 100%)',
+      },
+      rotate: 15,
+    },
+    {
+      style: {
+        top: 40,
+        right: 140,
+        width: 110,
+        height: 110,
+        borderTopLeftRadius: 110,
+        borderBottomRightRadius: 110,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(21, 166, 138, 0.22) 0%, rgba(21, 166, 138, 0.03) 100%)',
+      },
+      rotate: -25,
+    },
+    {
+      style: {
+        bottom: 110,
+        left: -130,
+        width: 320,
+        height: 280,
+        borderTopLeftRadius: 170,
+        borderTopRightRadius: 120,
+        borderBottomRightRadius: 190,
+        borderBottomLeftRadius: 90,
+        experimental_backgroundImage:
+          'linear-gradient(160deg, rgba(139, 111, 214, 0.24) 0%, rgba(52, 211, 166, 0.05) 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: -50,
+        right: -40,
+        width: 210,
+        height: 210,
+        borderTopLeftRadius: 210,
+        borderBottomRightRadius: 210,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(233, 196, 106, 0.16) 0%, rgba(233, 196, 106, 0.02) 100%)',
+      },
+      rotate: -60,
+    },
+    {
+      style: {
+        top: 340,
+        left: 14,
+        width: 60,
+        height: 60,
+        borderTopLeftRadius: 60,
+        borderBottomRightRadius: 60,
+        experimental_backgroundImage:
+          'linear-gradient(135deg, rgba(52, 211, 166, 0.22) 0%, rgba(52, 211, 166, 0.04) 100%)',
+      },
+      rotate: 40,
+    },
+  ],
+};
 
 /** Style of a screen's background: the canvas colour with its gradient. */
 export function screenFill(theme: ThemeColors) {
