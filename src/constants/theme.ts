@@ -79,7 +79,93 @@ export const Radius = {
  * gradient), `rotate` turns it (degrees).
  */
 export type BackdropShape = { style: ViewStyle; rotate?: number };
-export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = { light: [], dark: [] };
+/** Aurora: big soft glows in emerald, mint, amethyst and gold, like northern lights. */
+export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = {
+  light: [
+    {
+      style: {
+        top: -140,
+        left: -120,
+        width: 420,
+        height: 420,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(15, 138, 111, 0.46) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        top: 200,
+        right: -160,
+        width: 380,
+        height: 380,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(52, 211, 166, 0.42) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: -160,
+        left: -80,
+        width: 460,
+        height: 460,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(139, 111, 214, 0.30) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        top: 90,
+        right: 10,
+        width: 180,
+        height: 180,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(201, 154, 46, 0.30) 0%, transparent 100%)',
+      },
+    },
+  ],
+  dark: [
+    {
+      style: {
+        top: -140,
+        left: -120,
+        width: 420,
+        height: 420,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(52, 211, 166, 0.26) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        top: 200,
+        right: -160,
+        width: 380,
+        height: 380,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(21, 166, 138, 0.24) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        bottom: -160,
+        left: -80,
+        width: 460,
+        height: 460,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(139, 111, 214, 0.30) 0%, transparent 100%)',
+      },
+    },
+    {
+      style: {
+        top: 90,
+        right: 10,
+        width: 180,
+        height: 180,
+        experimental_backgroundImage:
+          'radial-gradient(circle closest-side, rgba(233, 196, 106, 0.14) 0%, transparent 100%)',
+      },
+    },
+  ],
+};
 
 /** Style of a screen's background: the canvas colour with its gradient. */
 export function screenFill(theme: ThemeColors) {
