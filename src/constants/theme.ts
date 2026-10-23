@@ -1,3 +1,5 @@
+import type { ViewStyle } from 'react-native';
+
 /**
  * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
  * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
@@ -70,6 +72,14 @@ export const Radius = {
   control: 12,
   photo: 14,
 };
+
+/**
+ * Decorative shapes drawn behind every screen (tab screens and pushed / modal pages), fixed while
+ * the content scrolls. `style` places and paints the shape (absolute position, size, radius,
+ * gradient), `rotate` turns it (degrees).
+ */
+export type BackdropShape = { style: ViewStyle; rotate?: number };
+export const Backdrop: Record<'light' | 'dark', BackdropShape[]> = { light: [], dark: [] };
 
 /** Style of a screen's background: the canvas colour with its gradient. */
 export function screenFill(theme: ThemeColors) {
