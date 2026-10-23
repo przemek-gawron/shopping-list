@@ -1,92 +1,101 @@
+import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk/700Bold';
+import { SpaceMono_700Bold } from '@expo-google-fonts/space-mono/700Bold';
+
 /**
  * The app's look. Every colour, gradient, shadow and corner radius lives here, so a redesign is
  * mostly a matter of changing these values. Gradients and shadows are CSS strings that React
  * Native draws itself (`experimental_backgroundImage`, `boxShadow`); undefined means none.
  *
- * Midnight Emerald – refined jewel tones: deep emerald with gold, dark mode first with frosted-
- * glass cards over an emerald → amethyst glow.
+ * Raw Kraft – tactile brutalism: recycled-paper grain under everything, ink-black 2 px outlines,
+ * hard offset shadows instead of blur, square corners, a signal-orange accent and monospaced labels,
+ * like a printed market list. Dark mode is the same sheet in charcoal with chalk lines.
  */
 export const Colors = {
   light: {
-    text: '#0E1F1C',
-    textSecondary: '#5C6F6B',
+    text: '#16130F',
+    textSecondary: '#5E554A',
     /** Screen canvas */
-    background: '#EEF3F1',
+    background: '#E9E1CF',
     /** Drawn over `background` behind every screen; should start with the background colour at the top. */
-    backgroundGradient: 'linear-gradient(180deg, #EEF3F1 0%, #E1EBE8 100%)',
+    backgroundGradient: 'linear-gradient(180deg, #E9E1CF 0%, #E2D7BF 100%)' as string | undefined,
     /** Brand colour: links, icons, selected states */
-    tint: '#0B6E5A',
+    tint: '#D9381A',
     /** Fill of primary actions (buttons, add button, selected chips and day); falls back to `tint`. */
-    tintGradient: 'linear-gradient(135deg, #0F8A6F 0%, #0B4F4A 100%)',
+    tintGradient: undefined as string | undefined,
     /** Text and icons on `tint` */
-    onPrimary: '#FFFFFF',
-    accent: '#C99A2E',
-    destructive: '#C2410C',
-    icon: '#98A8A4',
-    border: 'rgba(11, 79, 74, 0.14)',
-    borderSubtle: 'rgba(11, 79, 74, 0.08)',
+    onPrimary: '#FFF8EC',
+    accent: '#E8B21E',
+    destructive: '#A32418',
+    icon: '#8A7F70',
+    border: '#16130F',
+    borderSubtle: '#16130F',
     /** Cards, inputs, sheets */
-    cardBackground: 'rgba(255, 255, 255, 0.78)',
+    cardBackground: 'rgba(252, 248, 239, 0.86)',
     /** Solid fill of notices floating over content (cards are see-through) */
-    toastBackground: '#FFFFFF',
+    toastBackground: '#FCF8EF',
     /** Quiet fills: stepper buttons, photo placeholders, section headers, progress track */
-    surfaceCard: '#DCE7E4',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 30px rgba(11, 79, 74, 0.10)',
+    surfaceCard: '#D8CDB4',
+    cardShadow: '4px 4px 0 #16130F',
     /** Shadow under primary actions */
-    tintShadow: '0 8px 22px rgba(11, 79, 74, 0.35)',
+    tintShadow: '3px 3px 0 #16130F',
     /** Plan statistics: meals from a recipe, ordered in, without a recipe (checked for colour-blind separation) */
-    chartRecipe: '#0F8A6F',
-    chartOrdered: '#C46A1C',
-    chartNote: '#8B6FD6',
+    chartRecipe: '#2F6B4F',
+    chartOrdered: '#D9381A',
+    chartNote: '#3E5C9A',
   },
   dark: {
-    text: '#E8F5F1',
-    textSecondary: '#8FA9A3',
-    background: '#0B1F1C',
-    backgroundGradient: 'linear-gradient(165deg, #0B1F1C 0%, #081412 45%, #150F24 100%)',
-    tint: '#34D3A6',
-    tintGradient: 'linear-gradient(135deg, #3BE0B0 0%, #15A68A 100%)',
-    onPrimary: '#04211B',
-    accent: '#E9C46A',
-    destructive: '#FB7185',
-    icon: '#55706A',
-    border: 'rgba(52, 211, 166, 0.18)',
-    borderSubtle: 'rgba(255, 255, 255, 0.08)',
-    cardBackground: 'rgba(255, 255, 255, 0.05)',
-    toastBackground: '#17312C',
-    surfaceCard: 'rgba(255, 255, 255, 0.08)',
-    cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.45)',
-    tintShadow: '0 8px 26px rgba(52, 211, 166, 0.30)',
-    chartRecipe: '#22A47E',
-    chartOrdered: '#BF7A22',
-    chartNote: '#8A72D9',
+    text: '#F1E9D8',
+    textSecondary: '#A99E8A',
+    background: '#1C1A16',
+    backgroundGradient: 'linear-gradient(180deg, #1C1A16 0%, #15130F 100%)',
+    tint: '#FF6A3D',
+    tintGradient: undefined,
+    onPrimary: '#16130F',
+    accent: '#F2C230',
+    destructive: '#FF7466',
+    icon: '#6E665A',
+    border: '#E6DCC6',
+    borderSubtle: 'rgba(230, 220, 198, 0.8)',
+    cardBackground: 'rgba(40, 37, 31, 0.88)',
+    toastBackground: '#28251F',
+    surfaceCard: '#35302A',
+    cardShadow: '4px 4px 0 #000000',
+    tintShadow: '3px 3px 0 #000000',
+    chartRecipe: '#4FA57B',
+    chartOrdered: '#FF6A3D',
+    chartNote: '#7D97D6',
   },
 };
 
 /** Corner radii. */
 export const Radius = {
-  card: 18,
+  card: 4,
   /** Buttons, inputs, segmented control */
-  control: 12,
-  photo: 14,
+  control: 3,
+  photo: 2,
   /** Chips and round buttons (add, undo, stepper) */
-  pill: 999,
-  checkbox: 7,
+  pill: 3,
+  checkbox: 2,
 };
 
 /** Border widths. */
 export const Border = {
-  card: 1,
+  card: 2,
   /** Inputs, chips, secondary buttons */
-  control: 1,
+  control: 2,
 };
 
 /**
  * Font families by role; undefined means the system font. Every family used here must be in
  * `FontAssets`, which the root layout loads before hiding the splash screen.
  */
-export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {};
-export const FontAssets: Record<string, number> = {};
+export const Fonts: { title?: string; heading?: string; label?: string; button?: string } = {
+  title: 'SpaceGrotesk_700Bold',
+  heading: 'SpaceGrotesk_700Bold',
+  label: 'SpaceMono_700Bold',
+  button: 'SpaceMono_700Bold',
+};
+export const FontAssets: Record<string, number> = { SpaceGrotesk_700Bold, SpaceMono_700Bold };
 
 /** Style for a text role: the family, with the weight reset since custom families carry their own. */
 export function font(role: keyof typeof Fonts) {
@@ -96,8 +105,8 @@ export function font(role: keyof typeof Fonts) {
 
 /** Image tiled over every screen background (and cards), e.g. paper grain; null for none. */
 export const Texture: { light: number | null; dark: number | null; opacity: number } = {
-  light: null,
-  dark: null,
+  light: require('../../assets/textures/paper-light.png'),
+  dark: require('../../assets/textures/paper-dark.png'),
   opacity: 1,
 };
 
