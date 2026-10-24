@@ -1,4 +1,5 @@
-import { Modal, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackdropLayer } from '@/components/backdrop';
@@ -33,6 +34,10 @@ export function RecipePreview({ recipeId, onClose, onChoose }: Props) {
   const recipe = useStore((s) => s.recipes.find((r) => r.id === recipeId));
   const group = useStore((s) => s.groups.find((g) => g.id === recipe?.groupId));
   const products = useStore((s) => s.products);
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   return (
     <Modal
@@ -43,8 +48,10 @@ export function RecipePreview({ recipeId, onClose, onChoose }: Props) {
       onRequestClose={onClose}>
       {recipe && (
         <View style={[styles.root, screenFill(theme)]}>
-          <BackdropLayer />
-          <ScrollView
+          <BackdropLayer scrollY={scrollY} />
+          <Animated.ScrollView
+            onScroll={onScroll}
+            scrollEventThrottle={16}
             contentContainerStyle={[
               styles.content,
               // a page sheet starts below the status bar; full-screen Android modals do not
@@ -74,7 +81,7 @@ export function RecipePreview({ recipeId, onClose, onChoose }: Props) {
               ))}
             </Card>
             <Button label={t('preview_choose')} onPress={() => onChoose(recipe.id)} />
-          </ScrollView>
+          </Animated.ScrollView>
         </View>
       )}
     </Modal>

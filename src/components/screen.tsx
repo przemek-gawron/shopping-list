@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useRef, type ReactNode, type RefObject } from 'react';
-import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackdropLayer } from '@/components/backdrop';
@@ -31,6 +32,10 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
   const top = useSafeAreaInsets().top;
   const bottom = useTabBarInset() + Spacing.four;
   const { ref: pageRef, inset: keyboardInset } = useKeyboardInset();
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   const header = (
     <View style={styles.header}>
@@ -43,9 +48,11 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
 
   return (
     <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
-      <BackdropLayer />
+      <BackdropLayer scrollY={scroll ? scrollY : undefined} />
       {scroll ? (
-        <ScrollView
+        <Animated.ScrollView
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           style={{ marginBottom: keyboardInset }}
           contentContainerStyle={[styles.content, maxWidth, { paddingTop: top + Spacing.three, paddingBottom: bottom }]}
           automaticallyAdjustKeyboardInsets
@@ -53,7 +60,7 @@ export function Screen({ title, action, children, scroll = true, wide = false }:
           keyboardShouldPersistTaps="handled">
           {header}
           {children}
-        </ScrollView>
+        </Animated.ScrollView>
       ) : (
         <View style={[styles.root, styles.wide, maxWidth, { paddingTop: top, marginBottom: keyboardInset }]}>
           <View style={styles.headerPad}>{header}</View>
@@ -82,8 +89,11 @@ const SCROLL_MARGIN = Spacing.three;
 export function Page({ children, bottomPad = Spacing.five }: { children: ReactNode; bottomPad?: number }) {
   const theme = useTheme();
   const { ref: pageRef, inset: keyboardInset } = useKeyboardInset();
-  const scrollRef = useRef<ScrollView>(null);
-  const offset = useRef(0);
+  const scrollRef = useRef<Animated.ScrollView>(null);
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   const scrollIntoView = useCallback<ScrollIntoView>((target) => {
     const scroll = scrollRef.current;
@@ -92,17 +102,17 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
       target.current?.measureInWindow((_x, y, _width, height) => {
         const visibleBottom = Math.min(pageY + pageHeight, Keyboard.metrics()?.screenY ?? Infinity);
         const overflow = y + height + SCROLL_MARGIN - visibleBottom;
-        if (overflow > 0) scroll.scrollTo({ y: offset.current + overflow, animated: true });
+        if (overflow > 0) scroll.scrollTo({ y: scrollY.value + overflow, animated: true });
       }),
     );
-  }, [pageRef]);
+  }, [pageRef, scrollY]);
 
   return (
     <View style={[styles.root, screenFill(theme)]} ref={pageRef}>
-      <BackdropLayer />
-      <ScrollView
+      <BackdropLayer scrollY={scrollY} />
+      <Animated.ScrollView
         ref={scrollRef}
-        onScroll={(e) => (offset.current = e.nativeEvent.contentOffset.y)}
+        onScroll={onScroll}
         scrollEventThrottle={16}
         style={{ marginBottom: keyboardInset }}
         contentInsetAdjustmentBehavior="automatic"
@@ -112,7 +122,7 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
         <ScrollIntoViewContext value={scrollIntoView}>{children}</ScrollIntoViewContext>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
