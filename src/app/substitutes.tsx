@@ -5,7 +5,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { Field } from '@/components/field';
-import { KEYBOARD_DONE } from '@/components/keyboard-done';
+import { KeyboardDoneBar } from '@/components/keyboard-done';
 import { Page } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -72,9 +72,10 @@ export default function SubstitutesScreen() {
                 value={item.quantity}
                 onChangeText={(quantity) => patchItem(group.id, index, { quantity })}
                 keyboardType="decimal-pad"
-                inputAccessoryViewID={KEYBOARD_DONE}
+                inputAccessoryViewID={`done-${group.id}-${index}`}
                 style={[styles.input, styles.quantity, inputStyle]}
               />
+              <KeyboardDoneBar nativeID={`done-${group.id}-${index}`} />
               <Chip
                 label={t(`unit_${item.unit}`)}
                 onPress={() => patchItem(group.id, index, { unit: UNIT_CYCLE[(UNIT_CYCLE.indexOf(item.unit) + 1) % UNIT_CYCLE.length] })}

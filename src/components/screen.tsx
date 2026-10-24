@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useRef, type ReactNode, type Re
 import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardDoneBar } from '@/components/keyboard-done';
 import { BackdropLayer } from '@/components/backdrop';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, screenFill, Spacing, WideContentWidth } from '@/constants/theme';
@@ -114,7 +113,6 @@ export function Page({ children, bottomPad = Spacing.five }: { children: ReactNo
         contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
         <ScrollIntoViewContext value={scrollIntoView}>{children}</ScrollIntoViewContext>
       </ScrollView>
-      <KeyboardDoneBar />
     </View>
   );
 }
