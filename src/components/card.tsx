@@ -13,6 +13,7 @@ type AnimatedViewProps = ComponentProps<typeof Animated.View>;
 type Props = {
   children: ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
   /** false keeps the buttons inside a pressable card reachable for screen readers. */
   accessible?: boolean;
@@ -23,7 +24,7 @@ type Props = {
 };
 
 /** Rounded surface; pressable when `onPress` is given. */
-export function Card({ children, onPress, style, accessible, layout, entering, exiting }: Props) {
+export function Card({ children, onPress, onLongPress, style, accessible, layout, entering, exiting }: Props) {
   const theme = useTheme();
   const press = usePressScale(0.98);
   const base = [styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderSubtle, boxShadow: theme.cardShadow }, style];
@@ -37,6 +38,7 @@ export function Card({ children, onPress, style, accessible, layout, entering, e
   const card = (
     <AnimatedPressable
       onPress={unlessSwiping(onPress)}
+      onLongPress={onLongPress && unlessSwiping(onLongPress)}
       onPressIn={press.onPressIn}
       onPressOut={press.onPressOut}
       accessible={accessible}

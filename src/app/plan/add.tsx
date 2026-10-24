@@ -1,17 +1,19 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
 import { MenuSections } from '@/components/menu-sections';
+import { RecipePreview } from '@/components/recipe-preview';
 import { Page } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { ServingsChips, ServingsStepper } from '@/components/servings';
 import { Stars } from '@/components/stars';
 import { ThemedText } from '@/components/themed-text';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing } from '@/constants/theme';
 import { byGroupThenTitle, groupForSlot, useSlotName } from '@/data/labels';
 import { useStore } from '@/data/store';
@@ -48,6 +50,8 @@ export default function PlanAddScreen() {
   const [servings, setServings] = useState(1);
   const [query, setQuery] = useState('');
   const [showMultipliers, setShowMultipliers] = useState(false);
+  // recipe looked at before picking it (long press or the eye button)
+  const [previewId, setPreviewId] = useState<string | null>(null);
   // opened from a meal of the plan: start with the recipes of the matching group ("Obiad" -> "Obiady")
   const [groupFilter, setGroupFilter] = useState<string | null>(() => {
     const index = slots.findIndex((s) => s.id === params.slotId);
@@ -148,7 +152,10 @@ export default function PlanAddScreen() {
         <View style={styles.section}>
           <ThemedText type="label">{t('recipe')}</ThemedText>
           {chosen || note ? (
-            <Card style={styles.chosen} onPress={() => (note ? setNote(null) : setRecipeId(null))}>
+            <Card
+              style={styles.chosen}
+              onPress={() => (note ? setNote(null) : setRecipeId(null))}
+              onLongPress={chosen ? () => setPreviewId(chosen.id) : undefined}>
               <View style={styles.chosenName}>
                 <ThemedText style={styles.chosenTitle} numberOfLines={2}>
                   {note ?? chosen?.title}
@@ -177,6 +184,7 @@ export default function PlanAddScreen() {
               ) : (
                 <ThemedText type="small">{t('plan_note_hint')}</ThemedText>
               )}
+              {matches.length > 0 && <ThemedText type="small">{t('preview_hint')}</ThemedText>}
               {groups.length > 0 && (
                 <View style={styles.wrap}>
                   <Chip label={t('all')} selected={groupFilter === null} onPress={() => setGroupFilter(null)} />
@@ -191,9 +199,16 @@ export default function PlanAddScreen() {
                 recipes={matches}
                 flat={!!query.trim()}
                 renderRecipe={(r) => (
-                  <Card onPress={() => setRecipeId(r.id)} style={styles.chosen}>
+                  <Card onPress={() => setRecipeId(r.id)} onLongPress={() => setPreviewId(r.id)} style={styles.chosen}>
                     <ThemedText style={[styles.chosenName, styles.chosenTitle]}>{r.title}</ThemedText>
                     {r.rating ? <Stars value={r.rating} size={13} /> : null}
+                    <Pressable
+                      hitSlop={10}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('preview')}: ${r.title}`}
+                      onPress={() => setPreviewId(r.id)}>
+                      <IconSymbol name="eye" size={20} color={theme.icon} />
+                    </Pressable>
                   </Card>
                 )}
               />
@@ -256,6 +271,14 @@ export default function PlanAddScreen() {
           <Button label={t('plan_add_confirm')} onPress={save} disabled={ordering && !name} />
         </>
       )}
+      <RecipePreview
+        recipeId={previewId}
+        onClose={() => setPreviewId(null)}
+        onChoose={(id) => {
+          setRecipeId(id);
+          setPreviewId(null);
+        }}
+      />
     </Page>
   );
 }

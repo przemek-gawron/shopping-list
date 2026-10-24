@@ -40,6 +40,7 @@ const MAPPING = {
   'arrow.uturn.backward': 'undo',
   'square.and.arrow.up': 'ios-share',
   'chart.bar.fill': 'bar-chart',
+  'eye': 'visibility',
 } as IconMapping;
 
 /**
