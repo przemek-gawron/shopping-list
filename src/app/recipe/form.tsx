@@ -187,7 +187,12 @@ export default function RecipeFormScreen() {
 
       <View style={styles.section}>
         <ThemedText type="label">{t('group')}</ThemedText>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={styles.chips}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+          style={styles.edgeScroll}
+          contentContainerStyle={[styles.chips, styles.edgeScrollContent]}>
           <Chip label={t('no_group')} selected={group === null} onPress={() => setGroup(null)} />
           {groups.map((g) => (
             <Chip key={g.id} label={`${g.emoji} ${g.name}`} selected={group === g.id} onPress={() => setGroup(g.id)} />
@@ -251,7 +256,12 @@ export default function RecipeFormScreen() {
                 }}
               />
             )}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              style={styles.edgeScroll}
+              contentContainerStyle={[styles.chips, styles.edgeScrollContent]}>
               {UNITS.map((u) => (
                 <Chip key={u} label={t(`unit_${u}`)} selected={row.unit === u} onPress={() => patchRow(row.key, { unit: u })} />
               ))}
@@ -299,6 +309,9 @@ const styles = StyleSheet.create({
   photoButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   section: { gap: Spacing.two },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  // chip rows scroll to the edges of the page instead of being clipped by its padding
+  edgeScroll: { marginHorizontal: -Spacing.three },
+  edgeScrollContent: { paddingHorizontal: Spacing.three },
   ingredient: { gap: Spacing.two },
   ingredientTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   name: { flex: 1, minHeight: 44, borderWidth: 1, borderRadius: Radius.control, paddingHorizontal: 12, fontSize: 16 },
