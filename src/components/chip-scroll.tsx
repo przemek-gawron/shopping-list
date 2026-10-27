@@ -15,10 +15,21 @@ type Props = {
 /**
  * A horizontal row of chips that opens scrolled to the selected one, so a choice made earlier
  * (a recipe's group, an ingredient's unit, a later day) is visible without scrolling the row.
+ * A row whose selected chip already fits stays at its start.
  */
 export function ChipScroll({ selected, children, style, contentContainerStyle, keyboardShouldPersistTaps }: Props) {
   const scroll = useRef<ScrollView>(null);
-  const scrolled = useRef(false);
+  // the row's width and the selected chip's place arrive in either order; scroll once both are known
+  const width = useRef(0);
+  const chip = useRef<{ x: number; width: number } | null>(null);
+  const done = useRef(false);
+  const reveal = () => {
+    if (done.current || !width.current || !chip.current) return;
+    // only once: later picks are made by tapping, so the chip is already in view
+    done.current = true;
+    const { x, width: chipWidth } = chip.current;
+    if (x + chipWidth + Spacing.three > width.current) scroll.current?.scrollTo({ x: x - Spacing.five, animated: false });
+  };
   return (
     <ScrollView
       ref={scroll}
@@ -26,18 +37,19 @@ export function ChipScroll({ selected, children, style, contentContainerStyle, k
       showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       style={style}
-      contentContainerStyle={contentContainerStyle}>
+      contentContainerStyle={contentContainerStyle}
+      onLayout={(e) => {
+        width.current = e.nativeEvent.layout.width;
+        reveal();
+      }}>
       {Children.toArray(children).map((child, i) => (
         <View
           key={i}
           onLayout={
             i === selected
               ? (e) => {
-                  // only once: later picks are made by tapping, so the chip is already in view
-                  if (scrolled.current) return;
-                  scrolled.current = true;
-                  const { x } = e.nativeEvent.layout;
-                  if (x > Spacing.three * 2) scroll.current?.scrollTo({ x: x - Spacing.five, animated: false });
+                  chip.current = e.nativeEvent.layout;
+                  reveal();
                 }
               : undefined
           }>
