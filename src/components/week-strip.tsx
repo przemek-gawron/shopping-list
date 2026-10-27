@@ -12,6 +12,13 @@ const GAP = 6;
 /** Days reachable by scrolling, either side of today. */
 const RANGE_DAYS = 2 * 365;
 const VISIBLE = 7;
+/**
+ * Room above and below the days for the selection bounce (it overshoots past full size) and the
+ * selected day's shadow: the list clips at its edges, so it reaches this far beyond the strip and
+ * pads its content back by the same amount. Not sideways, where it would show slivers of the
+ * neighbouring weeks.
+ */
+const BLEED = 8;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
@@ -78,6 +85,8 @@ export function WeekStrip({ selected, onSelect, onVisibleStart, hasMeals, hasPic
           keyExtractor={(d) => d}
           extraData={[selected, hasMeals, hasPicked]}
           showsHorizontalScrollIndicator={false}
+          style={styles.bleed}
+          contentContainerStyle={styles.bleedContent}
           initialScrollIndex={initialIndex}
           getItemLayout={(_, index) => ({ length: step, offset: step * index, index })}
           snapToInterval={step}
@@ -147,6 +156,8 @@ function Day({ date, width, selected, picked, hasMeals, onPress }: DayProps) {
 }
 
 const styles = StyleSheet.create({
+  bleed: { marginVertical: -BLEED },
+  bleedContent: { paddingVertical: BLEED },
   day: { alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
   dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
   dot: { width: 5, height: 5, borderRadius: 3 },
