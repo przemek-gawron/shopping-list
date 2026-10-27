@@ -17,6 +17,7 @@ import { revealEnter, revealLayout, rowExit } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { byGroupThenTitle, recipeEmoji } from '@/data/labels';
 import { useStore } from '@/data/store';
+import { useTabSelected } from '@/hooks/use-tab-selected';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -25,6 +26,8 @@ const NO_GROUP = 'none';
 
 export default function RecipesScreen() {
   const theme = useTheme();
+  // changes made from another tab (a recipe deleted, data cleared in Settings) happen at once
+  const animate = useTabSelected();
   const t = useT();
   const recipes = useStore((s) => s.recipes);
   const groups = useStore((s) => s.groups);
@@ -99,7 +102,11 @@ export default function RecipesScreen() {
             renderRecipe={(r) => {
               const group = groupOf(r.groupId);
               return (
-                <Animated.View entering={revealEnter} exiting={rowExit} layout={revealLayout} style={styles.cell}>
+                <Animated.View
+                  entering={animate ? revealEnter : undefined}
+                  exiting={animate ? rowExit : undefined}
+                  layout={animate ? revealLayout : undefined}
+                  style={styles.cell}>
                   <SwipeToDelete
                     radius={Radius.card}
                     style={styles.cell}

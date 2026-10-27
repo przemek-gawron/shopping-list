@@ -22,6 +22,7 @@ import { randomPlan } from '@/data/random-plan';
 import { appliedSwaps } from '@/data/shopping';
 import { useStore } from '@/data/store';
 import type { MealSlot } from '@/data/types';
+import { useTabSelected } from '@/hooks/use-tab-selected';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -29,6 +30,8 @@ import { addDays, formatDate, startOfWeek, today, weekDays } from '@/utils/dates
 
 export default function PlanScreen() {
   const theme = useTheme();
+  // changes made from another tab (a recipe deleted, data cleared in Settings) happen at once
+  const animate = useTabSelected();
   const t = useT();
   const locale = useLocale();
   const slotName = useSlotName();
@@ -198,7 +201,7 @@ export default function PlanScreen() {
           const entries = dayEntries(selectedDate).filter((e) => e.slotId === slot.id);
           return (
             // the whole card adds a dish; the recipe name, checkbox, stepper and ✕ keep their own actions
-            <Card key={slot.id} style={styles.slot} layout={rowLayout} entering={(direction > 0 ? FadeInRight : FadeInLeft).duration(Motion.normal).delay(index * 45)} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
+            <Card key={slot.id} style={styles.slot} layout={animate ? rowLayout : undefined} entering={(direction > 0 ? FadeInRight : FadeInLeft).duration(Motion.normal).delay(index * 45)} accessible={false} onPress={() => router.push({ pathname: '/plan/add', params: { date: selectedDate, slotId: slot.id } })}>
               <View style={styles.slotHeader}>
                 <ThemedText type="label">{slotName(slot, index)}</ThemedText>
                 <View style={styles.slotActions}>
@@ -225,7 +228,11 @@ export default function PlanScreen() {
                 const isPicked = pickedShown.includes(entry.id);
                 const swapCount = appliedSwaps(entry, recipe, products).length;
                 return (
-                  <Animated.View key={entry.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
+                  <Animated.View
+                    key={entry.id}
+                    entering={animate ? rowEnter : undefined}
+                    exiting={animate ? rowExit : undefined}
+                    layout={animate ? rowLayout : undefined}>
                     <SwipeToDelete radius={Radius.control} onDelete={() => removePlanEntry(entry.id)}>
                       <View style={styles.entry}>
                         {entry.note ? (
