@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { LayoutAnimationConfig, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
@@ -78,23 +78,27 @@ export default function ListScreen() {
 
   // a ticked item first shows the tick, then moves to "Bought"; tapping again meanwhile cancels the move
   const [flipping, setFlipping] = useState<string[]>([]);
-  const settle = (id: string) => {
-    moveTimers.delete(id);
-    setFlipping((ids) => ids.filter((x) => x !== id));
-  };
-  const toggleSoon = (id: string) => {
-    const pending = moveTimers.get(id);
-    clearTimeout(pending);
-    if (pending) return settle(id);
-    setFlipping((ids) => [...ids, id]);
-    moveTimers.set(
-      id,
-      setTimeout(() => {
-        settle(id);
-        toggle(id);
-      }, MOVE_DELAY_MS),
-    );
-  };
+  // stable, so ticking one item re-renders only that row (ListRow is memoised)
+  const toggleSoon = useCallback(
+    (id: string) => {
+      const settle = () => {
+        moveTimers.delete(id);
+        setFlipping((ids) => ids.filter((x) => x !== id));
+      };
+      const pending = moveTimers.get(id);
+      clearTimeout(pending);
+      if (pending) return settle();
+      setFlipping((ids) => [...ids, id]);
+      moveTimers.set(
+        id,
+        setTimeout(() => {
+          settle();
+          toggle(id);
+        }, MOVE_DELAY_MS),
+      );
+    },
+    [toggle],
+  );
   // moves still waiting when the screen goes away happen at once
   useEffect(
     () => () => {
@@ -111,58 +115,17 @@ export default function ListScreen() {
     transform: [{ scaleX: withTiming(list.length ? done / list.length : 0, { duration: Motion.normal }) }],
   }));
 
-  // checking an item moves it to another section: it fades out of one and into the other
-  const row = (item: ListItem) => {
-    const shownChecked = item.checked !== flipping.includes(item.id);
-    return (
-      <Animated.View
-        key={item.id}
-        entering={animate ? quickEnter : undefined}
-        exiting={animate ? quickExit : undefined}
-        layout={animate ? quickLayout : undefined}>
-        <SwipeToDelete
-          radius={Radius.control}
-          onDelete={() => remove(item.id)}
-          onComplete={() => toggleSoon(item.id)}
-          completeLabel={item.checked ? t('list_uncheck') : t('list_checked')}>
-          <View style={styles.item}>
-            <Checkbox checked={shownChecked} onPress={unlessSwiping(() => toggleSoon(item.id))} accessibilityLabel={item.name} />
-            <View style={styles.itemText}>
-              {/* tapping the name or amount opens the item for editing */}
-              <Pressable
-                style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
-                accessibilityRole="button"
-                accessibilityLabel={`${t('list_edit')} – ${item.name}`}
-                onPress={unlessSwiping(() => router.push({ pathname: '/list/add', params: { id: item.id } }))}>
-                <ThemedText style={[styles.itemName, shownChecked && styles.doneText]} color={shownChecked ? 'textSecondary' : 'text'}>
-                  {item.name}
-                </ThemedText>
-                <ThemedText type="small" style={shownChecked && styles.doneText}>
-                  {formatAmount(item.quantity, item.unit)}
-                </ThemedText>
-              </Pressable>
-              {/* the recipes that need the item; tapping them shows the meals and amounts */}
-              {item.sources && item.sources.length > 0 && (
-                <Pressable
-                  style={({ pressed }) => pressed && styles.pressed}
-                  hitSlop={{ top: 4, bottom: 8 }}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sourceTitles(item, recipes)}`}
-                  onPress={unlessSwiping(() => router.push({ pathname: '/list/sources', params: { id: item.id } }))}>
-                  <ThemedText type="caption" color={shownChecked ? 'textSecondary' : 'tint'} numberOfLines={1}>
-                    {sourceTitles(item, recipes)}
-                  </ThemedText>
-                </Pressable>
-              )}
-            </View>
-            <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => remove(item.id))} accessibilityLabel={t('delete')}>
-              <IconSymbol name="xmark" size={18} color={theme.icon} />
-            </Pressable>
-          </View>
-        </SwipeToDelete>
-      </Animated.View>
-    );
-  };
+  const row = (item: ListItem) => (
+    <ListRow
+      key={item.id}
+      item={item}
+      shownChecked={item.checked !== flipping.includes(item.id)}
+      sources={sourceTitles(item, recipes)}
+      animate={animate}
+      onToggle={toggleSoon}
+      onRemove={remove}
+    />
+  );
 
   return (
     <Screen
@@ -239,6 +202,75 @@ export default function ListScreen() {
     </Screen>
   );
 }
+
+type RowProps = {
+  item: ListItem;
+  /** The tick as shown: flipped already while the item waits to move to its new section. */
+  shownChecked: boolean;
+  /** The recipes that need the item, as one line. */
+  sources: string;
+  animate: boolean;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+};
+
+/**
+ * One item of the list. Memoised: ticking an item re-renders that row only, not every row with its
+ * swipe gesture, which on Android held each tick for a second or more.
+ * Checking an item moves it to another section: it fades out of one and into the other.
+ */
+const ListRow = memo(function ListRow({ item, shownChecked, sources, animate, onToggle, onRemove }: RowProps) {
+  const theme = useTheme();
+  const t = useT();
+  const formatAmount = useFormatAmount();
+  return (
+    <Animated.View
+      entering={animate ? quickEnter : undefined}
+      exiting={animate ? quickExit : undefined}
+      layout={animate ? quickLayout : undefined}>
+      <SwipeToDelete
+        radius={Radius.control}
+        onDelete={() => onRemove(item.id)}
+        onComplete={() => onToggle(item.id)}
+        completeLabel={item.checked ? t('list_uncheck') : t('list_checked')}>
+        <View style={styles.item}>
+          <Checkbox checked={shownChecked} onPress={unlessSwiping(() => onToggle(item.id))} accessibilityLabel={item.name} />
+          <View style={styles.itemText}>
+            {/* tapping the name or amount opens the item for editing */}
+            <Pressable
+              style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('list_edit')} – ${item.name}`}
+              onPress={unlessSwiping(() => router.push({ pathname: '/list/add', params: { id: item.id } }))}>
+              <ThemedText style={[styles.itemName, shownChecked && styles.doneText]} color={shownChecked ? 'textSecondary' : 'text'}>
+                {item.name}
+              </ThemedText>
+              <ThemedText type="small" style={shownChecked && styles.doneText}>
+                {formatAmount(item.quantity, item.unit)}
+              </ThemedText>
+            </Pressable>
+            {/* the recipes that need the item; tapping them shows the meals and amounts */}
+            {sources !== '' && (
+              <Pressable
+                style={({ pressed }) => pressed && styles.pressed}
+                hitSlop={{ top: 4, bottom: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={`${t('list_sources_open', { name: item.name })}: ${sources}`}
+                onPress={unlessSwiping(() => router.push({ pathname: '/list/sources', params: { id: item.id } }))}>
+                <ThemedText type="caption" color={shownChecked ? 'textSecondary' : 'tint'} numberOfLines={1}>
+                  {sources}
+                </ThemedText>
+              </Pressable>
+            )}
+          </View>
+          <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => onRemove(item.id))} accessibilityLabel={t('delete')}>
+            <IconSymbol name="xmark" size={18} color={theme.icon} />
+          </Pressable>
+        </View>
+      </SwipeToDelete>
+    </Animated.View>
+  );
+});
 
 const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
