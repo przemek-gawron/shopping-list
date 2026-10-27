@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ReanimatedSwipeable, { SwipeDirection, type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -42,8 +42,9 @@ function setRow(id: symbol, moving: boolean, close: () => void) {
   lastSwipeAt = Date.now();
 }
 
-function forgetRow(id: symbol) {
-  if (rows.delete(id)) lastSwipeAt = Date.now();
+/** A row closed (`swiped`) or went away; only a closing swipe holds the presses right after it. */
+function forgetRow(id: symbol, swiped = true) {
+  if (rows.delete(id) && swiped) lastSwipeAt = Date.now();
 }
 
 /**
@@ -94,12 +95,15 @@ export function SwipeToDelete({ children, onDelete, style, radius = 0, onComplet
     mounted.current = true;
     return () => {
       mounted.current = false;
-      forgetRow(id);
+      // an item completed by a swipe moves to another section a moment later: a tap then is a new one
+      forgetRow(id, false);
     };
   }, [id]);
 
   // a deleted row fades out where it is; one that asks first (an alert) slides back meanwhile
   const remove = () => {
+    // the row below takes this one's place under the finger: presses right after belong to the swipe
+    lastSwipeAt = Date.now();
     onDelete();
     requestAnimationFrame(close);
   };
@@ -171,20 +175,32 @@ function useArmTracker(canComplete: boolean, onRelease: (outcome: -1 | 1) => voi
   const restOffset = useSharedValue(0);
   /** -1 armed to delete, 1 armed to complete, 0 neither. */
   const armed = useSharedValue(0);
-  const tracker = Gesture.Pan()
-    .activeOffsetX([-10, 10])
-    .onUpdate((e) => {
-      const x = e.translationX / FRICTION + restOffset.get();
-      const next = x < -fullAt.get() ? -1 : canComplete && x > COMPLETE_AT ? 1 : 0;
-      if (next === armed.get()) return;
-      armed.set(next);
-      runOnJS(thresholdTick)(next !== 0);
-    })
-    .onEnd(() => {
-      const outcome = armed.get();
-      armed.set(0);
-      if (outcome !== 0) runOnJS(onRelease)(outcome as -1 | 1);
-    });
+  // the latest handler, so the gesture itself is built once: a new gesture on every render makes
+  // the gesture handler reattach every row's native handlers, which on Android stalls a long list
+  const release = useRef(onRelease);
+  useLayoutEffect(() => {
+    release.current = onRelease;
+  });
+  // the ref is read when the finger lifts, never while rendering
+  /* eslint-disable react-hooks/refs */
+  const tracker = useMemo(() => {
+    const onArmedRelease = (outcome: -1 | 1) => release.current(outcome);
+    return Gesture.Pan()
+      .activeOffsetX([-10, 10])
+      .onUpdate((e) => {
+        const x = e.translationX / FRICTION + restOffset.get();
+        const next = x < -fullAt.get() ? -1 : canComplete && x > COMPLETE_AT ? 1 : 0;
+        if (next === armed.get()) return;
+        armed.set(next);
+        runOnJS(thresholdTick)(next !== 0);
+      })
+      .onEnd(() => {
+        const outcome = armed.get();
+        armed.set(0);
+        if (outcome !== 0) runOnJS(onArmedRelease)(outcome as -1 | 1);
+      });
+  }, [canComplete, armed, fullAt, restOffset]);
+  /* eslint-enable react-hooks/refs */
   return { tracker, fullAt, restOffset };
 }
 
