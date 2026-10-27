@@ -1,10 +1,11 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
+import { ChipScroll } from '@/components/chip-scroll';
 import { EmptyState } from '@/components/empty-state';
 import { MenuSections } from '@/components/menu-sections';
 import { RecipePreview } from '@/components/recipe-preview';
@@ -221,7 +222,7 @@ export default function PlanAddScreen() {
         <>
           <View style={styles.section}>
             <ThemedText type="label">{t('date')}</ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
+            <ChipScroll selected={days.indexOf(date)} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.chips}>
               {days.map((d) => (
                 <Chip
                   key={d}
@@ -230,7 +231,7 @@ export default function PlanAddScreen() {
                   onPress={() => setDate(d)}
                 />
               ))}
-            </ScrollView>
+            </ChipScroll>
           </View>
           <View style={styles.section}>
             <ThemedText type="label">{t('meal')}</ThemedText>

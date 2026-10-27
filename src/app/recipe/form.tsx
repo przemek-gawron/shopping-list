@@ -2,10 +2,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { Stack, router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
+import { ChipScroll } from '@/components/chip-scroll';
 import { Field } from '@/components/field';
 import { KeyboardDoneBar } from '@/components/keyboard-done';
 import { RecipePhoto } from '@/components/recipe-photo';
@@ -187,9 +188,8 @@ export default function RecipeFormScreen() {
 
       <View style={styles.section}>
         <ThemedText type="label">{t('group')}</ThemedText>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
+        <ChipScroll
+          selected={group === null ? 0 : groups.findIndex((g) => g.id === group) + 1}
           keyboardShouldPersistTaps="always"
           style={styles.edgeScroll}
           contentContainerStyle={[styles.chips, styles.edgeScrollContent]}>
@@ -197,7 +197,7 @@ export default function RecipeFormScreen() {
           {groups.map((g) => (
             <Chip key={g.id} label={`${g.emoji} ${g.name}`} selected={group === g.id} onPress={() => setGroup(g.id)} />
           ))}
-        </ScrollView>
+        </ChipScroll>
       </View>
 
       <Field
@@ -256,16 +256,15 @@ export default function RecipeFormScreen() {
                 }}
               />
             )}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
+            <ChipScroll
+              selected={UNITS.indexOf(row.unit)}
               keyboardShouldPersistTaps="handled"
               style={styles.edgeScroll}
               contentContainerStyle={[styles.chips, styles.edgeScrollContent]}>
               {UNITS.map((u) => (
                 <Chip key={u} label={t(`unit_${u}`)} selected={row.unit === u} onPress={() => patchRow(row.key, { unit: u })} />
               ))}
-            </ScrollView>
+            </ChipScroll>
           </View>
         ))}
         <Button
