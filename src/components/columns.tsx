@@ -51,8 +51,17 @@ export function Grid({ children, minItemWidth = 320 }: { children: ReactNode; mi
  * Blocks fade in and slide into place; the animation sits on each block's own wrapper, since a block
  * that animated itself would keep the offset of a wrapper that moved under it. A block that goes away
  * does so at once (its rows fade out on their own): fading the block out too left its space empty.
+ * `animate` off (a hidden tab) makes every change happen at once.
  */
-export function Columns({ blocks, minColumnWidth = 340 }: { blocks: { key: string; weight: number; node: ReactNode }[]; minColumnWidth?: number }) {
+export function Columns({
+  blocks,
+  minColumnWidth = 340,
+  animate = true,
+}: {
+  blocks: { key: string; weight: number; node: ReactNode }[];
+  minColumnWidth?: number;
+  animate?: boolean;
+}) {
   const [width, onLayout] = useWidth();
   const count = columnCount(width, minColumnWidth);
   const columns: { weight: number; nodes: ReactNode[] }[] = Array.from({ length: count }, () => ({ weight: 0, nodes: [] }));
@@ -63,7 +72,7 @@ export function Columns({ blocks, minColumnWidth = 340 }: { blocks: { key: strin
     if (current < count - 1 && columns[current].weight > 0 && columns[current].weight + block.weight / 2 > share) current++;
     columns[current].weight += block.weight;
     columns[current].nodes.push(
-      <Animated.View key={block.key} entering={quickEnter} layout={quickLayout}>
+      <Animated.View key={block.key} entering={animate ? quickEnter : undefined} layout={animate ? quickLayout : undefined}>
         {block.node}
       </Animated.View>,
     );

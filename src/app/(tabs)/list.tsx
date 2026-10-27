@@ -21,6 +21,7 @@ import { Motion, quickEnter, quickExit, quickLayout } from '@/constants/motion';
 import { Radius, Spacing, tintFill } from '@/constants/theme';
 import { useStore } from '@/data/store';
 import type { ListItem, Recipe } from '@/data/types';
+import { useTabSelected } from '@/hooks/use-tab-selected';
 import { useTheme } from '@/hooks/use-theme';
 import { useFormatAmount, useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -52,6 +53,8 @@ export default function ListScreen() {
   const clearList = useStore((s) => s.clearList);
   const undo = useStore((s) => s.undoList);
   const canUndo = useStore((s) => s.listHistory.length > 0);
+  // a list made from the Plan tab replaces every row while this tab is hidden: no animations then
+  const animate = useTabSelected();
 
   const sections = useMemo(
     () =>
@@ -112,7 +115,11 @@ export default function ListScreen() {
   const row = (item: ListItem) => {
     const shownChecked = item.checked !== flipping.includes(item.id);
     return (
-      <Animated.View key={item.id} entering={quickEnter} exiting={quickExit} layout={quickLayout}>
+      <Animated.View
+        key={item.id}
+        entering={animate ? quickEnter : undefined}
+        exiting={animate ? quickExit : undefined}
+        layout={animate ? quickLayout : undefined}>
         <SwipeToDelete
           radius={Radius.control}
           onDelete={() => remove(item.id)}
@@ -197,6 +204,7 @@ export default function ListScreen() {
 
           {/* departments side by side on tablets; the label row counts as one item */}
           <Columns
+            animate={animate}
             blocks={[
               ...sections.map((section) => ({
                 key: section.id,
