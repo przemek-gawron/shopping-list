@@ -13,12 +13,13 @@ const GAP = 6;
 const RANGE_DAYS = 2 * 365;
 const VISIBLE = 7;
 /**
- * Room above and below the days for the selection bounce (it overshoots past full size) and the
- * selected day's shadow: the list clips at its edges, so it reaches this far beyond the strip and
- * pads its content back by the same amount. Not sideways, where it would show slivers of the
- * neighbouring weeks.
+ * Room around the days for the selection bounce (it overshoots a few per cent past full size): the
+ * list clips at its edges, so it reaches this far beyond the strip and pads its content back by the
+ * same amount, and the days stay where they were. Sideways no more than the gap between days, so
+ * the room shows the gap and never a sliver of the neighbouring week.
  */
 const BLEED = 8;
+const BLEED_X = GAP;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
@@ -134,7 +135,8 @@ function Day({ date, width, selected, picked, hasMeals, onPress }: DayProps) {
       style={[
         styles.day,
         { width, marginRight: GAP },
-        selected ? tintFill(theme) : { backgroundColor: theme.cardBackground },
+        // no shadow on the selected day: it spreads far past the strip, which would cut it off
+        selected ? [tintFill(theme), { boxShadow: undefined }] : { backgroundColor: theme.cardBackground },
         { borderColor: isToday ? theme.tint : selected ? 'transparent' : theme.borderSubtle },
         bounce,
       ]}>
@@ -156,8 +158,8 @@ function Day({ date, width, selected, picked, hasMeals, onPress }: DayProps) {
 }
 
 const styles = StyleSheet.create({
-  bleed: { marginVertical: -BLEED },
-  bleedContent: { paddingVertical: BLEED },
+  bleed: { marginVertical: -BLEED, marginHorizontal: -BLEED_X },
+  bleedContent: { paddingVertical: BLEED, paddingHorizontal: BLEED_X },
   day: { alignItems: 'center', paddingVertical: 8, borderRadius: Radius.control, borderWidth: 1, gap: 2 },
   dayNumber: { fontSize: 17, fontWeight: '700', lineHeight: 22 },
   dot: { width: 5, height: 5, borderRadius: 3 },
