@@ -12,6 +12,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { rowExit, rowLayout } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { useStore } from '@/data/store';
+import { useScreenOpened } from '@/hooks/use-screen-opened';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -23,12 +24,14 @@ export default function GroupsScreen() {
   const recipes = useStore((s) => s.recipes);
   const moveGroup = useStore((s) => s.moveGroup);
   const removeGroup = useStore((s) => s.removeGroup);
+  // row animations wait until the screen has slid in: set up during the slide, they hold it
+  const opened = useScreenOpened();
 
   return (
     <Page>
       {groups.length === 0 && <EmptyState emoji="🗂️" title={t('groups_empty_title')} subtitle={t('groups_empty_subtitle')} />}
       {groups.map((g, index) => (
-        <Animated.View key={g.id} exiting={rowExit} layout={rowLayout}>
+        <Animated.View key={g.id} exiting={opened ? rowExit : undefined} layout={opened ? rowLayout : undefined}>
           <SwipeToDelete
             radius={Radius.card}
             onDelete={() =>
