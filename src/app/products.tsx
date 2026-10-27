@@ -13,6 +13,7 @@ import { DEPARTMENT_EMOJI } from '@/constants/departments';
 import { rowExit, rowLayout } from '@/constants/motion';
 import { Radius, Spacing } from '@/constants/theme';
 import { useStore } from '@/data/store';
+import { useProgressiveCount } from '@/hooks/use-progressive-count';
 import { useTheme } from '@/hooks/use-theme';
 import { useT } from '@/i18n';
 import { confirm } from '@/utils/confirm';
@@ -28,6 +29,8 @@ export default function ProductsScreen() {
     const q = query.trim().toLowerCase();
     return products.filter((p) => !q || p.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
   }, [products, query]);
+  // the screen opens at once even with a few hundred products; the rest follow frame by frame
+  const shown = useProgressiveCount(visible.length);
 
   return (
     <Page>
@@ -40,7 +43,7 @@ export default function ProductsScreen() {
         style={[styles.search, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
       />
       {products.length === 0 && <EmptyState emoji="🥕" title={t('products_empty_title')} subtitle={t('products_empty_subtitle')} />}
-      {visible.map((p) => (
+      {visible.slice(0, shown).map((p) => (
         <Animated.View key={p.id} exiting={rowExit} layout={rowLayout}>
           <SwipeToDelete
             radius={Radius.card}
