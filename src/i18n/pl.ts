@@ -14,6 +14,8 @@ export default {
   date: 'Dzień',
   meal: 'Posiłek',
   servings: 'Porcje',
+  stepper_decrease: 'Zmniejsz',
+  stepper_increase: 'Zwiększ',
   recipe: 'Przepis',
   quantity: 'Ilość',
   unit: 'Jednostka',

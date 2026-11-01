@@ -17,6 +17,8 @@ const en: Record<keyof typeof pl, string> = {
   date: 'Day',
   meal: 'Meal',
   servings: 'Servings',
+  stepper_decrease: 'Decrease',
+  stepper_increase: 'Increase',
   recipe: 'Recipe',
   quantity: 'Quantity',
   unit: 'Unit',

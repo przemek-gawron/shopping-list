@@ -6,6 +6,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { Motion } from '@/constants/motion';
 import { useTheme } from '@/hooks/use-theme';
+import { useT } from '@/i18n';
 
 type Props = {
   value: number;
@@ -21,6 +22,7 @@ type Props = {
 /** − value + control. */
 export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, onValuePress }: Props) {
   const theme = useTheme();
+  const t = useT();
   /** Which way the last button moved the value: the new number rolls in from that side. */
   const [direction, setDirection] = useState(1);
   const button = (icon: 'minus' | 'plus', next: number, disabled: boolean, label: string) => (
@@ -44,7 +46,7 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, 
 
   return (
     <View style={styles.root}>
-      {button('minus', Math.max(min, value - step), value <= min, '−')}
+      {button('minus', Math.max(min, value - step), value <= min, t('stepper_decrease'))}
       {/* no roll when the stepper first appears, only when the value changes */}
       <LayoutAnimationConfig skipEntering>
         <Animated.View key={value} entering={(direction > 0 ? FadeInUp : FadeInDown).duration(Motion.fast)}>
@@ -58,7 +60,7 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, 
           </ThemedText>
         </Animated.View>
       </LayoutAnimationConfig>
-      {button('plus', Math.min(max, value + step), value >= max, '+')}
+      {button('plus', Math.min(max, value + step), value >= max, t('stepper_increase'))}
     </View>
   );
 }
