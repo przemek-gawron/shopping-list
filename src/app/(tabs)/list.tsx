@@ -240,7 +240,7 @@ const ListRow = memo(function ListRow({ item, shownChecked, sources, animate, on
             <Pressable
               style={({ pressed }) => [styles.itemBody, pressed && styles.pressed]}
               accessibilityRole="button"
-              accessibilityLabel={`${t('list_edit')} – ${item.name}`}
+              accessibilityLabel={`${t('list_edit')} – ${item.name}, ${formatAmount(item.quantity, item.unit)}`}
               onPress={unlessSwiping(() => router.push({ pathname: '/list/add', params: { id: item.id } }))}>
               <ThemedText style={[styles.itemName, shownChecked && styles.doneText]} color={shownChecked ? 'textSecondary' : 'text'}>
                 {item.name}
