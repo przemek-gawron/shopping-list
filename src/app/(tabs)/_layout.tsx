@@ -1,8 +1,12 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useT } from '@/i18n';
+
+// Tab bar minimizing exists only on iOS 26+; older iOS warns about the prop.
+const canMinimize = Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26;
 
 export default function TabLayout() {
   const colors = Colors[useColorScheme()];
@@ -14,7 +18,7 @@ export default function TabLayout() {
       backgroundColor={colors.background}
       indicatorColor={colors.surfaceCard}
       labelVisibilityMode="labeled"
-      minimizeBehavior="never">
+      minimizeBehavior={canMinimize ? 'never' : undefined}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>{t('tab_recipes')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="book.fill" md="menu_book" />
