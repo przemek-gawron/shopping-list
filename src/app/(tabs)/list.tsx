@@ -263,7 +263,7 @@ const ListRow = memo(function ListRow({ item, shownChecked, sources, animate, on
               </Pressable>
             )}
           </View>
-          <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => onRemove(item.id))} accessibilityLabel={t('delete')}>
+          <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => onRemove(item.id))} accessibilityLabel={`${t('delete')} – ${item.name}`}>
             <IconSymbol name="xmark" size={18} color={theme.icon} />
           </Pressable>
         </View>
