@@ -49,10 +49,10 @@ export default function GroupsScreen() {
                   <ThemedText type="small">{t('recipes_count', { count: recipes.filter((r) => r.groupId === g.id).length })}</ThemedText>
                 </View>
               </Pressable>
-              <Pressable hitSlop={8} accessibilityRole="button" disabled={index === 0} onPress={unlessSwiping(() => moveGroup(g.id, -1))} accessibilityLabel={t('move_up')}>
+              <Pressable hitSlop={8} accessibilityRole="button" disabled={index === 0} onPress={unlessSwiping(() => moveGroup(g.id, -1))} accessibilityLabel={`${t('move_up')} – ${g.name}`}>
                 <IconSymbol name="chevron.up" size={20} color={index === 0 ? theme.border : theme.textSecondary} />
               </Pressable>
-              <Pressable hitSlop={8} accessibilityRole="button" disabled={index === groups.length - 1} onPress={unlessSwiping(() => moveGroup(g.id, 1))} accessibilityLabel={t('move_down')}>
+              <Pressable hitSlop={8} accessibilityRole="button" disabled={index === groups.length - 1} onPress={unlessSwiping(() => moveGroup(g.id, 1))} accessibilityLabel={`${t('move_down')} – ${g.name}`}>
                 <IconSymbol name="chevron.down" size={20} color={index === groups.length - 1 ? theme.border : theme.textSecondary} />
               </Pressable>
             </Card>
