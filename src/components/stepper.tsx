@@ -17,10 +17,12 @@ type Props = {
   format?: (value: number) => string;
   /** Makes the number tappable, e.g. to offer more values than the buttons reach. */
   onValuePress?: () => void;
+  /** Added to the button labels, e.g. the dish name when several steppers share a screen. */
+  context?: string;
 };
 
 /** − value + control. */
-export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, onValuePress }: Props) {
+export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, onValuePress, context }: Props) {
   const theme = useTheme();
   const t = useT();
   /** Which way the last button moved the value: the new number rolls in from that side. */
@@ -34,7 +36,7 @@ export function Stepper({ value, onChange, min = 1, max = 99, step = 1, format, 
       disabled={disabled}
       hitSlop={6}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={context ? `${label} – ${context}` : label}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: theme.surfaceCard },

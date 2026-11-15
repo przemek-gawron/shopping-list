@@ -14,12 +14,12 @@ export function useFormatServings() {
   return (value: number) => `${value.toLocaleString(locale, { maximumFractionDigits: 2 })}×`;
 }
 
-type Props = { value: number; onChange: (value: number) => void; onValuePress: () => void };
+type Props = { value: number; onChange: (value: number) => void; onValuePress: () => void; context?: string };
 
 /** − 1,5× + for a recipe multiplier; tapping the number asks the parent to show `ServingsChips`. */
-export function ServingsStepper({ value, onChange, onValuePress }: Props) {
+export function ServingsStepper({ value, onChange, onValuePress, context }: Props) {
   const format = useFormatServings();
-  return <Stepper value={value} onChange={onChange} min={MIN_SERVINGS} format={format} onValuePress={onValuePress} />;
+  return <Stepper value={value} onChange={onChange} min={MIN_SERVINGS} format={format} onValuePress={onValuePress} context={context} />;
 }
 
 /** Quick choice of whole and half multipliers. */

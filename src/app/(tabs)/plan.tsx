@@ -227,6 +227,7 @@ export default function PlanScreen() {
                 const recipe = recipes.find((r) => r.id === entry.recipeId);
                 const isPicked = pickedShown.includes(entry.id);
                 const swapCount = appliedSwaps(entry, recipe, products).length;
+                const name = entry.note ?? recipe?.title ?? entry.title ?? '?';
                 return (
                   <Animated.View
                     key={entry.id}
@@ -252,7 +253,7 @@ export default function PlanScreen() {
                             <ThemedText style={styles.cart}>🛒</ThemedText>
                           </View>
                         ) : (
-                          <Checkbox checked={isPicked} onPress={unlessSwiping(() => toggle(entry.id))} accessibilityLabel={t('plan_pick_for_list')} />
+                          <Checkbox checked={isPicked} onPress={unlessSwiping(() => toggle(entry.id))} accessibilityLabel={`${t('plan_pick_for_list')} – ${name}`} />
                         )}
                         <Pressable
                           style={styles.entryTitle}
@@ -260,7 +261,7 @@ export default function PlanScreen() {
                           disabled={!recipe}
                           onPress={unlessSwiping(() => recipe && router.push({ pathname: '/recipe/[id]', params: { id: recipe.id, entryId: entry.id } }))}>
                           <ThemedText style={styles.entryName} numberOfLines={2}>
-                            {entry.note ?? recipe?.title ?? entry.title ?? '?'}
+                            {name}
                           </ThemedText>
                           {!entry.note && !recipe && <ThemedText type="caption">{t('plan_recipe_deleted')}</ThemedText>}
                           {entry.note && (
@@ -278,9 +279,10 @@ export default function PlanScreen() {
                             value={entry.servings}
                             onChange={unlessSwiping((v: number) => updatePlanEntry(entry.id, v))}
                             onValuePress={unlessSwiping(() => setEditing(editing === entry.id ? null : entry.id))}
+                            context={name}
                           />
                         )}
-                        <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => removePlanEntry(entry.id))} accessibilityLabel={t('delete')}>
+                        <Pressable hitSlop={8} accessibilityRole="button" onPress={unlessSwiping(() => removePlanEntry(entry.id))} accessibilityLabel={`${t('delete')} – ${name}`}>
                           <IconSymbol name="xmark" size={18} color={theme.icon} />
                         </Pressable>
                       </View>
