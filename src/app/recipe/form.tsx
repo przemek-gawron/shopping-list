@@ -242,7 +242,7 @@ export default function RecipeFormScreen() {
               <Pressable
                 hitSlop={8}
                 accessibilityRole="button"
-                accessibilityLabel={t('delete')}
+                accessibilityLabel={row.name.trim() ? `${t('delete')} – ${row.name.trim()}` : t('delete')}
                 onPress={() => setRows((current) => (current.length > 1 ? current.filter((r) => r.key !== row.key) : [emptyRow()]))}>
                 <IconSymbol name="xmark" size={18} color={theme.icon} />
               </Pressable>
